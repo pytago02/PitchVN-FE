@@ -1,0 +1,765 @@
+/* ════════════════════════════════════════════════════════════
+   HOST & BASE
+════════════════════════════════════════════════════════════ */
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* ════════════════════════════════════════════════════════════
+   POST CARD WRAPPER
+════════════════════════════════════════════════════════════ */
+.thread-post {
+  display: flex;
+  padding: 16px 24px 12px 24px;
+  border-bottom: 0.5px solid var(--border-color);
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.thread-post.clickable {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.thread-post.clickable:hover {
+  background-color: rgba(128, 128, 128, 0.04);
+}
+
+/* ════════════════════════════════════════════════════════════
+   LEFT COLUMN — Avatar + Thread Line
+════════════════════════════════════════════════════════════ */
+.thread-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.thread-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
+}
+
+.thread-line {
+  width: 2px;
+  flex: 1;
+  min-height: 16px;
+  background-color: var(--thread-line-color);
+  border-radius: 1px;
+  margin-bottom: 4px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   RIGHT COLUMN — Content
+════════════════════════════════════════════════════════════ */
+.thread-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ── Header ── */
+.thread-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+
+.author-info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.author-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.author-name-row strong {
+  color: var(--text-primary);
+}
+
+.verified-icon {
+  color: #1da1f2;
+  flex-shrink: 0;
+}
+
+.author-location {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--text-tertiary);
+}
+
+/* Badge */
+.badge {
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-weight: 700;
+  border: 1px solid var(--border-color);
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.badge.available_slot {
+  color: var(--brand-primary);
+  border-color: var(--brand-primary);
+  background-color: rgba(133, 234, 45, 0.08);
+}
+
+.badge.challenge {
+  color: var(--danger);
+  border-color: var(--danger);
+  background-color: rgba(239, 68, 68, 0.08);
+}
+
+.badge.tournament {
+  color: #f59e0b;
+  border-color: #f59e0b;
+  background-color: rgba(245, 158, 11, 0.08);
+}
+
+.badge.recruitment {
+  color: #8b5cf6;
+  border-color: #8b5cf6;
+  background-color: rgba(139, 92, 246, 0.08);
+}
+
+.badge.general {
+  color: var(--text-tertiary);
+  background: transparent;
+  border-color: transparent;
+  padding: 0;
+}
+
+/* Time & More */
+.time-and-menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.time {
+  color: var(--text-tertiary);
+}
+
+/* ── Body ── */
+.thread-body {
+  margin-bottom: 10px;
+}
+
+.content-text {
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+/* ── Media — Single Image ── */
+.media-single {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+}
+
+.thread-img-single {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Media — Grid Images ── */
+.media-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+}
+
+.media-grid.media-grid-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.media-grid-item {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1;
+}
+
+.thread-img-grid {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.media-grid-item:hover .thread-img-grid {
+  transform: scale(1.03);
+}
+
+.more-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* ════════════════════════════════════════════════════════════
+   ACTION BAR
+════════════════════════════════════════════════════════════ */
+.thread-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 8px;
+  border-radius: 20px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  font-family: inherit;
+}
+
+.action-btn:hover {
+  background-color: rgba(128, 128, 128, 0.1);
+}
+
+.action-btn.liked {
+  color: var(--danger);
+}
+
+.action-btn.reposted {
+  color: var(--brand-primary);
+}
+
+/* Like heart beat animation */
+@keyframes heartbeat {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.35); }
+  60%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+.action-btn.animating svg {
+  animation: heartbeat 0.4s ease-in-out;
+}
+
+.action-count {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  min-width: 12px;
+}
+
+.action-count.liked-count {
+  color: var(--danger);
+}
+
+.action-count.reposted-count {
+  color: var(--brand-primary);
+}
+
+/* ── Footer Row ── */
+.thread-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 20px;
+}
+
+.thread-stats {
+  color: var(--text-tertiary);
+}
+
+.action-outline-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 5px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.action-outline-btn.primary {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+.action-outline-btn.secondary {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.action-outline-btn:hover {
+  background-color: rgba(128, 128, 128, 0.1);
+}
+
+.action-outline-btn.primary:hover {
+  background-color: rgba(133, 234, 45, 0.1);
+}
+
+.action-outline-btn.secondary:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* ════════════════════════════════════════════════════════════
+   MORE BUTTON
+════════════════════════════════════════════════════════════ */
+.more-menu-container {
+  position: relative;
+  display: inline-block;
+}
+
+.more-btn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 50%;
+  transition: background-color 0.15s, color 0.15s;
+  margin: -4px;
+}
+
+.more-btn:hover {
+  background-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+/* ════════════════════════════════════════════════════════════
+   OVERLAY PANEL — Repost / Share
+════════════════════════════════════════════════════════════ */
+::ng-deep .custom-overlay-panel.p-popover {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+  padding: 6px !important;
+  min-width: 200px;
+}
+
+::ng-deep .custom-overlay-panel.p-popover::before,
+::ng-deep .custom-overlay-panel.p-popover::after {
+  display: none !important;
+}
+
+.overlay-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.overlay-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  width: 100%;
+  text-align: left;
+  transition: background-color 0.15s;
+}
+
+.overlay-item:hover {
+  background-color: rgba(128, 128, 128, 0.1);
+}
+
+.overlay-separator {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 4px 0;
+}
+
+/* ════════════════════════════════════════════════════════════
+   MORE MENU — PrimeNG p-menu override (Threads style)
+════════════════════════════════════════════════════════════ */
+::ng-deep .custom-more-menu.p-menu {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45) !important;
+  min-width: 240px !important;
+  padding: 6px !important;
+  font-family: inherit !important;
+}
+
+::ng-deep .custom-more-menu.p-menu .p-menu-list,
+::ng-deep .custom-more-menu.p-menu .p-menu-submenu-list,
+::ng-deep .custom-more-menu.p-menu ul {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+
+::ng-deep .custom-more-menu.p-menu .p-menu-item,
+::ng-deep .custom-more-menu.p-menu .p-menuitem {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+::ng-deep .custom-more-menu.p-menu .p-menu-item-content,
+::ng-deep .custom-more-menu.p-menu .p-menuitem-content {
+  background: transparent !important;
+  border-radius: 10px !important;
+  transition: background-color 0.15s !important;
+  width: 100% !important;
+}
+
+::ng-deep .custom-more-menu.p-menu .p-menu-item-content:hover,
+::ng-deep .custom-more-menu.p-menu .p-menuitem-content:hover {
+  background-color: rgba(128, 128, 128, 0.1) !important;
+}
+
+::ng-deep .custom-more-menu.p-menu .p-menu-item-link,
+::ng-deep .custom-more-menu.p-menu .p-menuitem-link {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 12px 16px !important;
+  color: var(--text-primary) !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+}
+
+::ng-deep .custom-more-menu.p-menu .p-menu-item-label,
+::ng-deep .custom-more-menu.p-menu .p-menuitem-text {
+  flex: 1 !important;
+  order: 1 !important;
+  color: inherit !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+
+::ng-deep .custom-more-menu.p-menu .p-menu-item-icon,
+::ng-deep .custom-more-menu.p-menu .p-menuitem-icon {
+  order: 2 !important;
+  margin-left: 16px !important;
+  margin-right: 0 !important;
+  font-size: 18px !important;
+  color: var(--text-primary) !important;
+}
+
+::ng-deep .custom-more-menu.p-menu .menu-item-danger .p-menu-item-link,
+::ng-deep .custom-more-menu.p-menu .menu-item-danger .p-menu-item-label,
+::ng-deep .custom-more-menu.p-menu .menu-item-danger .p-menu-item-icon,
+::ng-deep .custom-more-menu.p-menu .menu-item-danger .p-menuitem-link,
+::ng-deep .custom-more-menu.p-menu .menu-item-danger .p-menuitem-text,
+::ng-deep .custom-more-menu.p-menu .menu-item-danger .p-menuitem-icon {
+  color: var(--danger) !important;
+}
+
+::ng-deep .custom-more-menu.p-menu .p-menu-separator,
+::ng-deep .custom-more-menu.p-menu .p-menuitem-separator {
+  height: 1px !important;
+  background-color: var(--border-color) !important;
+  margin: 6px 4px !important;
+  border: none !important;
+}
+
+::ng-deep .custom-more-menu.p-menu .p-menu-item-link:focus,
+::ng-deep .custom-more-menu.p-menu .p-menu-item-content:focus,
+::ng-deep .custom-more-menu.p-menu .p-menuitem-link:focus,
+::ng-deep .custom-more-menu.p-menu .p-menuitem-content:focus {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* ════════════════════════════════════════════════════════════
+   REPLY DIALOG — PrimeNG p-dialog override
+════════════════════════════════════════════════════════════ */
+::ng-deep .custom-reply-dialog {
+  background-color: var(--surface-bg) !important;
+  width: 100%;
+  max-width: 560px;
+  border-radius: 20px !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5) !important;
+  overflow: hidden;
+}
+
+::ng-deep .custom-reply-dialog .p-dialog-content {
+  padding: 0 !important;
+  background: transparent;
+  display: block !important;
+  height: auto !important;
+  min-height: 260px;
+}
+
+.reply-dialog-inner {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--surface-bg);
+  color: var(--text-primary);
+  border-radius: 20px;
+  overflow: hidden;
+  width: 100%;
+}
+
+/* Dialog Header */
+.reply-dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 0.5px solid var(--border-color);
+}
+
+.reply-cancel-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  padding: 4px 0;
+  font-weight: 500;
+}
+
+.reply-cancel-btn:hover {
+  color: var(--text-primary);
+}
+
+.reply-post-btn {
+  background-color: var(--text-primary);
+  color: var(--surface-bg);
+  border: none;
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.reply-post-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.reply-post-btn:not(:disabled):hover {
+  opacity: 0.85;
+}
+
+/* Original Post Preview */
+.reply-original-post {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px 8px 20px;
+}
+
+.reply-thread-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.reply-original-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
+}
+
+.reply-thread-line {
+  width: 2px;
+  flex: 1;
+  min-height: 20px;
+  background-color: var(--thread-line-color);
+  border-radius: 1px;
+}
+
+.reply-original-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.reply-original-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.reply-original-header strong {
+  color: var(--text-primary);
+}
+
+.reply-original-time {
+  color: var(--text-tertiary);
+}
+
+.reply-original-text {
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Compose Row */
+.reply-compose-row {
+  display: flex;
+  gap: 12px;
+  padding: 8px 20px 16px 20px;
+}
+
+.reply-compose-col {
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.reply-compose-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.reply-compose-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.reply-to-label {
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
+}
+
+.reply-textarea {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  resize: none;
+  padding: 0;
+  box-sizing: border-box;
+  line-height: 1.5;
+}
+
+.reply-textarea:focus {
+  outline: none;
+}
+
+.reply-textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+.reply-media-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.media-btn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.15s;
+}
+
+.media-btn:hover {
+  color: var(--text-primary);
+}
+
+.gif-btn {
+  font-size: 10px;
+  font-weight: 800;
+  border: 1.5px solid var(--text-tertiary);
+  border-radius: 5px;
+  padding: 2px 5px;
+  height: auto;
+  min-height: unset;
+}
+
+.gif-btn:hover {
+  border-color: var(--text-primary);
+}
+
+/* ════════════════════════════════════════════════════════════
+   TOAST override
+════════════════════════════════════════════════════════════ */
+::ng-deep .custom-toast.p-toast {
+  font-family: inherit !important;
+}
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════════════════════════ */
+@media screen and (max-width: 767px) {
+  .thread-post {
+    padding: 14px 16px 10px 16px;
+  }
+
+  ::ng-deep .custom-reply-dialog {
+    max-width: 100% !important;
+    border-radius: 20px 20px 0 0 !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+  }
+}

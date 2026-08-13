@@ -1,0 +1,589 @@
+﻿<div class="pitch-finder-container">
+
+  <!-- ══════════════════════════════════════════════════════
+       1. STICKY HEADER & SEARCH BAR
+  ════════════════════════════════════════════════════════ -->
+  <header class="finder-header">
+    <div class="header-top">
+      <div class="header-title-group">
+        <h1 class="heading-xl">Tìm sân bóng</h1>
+        <span class="caption-sm header-location">
+          <svg viewBox="0 0 24 24" fill="var(--brand-primary)" width="14" height="14">
+            <path
+              d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+          </svg>
+          {{ userLocation.name }}
+        </span>
+      </div>
+
+      <!-- View Mode Toggle (Mobile / Tablet) -->
+      <div class="view-toggle-btns">
+        <button class="toggle-btn" [class.active]="viewMode === 'list'" (click)="viewMode = 'list'"
+          title="Xem dạng danh sách">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+            <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
+          </svg>
+          <span class="caption-sm">Danh sách</span>
+        </button>
+        <button class="toggle-btn" [class.active]="viewMode === 'map'" (click)="viewMode = 'map'"
+          title="Xem trên bản đồ">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+            <path
+              d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z" />
+          </svg>
+          <span class="caption-sm">Bản đồ</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search Input & Filter Button -->
+    <div class="search-input-row">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"
+          class="search-icon">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input type="text" class="search-input body-md"
+          placeholder="Tìm theo tên sân, quận huyện, địa chỉ (vd: Cầu Giấy, Chảo Lửa...)" [(ngModel)]="searchQuery"
+          (input)="applyFilters()" />
+        @if (searchQuery.length > 0) {
+        <button class="clear-search-btn" (click)="searchQuery = ''; applyFilters()">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+          </svg>
+        </button>
+        }
+      </div>
+
+      <button class="filter-trigger-btn" [class.active]="selectedFacilities.length > 0 || selectedType !== 'all'"
+        (click)="showFilterDrawer = !showFilterDrawer">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+          <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" />
+        </svg>
+        <span class="body-md">Bộ lọc</span>
+        @if (selectedFacilities.length > 0 || selectedType !== 'all') {
+        <span class="filter-count-badge">{{ selectedFacilities.length + (selectedType !== 'all' ? 1 : 0) }}</span>
+        }
+      </button>
+    </div>
+
+    <!-- Radius Quick Pills & Custom Input -->
+    <div class="radius-filter-row">
+      <div class="radius-control-group">
+        <span class="caption-sm radius-label">Bán kính:</span>
+        <div class="radius-pills">
+          @for (r of radiusOptions; track r) {
+          <button class="radius-pill caption-sm" [class.active]="selectedRadius === r" (click)="setRadius(r)">
+            {{ r }} km
+          </button>
+          }
+        </div>
+
+        <!-- Custom Radius Input Box -->
+        <div class="custom-radius-box">
+          <input type="number" min="1" max="100" class="custom-radius-input caption-sm" [ngModel]="selectedRadius"
+            (ngModelChange)="onCustomRadiusChange($event)" title="Nhập bán kính tùy chỉnh" />
+          <span class="custom-radius-suffix caption-sm">km</span>
+        </div>
+      </div>
+
+      <div class="quick-type-pills">
+        <button class="type-pill caption-sm" [class.active]="selectedType === 'all'" (click)="setType('all')">Tất
+          cả</button>
+        <button class="type-pill caption-sm" [class.active]="selectedType === '5v5'" (click)="setType('5v5')">Sân
+          5</button>
+        <button class="type-pill caption-sm" [class.active]="selectedType === '7v7'" (click)="setType('7v7')">Sân
+          7</button>
+        <button class="type-pill caption-sm" [class.active]="selectedType === '11v11'" (click)="setType('11v11')">Sân
+          11</button>
+      </div>
+    </div>
+
+    <!-- Expanded Filter Drawer -->
+    @if (showFilterDrawer) {
+    <div class="filter-drawer">
+      <div class="drawer-header">
+        <span class="heading-lg">Bộ lọc chi tiết</span>
+        <button class="reset-filter-btn caption-sm" (click)="resetFilters()">Đặt lại</button>
+      </div>
+
+      <div class="drawer-section">
+        <span class="caption-sm section-title">Tiện ích sân bóng</span>
+        <div class="facilities-grid">
+          @for (fac of facilitiesList; track fac.id) {
+          <button class="facility-chip caption-sm" [class.active]="isFacilitySelected(fac.id)"
+            (click)="toggleFacility(fac.id)">
+            <i [class]="fac.icon"></i>
+            {{ fac.name }}
+          </button>
+          }
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <span class="caption-sm section-title">Sắp xếp theo</span>
+        <div class="sort-options">
+          <button class="sort-chip caption-sm" [class.active]="sortBy === 'distance'"
+            (click)="sortBy = 'distance'; applyFilters()">Gần tôi nhất</button>
+          <button class="sort-chip caption-sm" [class.active]="sortBy === 'rating'"
+            (click)="sortBy = 'rating'; applyFilters()">Đánh giá cao nhất</button>
+          <button class="sort-chip caption-sm" [class.active]="sortBy === 'price'"
+            (click)="sortBy = 'price'; applyFilters()">Giá tốt nhất</button>
+        </div>
+      </div>
+    </div>
+    }
+  </header>
+
+  <!-- ══════════════════════════════════════════════════════
+       2. MAIN CONTENT: SPLIT VIEW (LIST + REAL MAP)
+  ════════════════════════════════════════════════════════ -->
+  <div class="finder-layout-body">
+
+    <!-- ── Left Column: Pitches List ── -->
+    <div class="pitches-list-col" [class.hidden-mobile]="viewMode === 'map'">
+      <div class="list-meta-bar">
+        <span class="caption-sm meta-count">
+          Tìm thấy <strong>{{ filteredPitches.length }}</strong> sân bóng trong bán kính {{ selectedRadius }}km
+        </span>
+      </div>
+
+      <div class="pitches-cards-stream">
+        @for (pitch of filteredPitches; track pitch.id) {
+        <div class="pitch-card" [class.highlighted]="activeMapMarkerPitch?.id === pitch.id"
+          (click)="selectMapMarker(pitch)">
+          <!-- Card Image Box -->
+          <div class="pitch-card-media" (click)="openPitchDetail(pitch)">
+            <div class="pitch-turf-pattern">
+              <div class="pitch-turf-lines"></div>
+              <div class="pitch-turf-center-circle"></div>
+            </div>
+            <img [src]="pitch.coverImage" [alt]="pitch.name" class="pitch-cover-img"
+              (error)="$any($event.target).style.display = 'none'" />
+            <div class="card-badges-top">
+              <span class="distance-badge caption-sm">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+                  <path
+                    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                </svg>
+                {{ pitch.distanceKm }} km
+              </span>
+              @if (pitch.featured) {
+              <span class="featured-badge caption-sm">Nổi bật</span>
+              }
+            </div>
+            <div class="slots-available-pill caption-sm">
+              🟢 Còn {{ pitch.availableSlotsCount }} slot hôm nay
+            </div>
+          </div>
+
+          <!-- Card Content Info -->
+          <div class="pitch-card-info">
+            <div class="pitch-title-row">
+              <h3 class="pitch-name heading-lg" (click)="openPitchDetail(pitch)">{{ pitch.name }}</h3>
+              @if (pitch.isVerified) {
+              <svg viewBox="0 0 24 24" fill="#1da1f2" width="16" height="16" class="verified-icon">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+              </svg>
+              }
+            </div>
+
+            <div class="pitch-address-row caption-sm">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
+                <path
+                  d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+              </svg>
+              <span>{{ pitch.address }}</span>
+            </div>
+
+            <!-- Rating & Price Row -->
+            <div class="pitch-meta-row">
+              <div class="rating-box caption-sm">
+                <svg viewBox="0 0 24 24" fill="#f59e0b" width="14" height="14">
+                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                </svg>
+                <strong>{{ pitch.rating }}</strong>
+                <span class="review-count">({{ pitch.reviewCount }})</span>
+              </div>
+
+              <div class="price-range body-md">
+                từ <strong>{{ formatPrice(pitch.minPrice) }}</strong>
+              </div>
+            </div>
+
+            <!-- Facilities Quick Preview -->
+            <div class="facilities-preview">
+              @for (facId of pitch.facilities | slice:0:4; track facId) {
+              <span class="fac-tag caption-xs" [title]="getFacilityName(facId)">
+                <i [class]="getFacilityIcon(facId)"></i>
+                {{ getFacilityName(facId) }}
+              </span>
+              }
+            </div>
+
+            <!-- Card Action Buttons -->
+            <div class="card-action-btns">
+              <button class="directions-btn" (click)="openGoogleMapsDirections(pitch, $event)"
+                title="Chỉ đường qua Google Maps">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+                  <polygon points="3 11 22 2 13 21 11 13 3 11" />
+                </svg>
+                <span class="caption-sm">Đường đi</span>
+              </button>
+              <button class="detail-outline-btn body-md" (click)="openPitchDetail(pitch)">
+                Chi tiết
+              </button>
+              <button class="book-now-btn body-md" (click)="openSchedule(pitch)">
+                Đặt sân
+              </button>
+            </div>
+          </div>
+        </div>
+        }
+
+        @if (filteredPitches.length === 0) {
+        <div class="no-pitches-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M16 16s-1.5-2-4-2-4 2-4 2" />
+            <line x1="9" y1="9" x2="9.01" y2="9" />
+            <line x1="15" y1="9" x2="15.01" y2="9" />
+          </svg>
+          <p class="heading-lg">Không tìm thấy sân bóng phù hợp</p>
+          <span class="caption-sm">Hãy thử tăng bán kính tìm kiếm hoặc thay đổi từ khóa.</span>
+          <button class="reset-filter-btn-cta body-md" (click)="resetFilters()">Xem tất cả sân</button>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- ── Right Column: Real Interactive Leaflet Map ── -->
+    <div class="pitch-map-col" [class.hidden-mobile]="viewMode === 'list'">
+      <div class="interactive-map-wrapper">
+
+        <!-- Map Controls -->
+        <div class="map-overlay-controls">
+          <div class="radius-indicator-card caption-sm">
+            <span class="pulse-dot"></span>
+            Bán kính quét: <strong>{{ selectedRadius }} km</strong>
+          </div>
+          <button class="map-recenter-btn" (click)="recenterMap()" title="Về vị trí của tôi">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path
+                d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Real Leaflet Map Container with Scroll Zoom -->
+        <div id="pitch-leaflet-map" class="real-leaflet-map-canvas"></div>
+
+        <!-- Map Active Card Popup (When Marker Selected) -->
+        @if (activeMapMarkerPitch) {
+        <div class="map-popup-card">
+          <button class="popup-close-btn" (click)="activeMapMarkerPitch = null">✕</button>
+          <div class="popup-thumb-box">
+            <div class="pitch-turf-pattern mini"></div>
+            <img [src]="activeMapMarkerPitch.coverImage" class="popup-thumb"
+              (error)="$any($event.target).style.display = 'none'" />
+          </div>
+          <div class="popup-content">
+            <h4 class="heading-lg popup-title">{{ activeMapMarkerPitch.name }}</h4>
+            <div class="caption-sm popup-meta">
+              <span>⭐ {{ activeMapMarkerPitch.rating }}</span> ·
+              <span>📍 {{ activeMapMarkerPitch.distanceKm }} km</span>
+            </div>
+            <div class="popup-price body-md">
+              từ <strong>{{ formatPrice(activeMapMarkerPitch.minPrice) }}</strong>
+            </div>
+            <div class="popup-actions">
+              <button class="popup-btn directions caption-sm" (click)="openGoogleMapsDirections(activeMapMarkerPitch)"
+                title="Chỉ đường qua Google Maps">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                  <polygon points="3 11 22 2 13 21 11 13 3 11" />
+                </svg>
+                Đường đi
+              </button>
+              <button class="popup-btn outline caption-sm" (click)="openPitchDetail(activeMapMarkerPitch)">Chi
+                tiết</button>
+              <button class="popup-btn primary caption-sm" (click)="openSchedule(activeMapMarkerPitch)">Đặt sân</button>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     3. PRIME NG MODAL: PITCH DETAIL MODAL (#headless)
+════════════════════════════════════════════════════════ -->
+<app-pitch-detail-popup [(visible)]="showDetailModal" [pitch]="selectedPitch" (onBookSchedule)="openSchedule($event.pitch, $event.subPitch)"></app-pitch-detail-popup>
+
+<!-- ══════════════════════════════════════════════════════
+     4. PRIME NG MODAL: TIME SLOT PICKER MODAL (#headless)
+════════════════════════════════════════════════════════ -->
+<p-dialog [(visible)]="showScheduleModal" [modal]="true" [draggable]="false" [resizable]="false" [showHeader]="false"
+  styleClass="custom-schedule-dialog" [dismissableMask]="true" maskStyleClass="custom-modal-mask" appendTo="body">
+  <ng-template #headless>
+    @if (selectedPitch) {
+    <div class="schedule-dialog-inner">
+      <!-- Header -->
+      <div class="schedule-header">
+        <button class="modal-back-btn" (click)="closeSchedule()">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+          </svg>
+        </button>
+        <div class="schedule-header-titles">
+          <h3 class="heading-lg">Chọn khung giờ đặt sân</h3>
+          <span class="caption-sm">{{ selectedPitch.name }}</span>
+        </div>
+        <div style="width: 32px"></div>
+      </div>
+
+      <div class="schedule-body">
+        <!-- 1. Sub-pitch selector tabs (Scrollable with Drag-to-Scroll) -->
+        <div class="subpitch-selector-row">
+          <div class="selector-header-row">
+            <span class="caption-sm selector-label">Chọn sân con:</span>
+            <span class="caption-xs drag-hint">👈 Nắm / Kéo để cuộn 👉</span>
+          </div>
+          <div class="subpitch-pills grab-scroll-container" #subpitchScroll
+            (mousedown)="startDrag($event, subpitchScroll)" (mousemove)="onDrag($event, subpitchScroll)"
+            (mouseup)="stopDrag()" (mouseleave)="stopDrag()">
+            @for (sub of selectedPitch.subPitches; track sub.id) {
+            <button class="sub-pill caption-sm" [class.active]="selectedSubPitch?.id === sub.id"
+              (click)="selectSubPitch(sub)">
+              {{ sub.name }} ({{ sub.typeLabel }})
+            </button>
+            }
+          </div>
+        </div>
+
+        <!-- 2. Date Slider (Scrollable with Drag-to-Scroll) -->
+        <div class="date-slider-row">
+          <div class="selector-header-row">
+            <span class="caption-sm selector-label">Chọn ngày:</span>
+            <span class="caption-xs drag-hint">👈 Nắm / Kéo để cuộn 👉</span>
+          </div>
+          <div class="dates-stream grab-scroll-container" #dateScroll (mousedown)="startDrag($event, dateScroll)"
+            (mousemove)="onDrag($event, dateScroll)" (mouseup)="stopDrag()" (mouseleave)="stopDrag()">
+            @for (item of datesList; track item.dateStr) {
+            <button class="date-card" [class.active]="selectedDateStr === item.dateStr"
+              (click)="selectDate(item.dateStr)">
+              <span class="date-day-name caption-sm">{{ item.dayName }}</span>
+              <span class="date-label heading-lg">{{ item.label }}</span>
+            </button>
+            }
+          </div>
+        </div>
+
+        <!-- 3. Slots Grid -->
+        <div class="slots-section">
+          <div class="slots-legend">
+            <span class="legend-item caption-xs"><span class="legend-box available"></span> Còn trống</span>
+            <span class="legend-item caption-xs"><span class="legend-box selected"></span> Đang chọn</span>
+            <span class="legend-item caption-xs"><span class="legend-box booked"></span> Đã đặt</span>
+          </div>
+
+          <div class="slots-grid">
+            @for (slot of timeSlots; track slot.id) {
+            <button class="slot-btn" [class.available]="slot.status === 'available'"
+              [class.booked]="slot.status === 'booked' || slot.status === 'held'"
+              [class.selected]="selectedSlot?.id === slot.id" [disabled]="slot.status !== 'available'"
+              (click)="selectSlot(slot)">
+              @if (slot.isGoldenHour) {
+              <span class="golden-badge caption-xs">Khung vàng</span>
+              }
+              <span class="slot-time heading-lg">{{ slot.startTime }} - {{ slot.endTime }}</span>
+              <span class="slot-price caption-sm">{{ formatPrice(slot.price) }}</span>
+            </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="schedule-footer">
+        <div class="selected-summary">
+          @if (selectedSlot) {
+          <div class="summary-details">
+            <span class="caption-sm">Đã chọn: <strong>{{ selectedSubPitch?.name }}</strong> ({{ selectedSlot.startTime
+              }} - {{ selectedSlot.endTime }})</span>
+            <span class="heading-lg summary-price">{{ formatPrice(selectedSlot.price) }}</span>
+          </div>
+          } @else {
+          <span class="caption-sm select-prompt">Vui lòng chọn 1 khung giờ còn trống ở trên</span>
+          }
+        </div>
+
+        <button class="modal-primary-btn heading-lg" [disabled]="!selectedSlot" (click)="proceedToBooking()">
+          Tiếp tục đặt sân
+        </button>
+      </div>
+    </div>
+    }
+  </ng-template>
+</p-dialog>
+
+<!-- ══════════════════════════════════════════════════════
+     5. PRIME NG MODAL: CHECKOUT & PAYMENT MODAL (#headless)
+════════════════════════════════════════════════════════ -->
+<p-dialog [(visible)]="showBookingModal" [modal]="true" [draggable]="false" [resizable]="false" [showHeader]="false"
+  styleClass="custom-checkout-dialog" [dismissableMask]="true" maskStyleClass="custom-modal-mask" appendTo="body">
+  <ng-template #headless>
+    <div class="checkout-dialog-inner">
+      <!-- Header -->
+      <div class="checkout-header">
+        <button class="modal-back-btn" (click)="closeBookingModal()">✕</button>
+        <h3 class="heading-lg">Xác nhận đặt sân</h3>
+        <div style="width: 24px"></div>
+      </div>
+
+      <div class="checkout-body">
+        <!-- Booking Summary Card -->
+        <div class="checkout-summary-card">
+          <div class="summary-pitch-title heading-lg">{{ selectedPitch?.name }}</div>
+          <div class="summary-subpitch-name body-md">🏟️ {{ selectedSubPitch?.name }} ({{ selectedSubPitch?.typeLabel
+            }})</div>
+          <div class="summary-time-row body-md">
+            <span>📅 Ngày: <strong>{{ selectedDateStr }}</strong></span>
+            <span>🕒 Giờ: <strong>{{ selectedSlot?.startTime }} - {{ selectedSlot?.endTime }}</strong> (90 phút)</span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-total-row">
+            <span class="body-md">Tổng tiền thanh toán:</span>
+            <span class="heading-xl total-price">{{ formatPrice(selectedSlot?.price || 0) }}</span>
+          </div>
+        </div>
+
+        <!-- Customer Info Form -->
+        <div class="checkout-form-section">
+          <h4 class="caption-sm form-section-title">Thông tin người đặt</h4>
+          <div class="form-group">
+            <label class="caption-sm">Họ và tên *</label>
+            <input type="text" class="form-input body-md" [(ngModel)]="bookingName" placeholder="Nhập họ và tên" />
+          </div>
+          <div class="form-group">
+            <label class="caption-sm">Số điện thoại liên hệ *</label>
+            <input type="tel" class="form-input body-md" [(ngModel)]="bookingPhone" placeholder="Nhập số điện thoại" />
+          </div>
+          <div class="form-group">
+            <label class="caption-sm">Ghi chú cho chủ sân (Tùy chọn)</label>
+            <input type="text" class="form-input body-md" [(ngModel)]="bookingNote"
+              placeholder="Ví dụ: Cần mượn áo bib số 1-10..." />
+          </div>
+        </div>
+
+        <!-- Payment Method Selection -->
+        <div class="checkout-form-section">
+          <h4 class="caption-sm form-section-title">Phương thức thanh toán</h4>
+          <div class="payment-methods-list">
+            <!-- VietQR -->
+            <label class="payment-option-card" [class.selected]="paymentMethod === 'vietqr'">
+              <input type="radio" name="payMethod" value="vietqr" [(ngModel)]="paymentMethod" />
+              <div class="pay-info">
+                <strong class="body-md">Chuyển khoản VietQR (Ngân hàng)</strong>
+                <span class="caption-sm">Quét mã QR qua ứng dụng Banking tức thì</span>
+              </div>
+              <span class="pay-badge caption-xs">Khuyên dùng</span>
+            </label>
+
+            <!-- MoMo / VNPay -->
+            <label class="payment-option-card" [class.selected]="paymentMethod === 'momo'">
+              <input type="radio" name="payMethod" value="momo" [(ngModel)]="paymentMethod" />
+              <div class="pay-info">
+                <strong class="body-md">Ví điện tử MoMo / VNPay</strong>
+                <span class="caption-sm">Thanh toán qua ví MoMo hoặc VNPay QR</span>
+              </div>
+            </label>
+
+            <!-- Cash -->
+            <label class="payment-option-card" [class.selected]="paymentMethod === 'cash'">
+              <input type="radio" name="payMethod" value="cash" [(ngModel)]="paymentMethod" />
+              <div class="pay-info">
+                <strong class="body-md">Thanh toán tiền mặt tại sân</strong>
+                <span class="caption-sm">Thanh toán trực tiếp cho chủ sân khi đến đá</span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Action -->
+      <div class="checkout-footer">
+        <button class="checkout-cancel-btn body-md" (click)="closeBookingModal()">Hủy</button>
+        <button class="modal-primary-btn heading-lg" [disabled]="isSubmittingBooking" (click)="confirmBooking()">
+          @if (isSubmittingBooking) {
+          <span class="spinner"></span> Đang xử lý...
+          } @else {
+          Xác nhận đặt sân
+          }
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- ══════════════════════════════════════════════════════
+     6. PRIME NG MODAL: BOOKING SUCCESS (#headless)
+════════════════════════════════════════════════════════ -->
+<p-dialog [(visible)]="showSuccessModal" [modal]="true" [draggable]="false" [resizable]="false" [showHeader]="false"
+  styleClass="custom-success-dialog" [dismissableMask]="true" maskStyleClass="custom-modal-mask" appendTo="body">
+  <ng-template #headless>
+    @if (completedBooking) {
+    <div class="success-dialog-inner">
+      <div class="success-icon-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="3" width="40" height="40">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </div>
+
+      <h2 class="heading-xl success-title">Đặt sân thành công!</h2>
+      <p class="body-md success-desc">
+        Thông tin đặt sân đã được gửi đến chủ sân <strong>{{ completedBooking.pitch.name }}</strong>.
+      </p>
+
+      <!-- Receipt Card -->
+      <div class="receipt-card">
+        <div class="receipt-row">
+          <span class="caption-sm">Mã đặt sân:</span>
+          <strong class="heading-lg receipt-code">{{ completedBooking.bookingCode }}</strong>
+        </div>
+        <div class="receipt-row">
+          <span class="caption-sm">Sân bóng:</span>
+          <span class="body-md">{{ completedBooking.pitch.name }} ({{ completedBooking.subPitch.name }})</span>
+        </div>
+        <div class="receipt-row">
+          <span class="caption-sm">Thời gian:</span>
+          <span class="body-md">{{ completedBooking.slot.startTime }} - {{ completedBooking.slot.endTime }} ({{
+            completedBooking.date }})</span>
+        </div>
+        <div class="receipt-row">
+          <span class="caption-sm">Người đặt:</span>
+          <span class="body-md">{{ completedBooking.userName }} ({{ completedBooking.userPhone }})</span>
+        </div>
+        <div class="receipt-divider"></div>
+        <div class="receipt-row total">
+          <span class="body-md">Tổng tiền:</span>
+          <strong class="heading-xl total-val">{{ formatPrice(completedBooking.totalPrice) }}</strong>
+        </div>
+      </div>
+
+      <button class="modal-primary-btn heading-lg" style="width: 100%; margin-top: 20px;" (click)="closeSuccessModal()">
+        Hoàn tất
+      </button>
+    </div>
+    }
+  </ng-template>
+</p-dialog>
+
+<!-- PrimeNG Toast -->
+<p-toast position="top-right" styleClass="custom-toast"></p-toast>
+

@@ -1,0 +1,250 @@
+::ng-deep .custom-team-modal {
+  background-color: var(--surface-bg) !important;
+  width: 100%;
+  max-width: 540px;
+  border-radius: 20px !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5) !important;
+  overflow: hidden;
+}
+
+::ng-deep .custom-modal-mask {
+  background-color: rgba(0, 0, 0, 0.65) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+.modal-dialog-inner {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.modal-dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 0.5px solid var(--border-color);
+  background-color: var(--surface-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.modal-back-btn {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.modal-dialog-body {
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-dialog-footer {
+  position: sticky;
+  bottom: 0;
+  background-color: var(--surface-bg);
+  border-top: 0.5px solid var(--border-color);
+  padding: 14px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  z-index: 10;
+}
+
+.modal-cancel-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 8px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.modal-submit-btn {
+  background-color: var(--brand-primary);
+  color: #000000;
+  border: none;
+  padding: 8px 22px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(133, 234, 45, 0.25);
+}
+
+.team-profile-top {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.team-profile-logo {
+  width: 68px;
+  height: 68px;
+  border-radius: 16px;
+  object-fit: cover;
+  background-color: #222;
+}
+
+.team-profile-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.team-profile-titles h2 {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.team-profile-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rank-badge-lg {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+.team-elo-val {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.team-meta-loc {
+  color: var(--text-tertiary);
+}
+
+.team-desc-p {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.stats-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.stat-card {
+  background-color: rgba(128, 128, 128, 0.06);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-title {
+  color: var(--text-tertiary);
+}
+
+.stat-card strong {
+  color: var(--text-primary);
+}
+
+.stat-card.win strong {
+  color: #1d9e75;
+}
+
+.stat-card.draw strong {
+  color: #ef9f27;
+}
+
+.stat-card.loss strong {
+  color: #e24a4a;
+}
+
+.team-extra-stats-card {
+  background-color: rgba(128, 128, 128, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.extra-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.extra-stat-row span {
+  color: var(--text-tertiary);
+}
+
+.extra-stat-row strong {
+  color: var(--text-primary);
+}
+
+.roster-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.roster-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.roster-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background-color: rgba(128, 128, 128, 0.04);
+}
+
+.roster-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.roster-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.roster-info strong {
+  color: var(--text-primary);
+}
+
+.roster-info span {
+  color: var(--text-tertiary);
+}
+
+@media (max-width: 768px) {
+  ::ng-deep .custom-team-modal {
+    max-width: 100% !important;
+    border-radius: 20px 20px 0 0 !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+  }
+}

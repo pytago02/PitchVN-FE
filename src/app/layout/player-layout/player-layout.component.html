@@ -1,0 +1,201 @@
+<div class="threads-layout">
+  <!-- Left Sidebar (Desktop) -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="logo" (click)="toggleTheme()" style="cursor: pointer;" title="Toggle Theme">
+        <!-- Thay bằng SVG logo tương tự Threads, dùng màu primary (#85EA2D) -->
+        <svg viewBox="0 0 24 24" fill="var(--brand-primary)" width="32" height="32">
+          <path
+            d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1.85-6.52c1.33 0 2.22-.5 2.65-1.46l.4.15c-.47 1.15-1.57 1.77-3.12 1.77-2.14 0-3.66-1.53-3.66-3.8 0-2.29 1.54-3.83 3.75-3.83 2.14 0 3.51 1.47 3.51 3.5v.69h-5.46c.16 1.15.99 1.83 2.05 1.83 1.01 0 1.67-.53 1.88-1.25l.44.13c-.28.91-1.12 1.58-2.32 1.58-1.45 0-2.47-1.02-2.47-2.45 0-1.43.99-2.43 2.38-2.43 1.34 0 2.31.95 2.31 2.3v.23h-5.02c0 1.28.92 2.21 2.15 2.21zm2.34-3.41c0-1.05-.72-1.84-1.83-1.84-1.07 0-1.84.81-1.97 1.84h3.8z" />
+        </svg>
+      </div>
+
+      <nav class="nav-menu">
+        <!-- Bảng tin (Feed) -->
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+          </svg>
+          <span class="body-md">Bảng tin</span>
+        </a>
+        <!-- Tìm sân (Map) -->
+        <a routerLink="/tim-san" routerLinkActive="active" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path
+              d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+          </svg>
+          <span class="body-md">Tìm sân</span>
+        </a>
+        <!-- Tìm kèo (Challenge) -->
+        <a routerLink="/tim-keo" routerLinkActive="active" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path
+              d="M14 6l-3.8 5 3 3.8-1.6 1.6-3.8-3-5 3.8L1 15.6l5-3.8-3-3.8 1.6-1.6 3.8 3 5-3.8L14 6zm7.4 9.6L16.6 20.4l-1.6-1.6 3-3.8-5-3.8 1.6-1.6 3.8 5 3-3.8 1.6 1.6-4 5z" />
+          </svg>
+          <span class="body-md">Tìm kèo</span>
+        </a>
+
+        <!-- Space -->
+        <div style="height: 12px"></div>
+
+        <!-- Giải đấu -->
+        <a routerLink="/giai-dau" routerLinkActive="active" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path
+              d="M19 3H5v2h14V3zm-2 4H7v5.4c0 3.1 2.3 5.7 5.4 5.9v2.7h-4v2h12v-2h-4v-2.7c3.1-.2 5.4-2.8 5.4-5.9V7z" />
+          </svg>
+          <span class="body-md">Giải đấu</span>
+        </a>
+        <!-- Xếp hạng -->
+        <a routerLink="/xep-hang" routerLinkActive="active" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path
+              d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+          </svg>
+          <span class="body-md">Xếp hạng</span>
+        </a>
+        <!-- Tin nhắn -->
+        <a routerLink="/tin-nhan" routerLinkActive="active" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path
+              d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
+          </svg>
+          <span class="body-md">Tin nhắn</span>
+        </a>
+        <!-- Trang cá nhân -->
+        <a routerLink="/profile" routerLinkActive="active" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path
+              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+          </svg>
+          <span class="body-md">Trang cá nhân</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-section">
+        <div class="section-header">
+          <span class="caption-sm" style="color: var(--text-tertiary)">Lối tắt</span>
+          <span class="caption-sm" style="color: var(--text-tertiary); cursor: pointer">Chỉnh sửa</span>
+        </div>
+        <nav class="nav-menu">
+          <a routerLink="/my-team" routerLinkActive="active" class="nav-item">
+            <span class="body-md">Đội bóng của tôi</span>
+          </a>
+          <a routerLink="/my-challenges" routerLinkActive="active" class="nav-item">
+            <span class="body-md">Kèo đang tìm</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <button class="nav-item more-nav-btn" (click)="moreMenu.toggle($event)">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+        </svg>
+        <span class="body-md">Xem thêm</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Cột giữa: Nội dung chính -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Bottom Tab Bar cho Mobile -->
+  <nav class="bottom-tab-bar">
+    <!-- Bảng tin -->
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="tab-item">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+      </svg>
+    </a>
+    <!-- Tìm sân -->
+    <a routerLink="/tim-san" routerLinkActive="active" class="tab-item">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+        <path
+          d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+      </svg>
+    </a>
+    <!-- Tìm kèo -->
+    <a routerLink="/tim-keo" routerLinkActive="active" class="tab-item">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+        <path
+          d="M14 6l-3.8 5 3 3.8-1.6 1.6-3.8-3-5 3.8L1 15.6l5-3.8-3-3.8 1.6-1.6 3.8 3 5-3.8L14 6zm7.4 9.6L16.6 20.4l-1.6-1.6 3-3.8-5-3.8 1.6-1.6 3.8 5 3-3.8 1.6 1.6-4 5z" />
+      </svg>
+    </a>
+    <!-- Giải đấu -->
+    <a routerLink="/giai-dau" routerLinkActive="active" class="tab-item">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+        <path d="M19 3H5v2h14V3zm-2 4H7v5.4c0 3.1 2.3 5.7 5.4 5.9v2.7h-4v2h12v-2h-4v-2.7c3.1-.2 5.4-2.8 5.4-5.9V7z" />
+      </svg>
+    </a>
+    <!-- Xem thêm / Theme (Mobile) -->
+    <button class="tab-item more-tab-btn" (click)="moreMenu.toggle($event)">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+      </svg>
+    </button>
+  </nav>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PrimeNG: Popover Menu for "Xem thêm" (Threads style)
+════════════════════════════════════════════════════════ -->
+<p-popover #moreMenu styleClass="custom-sidebar-popover" appendTo="body">
+  <div class="sidebar-more-menu">
+    <!-- Nút chuyển giao diện Sáng / Tối -->
+    <button class="more-menu-item" (click)="toggleTheme(); moreMenu.hide()">
+      <span>{{ isDarkMode ? 'Chế độ sáng' : 'Chế độ tối' }}</span>
+      @if (isDarkMode) {
+      <!-- Sun icon -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <circle cx="12" cy="12" r="5" />
+        <line x1="12" y1="1" x2="12" y2="3" />
+        <line x1="12" y1="21" x2="12" y2="23" />
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+        <line x1="1" y1="12" x2="3" y2="12" />
+        <line x1="21" y1="12" x2="23" y2="12" />
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+      </svg>
+      } @else {
+      <!-- Moon icon -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      </svg>
+      }
+    </button>
+
+    <button class="more-menu-item" (click)="moreMenu.hide()">
+      <span>Cài đặt</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <circle cx="12" cy="12" r="3" />
+        <path
+          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+      </svg>
+    </button>
+
+    <button class="more-menu-item" (click)="moreMenu.hide()">
+      <span>Báo cáo sự cố</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+    </button>
+
+    <div class="more-menu-divider"></div>
+
+    <button class="more-menu-item danger" (click)="moreMenu.hide()">
+      <span>Đăng xuất</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <polyline points="16 17 21 12 16 7" />
+        <line x1="21" y1="12" x2="9" y2="12" />
+      </svg>
+    </button>
+  </div>
+</p-popover>

@@ -1,0 +1,958 @@
+<div class="challenge-finder-container">
+
+  <!-- ══════════════════════════════════════════════════════
+       1. STICKY HEADER & TABS
+  ════════════════════════════════════════════════════════ -->
+  <div class="header-top-row">
+    <div class="header-titles">
+      <h1 class="heading-xl">Tìm kèo thi đấu</h1>
+      <p class="caption-sm header-subtitle">Ghép trận bóng đá & so tài xếp hạng ELO phong trào</p>
+    </div>
+
+    <button class="post-challenge-cta heading-lg" (click)="openCreateChallenge()">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+      </svg>
+      Đăng bài tìm đối
+    </button>
+  </div>
+
+  <div class="my-team-banner" (click)="openTeamDetail(myTeam)">
+    <img [src]="myTeam.logo" class="my-team-avatar" />
+    <div class="my-team-info">
+      <div class="my-team-name-row">
+        <strong class="body-md">{{ myTeam.name }}</strong>
+        <span class="rank-badge caption-xs" [style.color]="getRankInfo(myTeam.rank).color"
+          [style.backgroundColor]="getRankInfo(myTeam.rank).bgLight">
+          Hạng {{ myTeam.rank }} · {{ myTeam.eloScore }} ELO
+        </span>
+      </div>
+      <span class="caption-xs my-team-stats">
+        {{ myTeam.wins }} Thắng · {{ myTeam.draws }} Hòa · {{ myTeam.losses }} Thua (Tỉ lệ thắng {{ myTeam.winRate }}%)
+      </span>
+    </div>
+    <button class="my-team-view-btn caption-sm">Hồ sơ đội</button>
+  </div>
+
+  <div class="layout-2col">
+    <!-- COL 1: FILTERS -->
+    <aside class="challenge-filters-col">
+      <div class="sidebar-header mb-4">
+        <h3 class="heading-lg">Bộ lọc tìm kiếm</h3>
+      </div>
+
+      <div class="filters-panel">
+        <div class="search-box filter-section">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"
+            class="search-icon">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input type="text" class="search-input body-md" placeholder="Tên đội, sân, khu vực..."
+            [(ngModel)]="searchQuery" (input)="applyFilters()" />
+          @if (searchQuery.length > 0) {
+          <button class="clear-search-btn" (click)="searchQuery = ''; applyFilters()">✕</button>
+          }
+        </div>
+
+        <div class="location-filter-panel filter-section mt-4">
+          <h4 class="caption-sm form-label mb-3">📍 Khu vực & Địa điểm</h4>
+
+          <div class="flex flex-col gap-3">
+            <div class="w-full">
+              <p-select id="province-select" [options]="provinces" [(ngModel)]="selectedProvince"
+                (onChange)="onProvinceChange()" [filter]="true" filterBy="name" optionLabel="name" [showClear]="true"
+                placeholder="Tất cả Tỉnh thành" styleClass="w-full search-box">
+                <ng-template #item let-prov>
+                  <span>{{ prov.name }}</span>
+                </ng-template>
+              </p-select>
+            </div>
+
+            <div class="w-full">
+              <p-select id="district-select" [options]="districts" [(ngModel)]="selectedDistrict"
+                (onChange)="onDistrictChange()" [disabled]="!selectedProvince" [filter]="true" filterBy="name"
+                optionLabel="name" [showClear]="true" placeholder="Tất cả Quận / Huyện" styleClass="w-full search-box">
+                <ng-template #item let-dist>
+                  <span>{{ dist.name }}</span>
+                </ng-template>
+              </p-select>
+            </div>
+
+            @if (apiVersion === 'v1') {
+            <div class="w-full">
+              <p-select id="wards-select" [options]="wards" [(ngModel)]="selectedWards" (onChange)="onWardsChange()"
+                [disabled]="!selectedDistrict" [filter]="true" filterBy="name" optionLabel="name" [showClear]="true"
+                placeholder="Tất cả Xã / Phường" styleClass="w-full search-box">
+                <ng-template #selecteditems let-value>
+                  <span>{{ getWardsLabel() }}</span>
+                </ng-template>
+                <ng-template #item let-dist>
+                  <span>{{ dist.name }}</span>
+                </ng-template>
+              </p-select>
+            </div>
+            }
+          </div>
+
+          <!-- <button class="api-version-toggle-btn caption-xs mt-3 w-full justify-center"
+            [class.post-merge]="apiVersion === 'v2'" [disabled]="isLoadingProvinces" (click)="toggleApiVersion()"
+            [title]="apiVersion === 'v1' ? 'Chuyển sang dữ liệu sau sáp nhập' : 'Chuyển sang dữ liệu trước sáp nhập'">
+            @if (isLoadingProvinces) {
+            <span class="loading-spinner-sm"></span> Đang tải...
+            } @else {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12">
+              <path d="M21 2v6h-6M3 12a9 9 0 0115-6.7L21 8M3 22v-6h6M21 12a9 9 0 01-15 6.7L3 16" />
+            </svg>
+            {{ apiVersion === 'v1' ? 'Xem sau sáp nhập →' : '← Xem trước sáp nhập' }}
+            }
+          </button> -->
+
+          <div class="loc-filter-block mt-4 flex-col gap-2">
+            <h4 class="caption-sm form-label mb-3">Bán kính</h4>
+            <div class="loc-pill-row flex-wrap">
+              @for (r of radiusList; track r.value) {
+              <button class="loc-pill caption-xs" [class.active]="selectedRadius === r.value"
+                (click)="setRadius(r.value)">{{ r.label }}</button>
+              }
+              <button class="loc-pill caption-xs" [class.active]="selectedRadius === 'custom'"
+                (click)="setRadius('custom')">Tùy chỉnh</button>
+              @if (selectedRadius === 'custom') {
+              <div class="custom-radius-input-wrapper mt-2">
+                <input type="number" class="custom-radius-input caption-xs" placeholder="Nhập km..."
+                  [(ngModel)]="customRadius" (input)="applyFilters()" />
+                <span class="caption-xs text-secondary-unit">km</span>
+              </div>
+              }
+            </div>
+
+          </div>
+
+          <div class="loc-filter-block mt-4 flex-col gap-2">
+            <h4 class="caption-sm form-label mb-3">Vị trí thi đấu</h4>
+            <div class="loc-pill-row flex-wrap">
+              @for (p of positionsList; track p.value) {
+              <button class="loc-pill caption-xs" [class.active]="selectedPosition === p.value"
+                (click)="setPosition(p.value)">{{ p.label }}</button>
+              }
+            </div>
+          </div>
+
+          <div class="loc-filter-block mt-4 flex-col gap-2">
+            <h4 class="caption-sm form-label mb-3">📅 Ngày & Khung giờ</h4>
+            <div class="w-full">
+              <p-datepicker [(ngModel)]="filterDate" dateFormat="dd/mm/yy" [showClear]="true" placeholder="Chọn ngày"
+                styleClass="w-full search-box" class="w-full" (ngModelChange)="applyFilters()"></p-datepicker>
+            </div>
+            <div class="flex items-center gap-2 mt-2">
+              <p-datepicker inputId="filter-time-from" [(ngModel)]="filterTimeFrom" [timeOnly]="true" [showClear]="true"
+                class="w-full" styleClass="w-full search-box" placeholder="Từ giờ"
+                (ngModelChange)="applyFilters()"></p-datepicker>
+              <span>-</span>
+              <p-datepicker inputId="filter-time-to" [(ngModel)]="filterTimeTo" [timeOnly]="true" [showClear]="true"
+                class="w-full" styleClass="w-full search-box" placeholder="Đến giờ"
+                (ngModelChange)="applyFilters()"></p-datepicker>
+            </div>
+          </div>
+
+          <div class="loc-filter-block mt-4 flex-col gap-2">
+            <h4 class="caption-sm form-label mb-3">⚽ Hình thức thi đấu</h4>
+
+            <div class="format-pills flex-wrap">
+              <button class="pill-btn caption-sm" [class.active]="selectedFormat === 'all'"
+                (click)="setFormat('all')">Tất
+                cả</button>
+              <button class="pill-btn caption-sm" [class.active]="selectedFormat === '5v5'"
+                (click)="setFormat('5v5')">Sân
+                5</button>
+              <button class="pill-btn caption-sm" [class.active]="selectedFormat === '7v7'"
+                (click)="setFormat('7v7')">Sân
+                7</button>
+              <button class="pill-btn caption-sm" [class.active]="selectedFormat === '11v11'"
+                (click)="setFormat('11v11')">Sân 11</button>
+            </div>
+          </div>
+
+          <div class="loc-filter-block mt-4 flex-col gap-2">
+            <h4 class="caption-sm form-label mb-3">💰 Thể thức chia tiền sân</h4>
+
+            <div class="format-pills flex-wrap">
+              <button class="pill-btn caption-sm" [class.active]="selectedFeeSplit === ''" (click)="setFeeSplit('')">Tất
+                cả</button>
+              <button class="pill-btn caption-sm" [class.active]="selectedFeeSplit === '50-50'"
+                (click)="setFeeSplit('50-50')">Cưa đôi 5-5</button>
+              <button class="pill-btn caption-sm" [class.active]="selectedFeeSplit === 'loser-pays'"
+                (click)="setFeeSplit('loser-pays')">Thua trả 100%</button>
+              <button class="pill-btn caption-sm" [class.active]="selectedFeeSplit === '60-40'"
+                (click)="setFeeSplit('60-40')">Chia 60-40</button>
+            </div>
+          </div>
+
+          <div class="loc-filter-block mt-4 flex-col gap-2">
+            <h4 class="caption-sm form-label mb-3">⭐ Hạng yêu cầu</h4>
+            <div class="rank-pills-stream flex-col gap-3 mt-2">
+              <label
+                class="caption-sm flex items-center gap-2 cursor-pointer w-full text-[var(--text-primary)] hover:opacity-80 transition-opacity">
+                <input type="checkbox" [checked]="selectedRanks.length === 0" (change)="toggleRank('all')"
+                  class="w-4 h-4 cursor-pointer accent-[var(--brand-primary)]">
+                <span [style.font-weight]="selectedRanks.length === 0 ? '600' : '400'">Tất cả hạng</span>
+              </label>
+              <div class="flex flex-col gap-3 w-full">
+                @for (tier of allRanks; track tier; let i = $index) {
+                <label
+                  class="caption-sm flex items-center gap-2 cursor-pointer w-full text-[var(--text-primary)] hover:opacity-80 transition-opacity"
+                  [style.--rank-color]="getRankInfo(tier).color" [style.margin-left.px]="(i + 1) * 16"
+                  [style.width]="'calc(100% - ' + ((i + 1) * 16) + 'px)'">
+                  <input type="checkbox" [checked]="selectedRanks.includes(tier)" (change)="toggleRank(tier)"
+                    class="w-4 h-4 cursor-pointer" [style.accent-color]="getRankInfo(tier).color">
+                  <span [style.color]="selectedRanks.includes(tier) ? getRankInfo(tier).color : 'inherit'"
+                    [style.font-weight]="selectedRanks.includes(tier) ? '600' : '400'">
+                    Hạng {{ tier }} ({{ getRankInfo(tier).title }})
+                  </span>
+                </label>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- COL 2: CONTENT -->
+    <main class="challenge-content-col">
+      <div class="challenge-tabs">
+        <button class="tab-btn heading-lg" [class.active]="activeTab === 'all'" (click)="setTab('all')">
+          Tất cả kèo
+        </button>
+        <button class="tab-btn heading-lg" [class.active]="activeTab === 'team'" (click)="setTab('team')">
+          Kèo Đội bóng 🛡️
+        </button>
+        <button class="tab-btn heading-lg" [class.active]="activeTab === 'individual'" (click)="setTab('individual')">
+          Ghép người đá 🏃
+        </button>
+        <button class="tab-btn heading-lg" [class.active]="activeTab === 'my'" (click)="setTab('my')">
+          Kèo của tôi
+        </button>
+      </div>
+
+      @if (activeTab === 'individual') {
+      <div class="individual-subtabs-row mb-4 mt-2">
+        <button class="subtab-pill caption-sm" [class.active]="individualSubFilter === 'all'"
+          (click)="setIndividualSubFilter('all')">
+          Tất cả
+        </button>
+        <button class="subtab-pill caption-sm" [class.active]="individualSubFilter === 'team_needs_player'"
+          (click)="setIndividualSubFilter('team_needs_player')">
+          🛡️👤 Đội tìm người ghép
+        </button>
+        <button class="subtab-pill caption-sm" [class.active]="individualSubFilter === 'player_needs_team'"
+          (click)="setIndividualSubFilter('player_needs_team')">
+          🏃 Người tìm đội
+        </button>
+      </div>
+      }
+
+      <div class="challenges-stream">
+        <div class="stream-meta-count caption-sm">
+          Có <strong>{{ filteredChallenges.length }}</strong> bài viết phù hợp
+        </div>
+
+        @for (chl of filteredChallenges; track chl.id) {
+        <article class="challenge-card" [class.matched]="chl.status === 'matched'">
+
+          <!-- Left Column: Avatar / Logo + Rank Badge -->
+          <div class="card-left-col">
+            @if (chl.creatorTeam) {
+            <img [src]="chl.creatorTeam.logo" [alt]="chl.creatorTeam.name" class="creator-logo"
+              (click)="openTeamDetail(chl.creatorTeam)" title="Xem hồ sơ đội" />
+            <span class="rank-pill-mini caption-xs" [style.color]="getRankInfo(chl.creatorTeam.rank).color"
+              [style.backgroundColor]="getRankInfo(chl.creatorTeam.rank).bgLight">
+              {{ chl.creatorTeam.rank }}
+            </span>
+            } @else if (chl.creatorUser) {
+            <img [src]="chl.creatorUser.avatar" class="creator-avatar" />
+            <span class="rank-pill-mini caption-xs" [style.color]="getRankInfo(chl.creatorUser.rank).color"
+              [style.backgroundColor]="getRankInfo(chl.creatorUser.rank).bgLight">
+              {{ chl.creatorUser.rank }}
+            </span>
+            }
+          </div>
+
+          <!-- Right Column: Content, Details & Action Buttons -->
+          <div class="card-right-col">
+
+            <!-- Card Header -->
+            <div class="card-header">
+              <div class="creator-title-block">
+                @if (chl.creatorTeam) {
+                <span class="team-name heading-lg" (click)="openTeamDetail(chl.creatorTeam)">
+                  {{ chl.creatorTeam.name }}
+                </span>
+                <span class="elo-score caption-xs">({{ chl.creatorTeam.eloScore }} ELO)</span>
+                } @else if (chl.creatorUser) {
+                <span class="team-name heading-lg">{{ chl.creatorUser.name }}</span>
+                <span class="elo-score caption-xs">({{ chl.creatorUser.elo }} ELO)</span>
+                }
+                <span class="post-time caption-xs">· {{ chl.createdAt }}</span>
+              </div>
+
+              <!-- Mode & Subtype Badges -->
+              <div class="card-header-badges">
+                @if (chl.type === 'team') {
+                <span class="type-badge team caption-xs">🛡️ Kèo Đội</span>
+                } @else if (chl.individualSubtype === 'team_needs_player') {
+                <span class="type-badge team-needs caption-xs">
+                  🛡️👤 Đội cần {{ chl.neededSlots || 1 }} người
+                </span>
+                } @else if (chl.individualSubtype === 'player_needs_team') {
+                <span class="type-badge player-needs caption-xs">
+                  🏃 Cầu thủ tìm đội
+                </span>
+                }
+
+                @if (chl.status === 'matched') {
+                <span class="matched-badge caption-xs">Đã ghép đủ</span>
+                } @else {
+                <span class="open-badge caption-xs">Đang mở</span>
+                }
+              </div>
+            </div>
+
+            <!-- Challenge Title -->
+            <h2 class="challenge-title body-md">{{ chl.title }}</h2>
+
+            <!-- Distance badge (hiển thị cho tất cả khi có dữ liệu) -->
+            @if (chl.distanceKm !== undefined) {
+            <div class="distance-badge-row">
+              <span class="distance-badge caption-xs" [style.color]="getDistanceLabel(chl.distanceKm).color"
+                [style.borderColor]="getDistanceLabel(chl.distanceKm).color">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11">
+                  <circle cx="12" cy="12" r="9" />
+                  <circle cx="12" cy="12" r="2" />
+                  <line x1="12" y1="3" x2="12" y2="7" />
+                </svg>
+                {{ getDistanceLabel(chl.distanceKm).text }} tới sân
+              </span>
+              @if (chl.areaNote) {
+              <span class="area-note-inline caption-xs">· {{ chl.areaNote }}</span>
+              }
+            </div>
+            }
+
+            <!-- Preferred position for player_needs_team -->
+            @if (chl.individualSubtype === 'player_needs_team' && chl.creatorUser?.preferredPosition) {
+            <div class="player-position-box caption-sm">
+              <span>🎯 Vị trí sở trường: <strong>{{ chl.creatorUser?.preferredPosition }}</strong></span>
+            </div>
+            }
+
+            <!-- Match Specifications Matrix -->
+            <div class="challenge-specs-box">
+              <div class="spec-row" style="margin-bottom: 8px;">
+                <span class="caption-sm spec-item w-full" style="color: var(--text-secondary);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  <span>{{ chl.pitchAddress || chl.district }}</span>
+                </span>
+              </div>
+
+              <div class="spec-row">
+                <span class="caption-sm spec-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  <strong>{{ chl.matchDate | date:'dd/MM/yyyy' }}</strong> ({{ chl.matchTime }})
+                </span>
+                <span class="caption-sm spec-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <line x1="3" y1="9" x2="21" y2="9" />
+                    <line x1="9" y1="21" x2="9" y2="9" />
+                  </svg>
+                  {{ chl.formatLabel }}
+                </span>
+              </div>
+
+              <div class="spec-row">
+                <span class="caption-sm spec-item location">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                    <path
+                      d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                  </svg>
+                  <span class="pitch-link" (click)="openPitchDetail(chl, $event)">
+                    {{ chl.pitchName }} ({{ chl.district }})
+                  </span>
+                </span>
+                <span class="caption-sm spec-item fee">
+                  💰 {{ chl.feeSplitLabel }}
+                </span>
+              </div>
+
+              <!-- Target Ranks & Form -->
+              <div class="spec-footer-row">
+                <div class="target-ranks-group caption-xs">
+                  <span>Hạng mong muốn:</span>
+                  @for (tr of chl.targetRanks; track tr) {
+                  <span class="target-rank-pill" [style.color]="getRankInfo(tr).color"
+                    [style.backgroundColor]="getRankInfo(tr).bgLight">
+                    {{ tr }}
+                  </span>
+                  }
+                </div>
+
+                <!-- Form Streak (Recent 5 Matches for Teams) -->
+                @if (chl.creatorTeam) {
+                <div class="form-streak-group caption-xs" title="Phong độ 5 trận gần nhất">
+                  <span>Phong độ:</span>
+                  @for (res of chl.creatorTeam.recentForm; track $index) {
+                  <span class="form-dot" [class.win]="res === 'W'" [class.draw]="res === 'D'"
+                    [class.loss]="res === 'L'">
+                    {{ res }}
+                  </span>
+                  }
+                </div>
+                }
+              </div>
+
+              <!-- Area/Location info for individual posts -->
+              @if (chl.type === 'individual') {
+              <div class="individual-area-info caption-xs">
+                @if (chl.individualSubtype === 'team_needs_player' && chl.neededPositions && chl.neededPositions.length
+                > 0)
+                {
+                <span class="area-info-item">
+                  <strong>Vị trí cần:</strong>
+                  @for (pos of chl.neededPositions; track pos) {
+                  <span class="needed-pos-pill">{{ pos }}</span>
+                  }
+                </span>
+                }
+                @if (chl.individualSubtype === 'player_needs_team' && chl.creatorUser?.preferredDistricts &&
+                chl.creatorUser!.preferredDistricts!.length > 0) {
+                <span class="area-info-item">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="11" height="11" style="opacity:0.7">
+                    <path
+                      d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                  </svg>
+                  <strong>Khu vực:</strong> {{ chl.creatorUser?.preferredDistricts?.join(', ') }}
+                </span>
+                }
+                @if (chl.creatorUser?.areaNote) {
+                <span class="area-info-note">
+                  📍 {{ chl.creatorUser?.areaNote }}
+                </span>
+                }
+              </div>
+              }
+            </div>
+
+            <!-- Note / Message -->
+            @if (chl.note) {
+            <p class="challenge-note body-base">
+              💬 "{{ chl.note }}"
+            </p>
+            }
+
+            <!-- Action Buttons -->
+            <div class="card-action-row">
+              <button class="action-btn chat-btn body-md" (click)="openChat(chl, $event)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                Nhắn tin
+              </button>
+
+              <a [href]="'tel:' + (chl.contactPhone || '0988888888')" class="action-btn call-btn body-md"
+                (click)="$event.stopPropagation()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <path
+                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+                {{ chl.contactPhone || '0988 888 888' }}
+              </a>
+
+              @if (chl.creatorTeam) {
+              <button class="action-btn outline-btn body-md" (click)="openTeamDetail(chl.creatorTeam)">
+                Hồ sơ đội
+              </button>
+              }
+
+              @if (chl.status === 'open') {
+              <button class="action-btn match-primary-btn heading-lg"
+                [class.join-team]="chl.individualSubtype === 'team_needs_player'"
+                [class.invite-player]="chl.individualSubtype === 'player_needs_team'"
+                (click)="openMatchConfirm(chl, $event)">
+                {{ getActionButtonText(chl) }}
+              </button>
+              } @else {
+              <button class="action-btn matched-state-btn body-md" disabled>
+                Đã ghép đủ
+              </button>
+              }
+            </div>
+
+          </div>
+        </article>
+        }
+
+        @if (filteredChallenges.length === 0) {
+        <div class="no-challenges-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="8" y1="12" x2="16" y2="12" />
+          </svg>
+          <p class="heading-lg">Không tìm thấy bài viết nào phù hợp</p>
+          <span class="caption-sm">Hãy thử thay đổi bộ lọc hoặc đăng bài tìm đối thủ mới.</span>
+          <button class="reset-filter-cta body-md" (click)="resetFilters()">Đặt lại bộ lọc</button>
+        </div>
+        }
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     3. MODAL: POST NEW CHALLENGE (#headless)
+════════════════════════════════════════════════════════ -->
+<p-dialog [(visible)]="showCreateDialog" [modal]="true" [draggable]="false" [resizable]="false" [showHeader]="false"
+  styleClass="custom-challenge-modal" [dismissableMask]="true" maskStyleClass="custom-modal-mask" appendTo="body">
+  <ng-template #headless>
+    <div class="modal-dialog-inner">
+      <!-- Header -->
+      <div class="modal-dialog-header">
+        <button class="modal-back-btn" (click)="closeCreateDialog()">✕</button>
+        <h3 class="heading-lg">Đăng bài tìm đối thủ & ghép người</h3>
+        <div style="width: 24px"></div>
+      </div>
+
+      <div class="modal-dialog-body">
+        <!-- 1. Post Type Selection -->
+        <div class="form-group">
+          <label class="caption-sm form-label">Chế độ đăng bài:</label>
+          <div class="type-switch-group">
+            <button class="switch-btn body-md" [class.active]="postType === 'team'" (click)="onPostTypeChange('team')">
+              🛡️ Kèo Đội bóng
+            </button>
+            <button class="switch-btn body-md" [class.active]="postType === 'individual'"
+              (click)="onPostTypeChange('individual')">
+              🏃 Ghép người đá
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Individual Sub-Options (When 'Ghép người đá' is selected) -->
+        @if (postType === 'individual') {
+        <div class="form-group individual-options-block">
+          <label class="caption-sm form-label highlight">Chọn mục đích ghép người:</label>
+          <div class="individual-choice-cards">
+            <!-- Choice 1: Team needs players -->
+            <label class="choice-card" [class.selected]="createIndividualSubtype === 'team_needs_player'"
+              (click)="onIndividualSubtypeChange('team_needs_player')">
+              <input type="radio" name="indChoice" [checked]="createIndividualSubtype === 'team_needs_player'" />
+              <div class="choice-content">
+                <strong class="body-md">🛡️👤 Đội của bạn đang thiếu người (Tìm người ghép)</strong>
+                <span class="caption-xs">Đăng tuyển thêm thành viên / chân ngoài vào đá cùng đội tối nay</span>
+              </div>
+            </label>
+
+            <!-- Choice 2: Player needs team -->
+            <label class="choice-card" [class.selected]="createIndividualSubtype === 'player_needs_team'"
+              (click)="onIndividualSubtypeChange('player_needs_team')">
+              <input type="radio" name="indChoice" [checked]="createIndividualSubtype === 'player_needs_team'" />
+              <div class="choice-content">
+                <strong class="body-md">🏃 Bạn là cầu thủ tự do (Tìm đội để ghép đá)</strong>
+                <span class="caption-xs">Đăng tìm đội bóng đang thiếu slot để xin tham gia thi đấu cùng</span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Specific inputs for Choice 1 -->
+          @if (createIndividualSubtype === 'team_needs_player') {
+          <div class="sub-form-box">
+            <div class="form-row-grid">
+              <div class="form-group">
+                <label class="caption-sm form-label">Số slot cần tìm:</label>
+                <input pInputText type="number" min="1" max="10" class="w-full" [(ngModel)]="newNeededSlots"
+                  (ngModelChange)="updateDefaultTitle()" />
+              </div>
+              <div class="form-group">
+                <label class="caption-sm form-label">Tiền sân mỗi người đóng:</label>
+                <input pInputText type="number" step="10000" class="w-full" [(ngModel)]="newEstimatedPrice"
+                  placeholder="50.000 đ" />
+              </div>
+            </div>
+          </div>
+          }
+
+          <!-- Specific inputs for Choice 2 -->
+          @if (createIndividualSubtype === 'player_needs_team') {
+          <div class="sub-form-box">
+            <div class="form-group">
+              <label class="caption-sm form-label">Vị trí sở trường của bạn:</label>
+              <p-select [options]="availablePositions" [(ngModel)]="newPreferredPosition" [multiple]="true"
+                optionLabel="name" optionValue="name" [showClear]="true" placeholder="Chọn vị trí sở trường"
+                styleClass="w-full search-box" (onChange)="updateDefaultTitle()">
+                <ng-template #header let-headerClass="class">
+                  <div [class]="headerClass">
+                    <p-checkbox [ngModel]="allPositionsSelected" [binary]="true"
+                      [indeterminate]="indeterminatePositions" (ngModelChange)="onToggleAllPositions($event)"
+                      label="Chọn tất cả" class="ml-1.5"></p-checkbox>
+                  </div>
+                </ng-template>
+                <ng-template #selectedItem>
+                  <span>{{ getPositionLabel() }}</span>
+                </ng-template>
+                <ng-template let-pos #item>
+                  <div class="flex items-center gap-2">
+                    <p-checkbox [ngModel]="isPositionSelected(pos)" [binary]="true" [tabindex]="-1"
+                      [readonly]="true"></p-checkbox>
+                    <span>{{ pos.name }}</span>
+                  </div>
+                </ng-template>
+              </p-select>
+            </div>
+          </div>
+          }
+        </div>
+        }
+
+        <!-- 3. Challenge Title -->
+        <div class="form-group">
+          <label class="caption-sm form-label">Tiêu đề bài viết *</label>
+          <input pInputText type="text" class="w-full" [(ngModel)]="newTitle"
+            placeholder="Ví dụ: Tìm kèo sân 7 giao lưu cọ xát tối mai tại Cầu Giấy..." />
+        </div>
+
+        <!-- 4. Format -->
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="caption-sm form-label">Hình thức thi đấu</label>
+          <div class="flex justify-center">
+            <p-select [options]="matchFormat" [(ngModel)]="newFormat" optionLabel="label" optionValue="value"
+              placeholder="Select a language" class="w-full md:w-56" />
+          </div>
+        </div>
+
+        <!-- Location Selection (Matches outside filter) -->
+        <div class="form-row-grid" style="grid-template-columns: repeat(auto-fit, minmax(30%, 1fr));">
+          <div class="form-group">
+            <label class="caption-sm form-label">Khu vực (Tỉnh/Thành)</label>
+            <p-select id="new-province-select" [options]="provinces" [(ngModel)]="newProvinceObj"
+              (onChange)="onNewProvinceChange()" [filter]="true" filterBy="name" optionLabel="name" [showClear]="true"
+              placeholder="Chọn Tỉnh/Thành" styleClass="w-full search-box">
+              <ng-template #item let-prov>
+                <span>{{ prov.name }}</span>
+              </ng-template>
+            </p-select>
+          </div>
+
+          <div class="form-group">
+            <label class="caption-sm form-label">Quận/Huyện</label>
+            <p-select id="new-district-select" [options]="newDistricts" [(ngModel)]="newDistrictObj"
+              (onChange)="onNewDistrictChange()" [disabled]="!newProvinceObj" [filter]="true" filterBy="name"
+              optionLabel="name" [showClear]="true" placeholder="Chọn Quận/Huyện" styleClass="w-full search-box">
+              <ng-template #item let-dist>
+                <span>{{ dist.name }}</span>
+              </ng-template>
+            </p-select>
+          </div>
+
+          <div class="form-group">
+            <label class="caption-sm form-label">Phường/Xã</label>
+            <p-select id="new-ward-select" [options]="newWards" [(ngModel)]="newWardObj" (onChange)="onNewWardChange()"
+              [disabled]="!newDistrictObj" [filter]="true" filterBy="name" optionLabel="name" [showClear]="true"
+              placeholder="Chọn Phường/Xã" styleClass="w-full search-box">
+              <ng-template #item let-ward>
+                <span>{{ ward.name }}</span>
+              </ng-template>
+            </p-select>
+          </div>
+        </div>
+
+        <!-- 5. Date & Time Grid -->
+        <div class="form-row-grid">
+          <div class="form-group">
+            <label class="caption-sm form-label">Ngày đá</label>
+            <div class="flex justify-center">
+              <p-datepicker [(ngModel)]="newDate" dateFormat="dd/mm/yy" [minDate]="minDate" class="w-full" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="caption-sm form-label">Khung giờ (Từ - Đến)</label>
+            <div class="flex items-center gap-2">
+              <p-datepicker inputId="time-from" [(ngModel)]="newTimeFrom" [timeOnly]="true" class="w-full"
+                placeholder="Từ" />
+              <span>-</span>
+              <p-datepicker inputId="time-to" [(ngModel)]="newTimeTo" [timeOnly]="true" class="w-full"
+                placeholder="Đến" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Pitch Location -->
+        <div class="form-group">
+          <label class="caption-sm form-label">Sân bóng</label>
+          <input pInputText type="text" class="w-full" [(ngModel)]="newPitch"
+            placeholder="Sân Chảo Lửa Cầu Giấy hoặc thỏa thuận..." />
+        </div>
+
+        <!-- 7. Fee Split (For team matches) -->
+        @if (postType === 'team') {
+        <div class="form-group">
+          <label class="caption-sm form-label">Thể thức chia tiền sân</label>
+          <div class="fee-options-group">
+            <button class="fee-pill caption-sm" [class.active]="newFeeSplit === '50-50'"
+              (click)="newFeeSplit = '50-50'">
+              Cưa đôi 5-5
+            </button>
+            <button class="fee-pill caption-sm" [class.active]="newFeeSplit === 'loser-pays'"
+              (click)="newFeeSplit = 'loser-pays'">
+              Bên thua trả 100%
+            </button>
+            <button class="fee-pill caption-sm" [class.active]="newFeeSplit === '60-40'"
+              (click)="newFeeSplit = '60-40'">
+              Chia 60-40
+            </button>
+          </div>
+        </div>
+        }
+
+        <!-- 8. Target Ranks Selection -->
+        <div class="form-group">
+          <label class="caption-sm form-label">Hạng đối thủ / Trình độ mong muốn (chọn nhiều)</label>
+          <div class="target-ranks-selector">
+            @for (tier of allRanks; track tier) {
+            <button class="rank-select-chip caption-sm" [class.selected]="newTargetRanks.includes(tier)"
+              [style.--rank-color]="getRankInfo(tier).color" (click)="toggleTargetRank(tier)">
+              Hạng {{ tier }}
+            </button>
+            }
+          </div>
+        </div>
+
+        <!-- 9. Note -->
+        <div class="form-group">
+          <label class="caption-sm form-label">Ghi chú thêm / Lời nhắn</label>
+          <textarea pTextarea class="w-full" [(ngModel)]="newNote" rows="3"
+            placeholder="Mô tả phong cách đá, yêu cầu đặc biệt hoặc thông tin liên hệ..."></textarea>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-dialog-footer">
+        <button class="modal-cancel-btn body-md" (click)="closeCreateDialog()">Hủy</button>
+        <button class="modal-submit-btn heading-lg" [disabled]="isSubmitting" (click)="submitNewChallenge()">
+          @if (isSubmitting) {
+          <span class="spinner"></span> Đang đăng...
+          } @else {
+          Đăng bài ngay
+          }
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- ════════════════════════════════════════════════════════════
+     SHARED POPUPS
+════════════════════════════════════════════════════════════ -->
+<app-team-detail-popup [(visible)]="showTeamModal" [team]="selectedTeam" (challenge)="openCreateChallenge()">
+</app-team-detail-popup>
+
+<app-pitch-detail-popup [(visible)]="showPitchModal" [pitch]="selectedPitch">
+</app-pitch-detail-popup>
+
+<!-- ══════════════════════════════════════════════════════
+     5. MODAL: QUICK CHAT DIRECT MESSAGE (#headless)
+════════════════════════════════════════════════════════ -->
+<p-dialog [(visible)]="showChatModal" [modal]="true" [draggable]="false" [resizable]="false" [showHeader]="false"
+  styleClass="custom-chat-dialog" [dismissableMask]="true" maskStyleClass="custom-modal-mask" appendTo="body">
+  <ng-template #headless>
+    <div class="chat-dialog-inner">
+      <!-- Chat Header -->
+      <div class="chat-header">
+        <button class="modal-back-btn" (click)="closeChatModal()">✕</button>
+        <div class="chat-header-user">
+          <strong class="heading-lg">
+            {{ selectedChallenge?.creatorTeam?.name || selectedChallenge?.creatorUser?.name }}
+          </strong>
+          <span class="caption-xs chat-online-status">
+            🟢 Đang trực tuyến · Hotline: {{ selectedChallenge?.contactPhone }}
+          </span>
+        </div>
+        <div style="width: 24px"></div>
+      </div>
+
+      <!-- Chat Messages List -->
+      <div class="chat-messages-body">
+        @for (msg of chatMessages; track msg.id) {
+        <div class="chat-message-row" [class.mine]="msg.isMine">
+          @if (!msg.isMine) {
+          <img [src]="msg.senderAvatar" class="chat-sender-avatar" />
+          }
+          <div class="chat-bubble">
+            <p class="chat-text body-md">{{ msg.text }}</p>
+            <span class="chat-time caption-xs">{{ msg.timestamp }}</span>
+          </div>
+        </div>
+        }
+      </div>
+
+      <!-- Quick Reply Suggestions -->
+      <div class="quick-replies-stream">
+        @for (qr of quickReplies; track qr) {
+        <button class="quick-reply-chip caption-xs" (click)="sendQuickReply(qr)">
+          {{ qr }}
+        </button>
+        }
+      </div>
+
+      <!-- Chat Input Footer -->
+      <div class="chat-input-footer">
+        <input type="text" class="chat-text-input body-md" placeholder="Nhập tin nhắn trao đổi..."
+          [(ngModel)]="newChatMessage" (keyup.enter)="sendChatMessage()" />
+        <button class="chat-send-btn" (click)="sendChatMessage()" [disabled]="!newChatMessage.trim()">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- ══════════════════════════════════════════════════════
+     6. MODAL: CONFIRM MATCH CHALLENGE (#headless)
+════════════════════════════════════════════════════════ -->
+<p-dialog [(visible)]="showMatchConfirmModal" [modal]="true" [draggable]="false" [resizable]="false"
+  [showHeader]="false" styleClass="custom-match-modal" [dismissableMask]="true" maskStyleClass="custom-modal-mask"
+  appendTo="body">
+  <ng-template #headless>
+    @if (selectedChallenge) {
+    <div class="modal-dialog-inner">
+      <div class="modal-dialog-header">
+        <button class="modal-back-btn" (click)="closeMatchConfirmModal()">✕</button>
+        <h3 class="heading-lg">{{ getMatchConfirmTitle(selectedChallenge) }}</h3>
+        <div style="width: 24px"></div>
+      </div>
+
+      <div class="modal-dialog-body">
+        <!-- 1. Versus Banner for Team vs Team -->
+        @if (selectedChallenge.type === 'team') {
+        <div class="matchup-banner-card">
+          <div class="matchup-team">
+            <img [src]="myTeam.logo" class="matchup-logo" />
+            <strong class="body-md">{{ myTeam.name }}</strong>
+            <span class="caption-xs">Hạng {{ myTeam.rank }} ({{ myTeam.eloScore }})</span>
+          </div>
+
+          <div class="matchup-vs heading-xl">VS</div>
+
+          <div class="matchup-team">
+            <img [src]="selectedChallenge.creatorTeam?.logo" class="matchup-logo" />
+            <strong class="body-md">{{ selectedChallenge.creatorTeam?.name }}</strong>
+            <span class="caption-xs">
+              Hạng {{ selectedChallenge.creatorTeam?.rank }} ({{ selectedChallenge.creatorTeam?.eloScore }})
+            </span>
+          </div>
+        </div>
+        }
+
+        <!-- 2. Individual Matchup Card: Team Needs Player -->
+        @if (selectedChallenge.individualSubtype === 'team_needs_player') {
+        <div class="individual-matchup-card">
+          <div class="matchup-sub-icon">🛡️👤</div>
+          <div class="matchup-sub-info">
+            <strong class="heading-lg">Đăng ký vào đá cùng {{ selectedChallenge.creatorTeam?.name }}</strong>
+            <span class="caption-sm">Đội đang tuyển <strong>{{ selectedChallenge.neededSlots || 1 }}
+                người</strong></span>
+          </div>
+        </div>
+        }
+
+        <!-- 3. Individual Matchup Card: Player Needs Team -->
+        @if (selectedChallenge.individualSubtype === 'player_needs_team') {
+        <div class="individual-matchup-card">
+          <img [src]="selectedChallenge.creatorUser?.avatar" class="matchup-player-avatar" />
+          <div class="matchup-sub-info">
+            <strong class="heading-lg">Mời {{ selectedChallenge.creatorUser?.name }} vào đá</strong>
+            <span class="caption-sm">Vị trí: <strong>{{ selectedChallenge.creatorUser?.preferredPosition
+                }}</strong></span>
+          </div>
+        </div>
+        }
+
+        <!-- Terms Summary -->
+        <div class="match-terms-card">
+          <div class="term-row">
+            <span class="caption-sm">📅 Thời gian:</span>
+            <strong class="body-md">{{ selectedChallenge.matchDate | date:'dd/MM/yyyy' }} ({{
+              selectedChallenge.matchTime }})</strong>
+          </div>
+          <div class="term-row">
+            <span class="caption-sm">🏟️ Sân bóng:</span>
+            <strong class="body-md">{{ selectedChallenge.pitchName }}</strong>
+          </div>
+          <div class="term-row">
+            <span class="caption-sm">⚽ Hình thức:</span>
+            <strong class="body-md">{{ selectedChallenge.formatLabel }}</strong>
+          </div>
+          <div class="term-row">
+            <span class="caption-sm">💰 Chi phí:</span>
+            <strong class="body-md">{{ selectedChallenge.feeSplitLabel }}</strong>
+          </div>
+          @if (selectedChallenge.type === 'team') {
+          <div class="term-row">
+            <span class="caption-sm">🏆 Tính điểm ELO:</span>
+            <strong class="body-md" style="color: var(--brand-primary)">Có tính ELO chính thức (+/- 32 điểm)</strong>
+          </div>
+          }
+        </div>
+
+        <p class="caption-sm match-policy-note">
+          ⚠️ Hãy đảm bảo có mặt đúng giờ và tuân thủ tinh thần thể thao Fair-play của cộng đồng PitchVN.
+        </p>
+      </div>
+
+      <div class="modal-dialog-footer">
+        <button class="modal-cancel-btn body-md" (click)="closeMatchConfirmModal()">Hủy</button>
+        <button class="modal-submit-btn heading-lg" (click)="confirmChallengeMatch()">
+          {{ getMatchConfirmButtonText(selectedChallenge) }}
+        </button>
+      </div>
+    </div>
+    }
+  </ng-template>
+</p-dialog>
+
+<!-- ══════════════════════════════════════════════════════
+     7. MODAL: MATCH SUCCESSFUL (#headless)
+════════════════════════════════════════════════════════ -->
+<p-dialog [(visible)]="showSuccessModal" [modal]="true" [draggable]="false" [resizable]="false" [showHeader]="false"
+  styleClass="custom-match-modal" [dismissableMask]="true" maskStyleClass="custom-modal-mask" appendTo="body">
+  <ng-template #headless>
+    <div class="success-dialog-inner">
+      <div class="success-icon-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="3" width="40" height="40">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </div>
+
+      <h2 class="heading-xl success-title">Thành công!</h2>
+      <p class="body-md success-desc">
+        Yêu cầu của bạn đã được ghi nhận và gửi đến đối phương. Chúc bạn có một trận đấu thăng hoa!
+      </p>
+
+      <button class="modal-submit-btn heading-lg" style="width: 100%; margin-top: 16px;" (click)="closeSuccessModal()">
+        Hoàn tất
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- PrimeNG Toast -->
+<p-toast position="top-right" styleClass="custom-toast"></p-toast>

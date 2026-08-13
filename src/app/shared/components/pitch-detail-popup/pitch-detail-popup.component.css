@@ -1,0 +1,398 @@
+﻿::ng-deep .custom-pitch-modal {
+  background-color: var(--surface-bg) !important;
+  width: 100%;
+  max-width: 600px;
+  border-radius: 20px !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5) !important;
+  overflow: hidden;
+}
+
+::ng-deep .custom-modal-mask {
+  background-color: rgba(0, 0, 0, 0.65) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+.pitch-modal-inner {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--surface-bg);
+  color: var(--text-primary);
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+.pitch-modal-header {
+  position: sticky;
+  top: 0;
+  background-color: var(--surface-bg);
+  border-bottom: 0.5px solid var(--border-color);
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.modal-back-btn {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  transition: background-color 0.15s ease;
+}
+
+.modal-back-btn:hover {
+  background-color: rgba(128, 128, 128, 0.1);
+}
+
+.modal-gallery {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  background-color: #1e3a1e;
+  overflow: hidden;
+}
+
+.gallery-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: relative;
+  z-index: 1;
+}
+
+.pitch-turf-pattern {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    #1b3b1f 0px,
+    #1b3b1f 30px,
+    #153018 30px,
+    #153018 60px
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pitch-turf-lines {
+  position: absolute;
+  inset: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+}
+
+.pitch-turf-center-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+}
+
+.modal-info-block {
+  padding: 16px 20px;
+  border-bottom: 0.5px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.info-rating-pill {
+  background-color: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.info-rating-pill span {
+  color: var(--text-tertiary);
+}
+
+.info-address {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+}
+
+.info-quick-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 4px 0;
+}
+
+.meta-chip {
+  background-color: rgba(128, 128, 128, 0.08);
+  color: var(--text-tertiary);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.info-desc {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.modal-section-block {
+  padding: 16px 20px;
+  border-bottom: 0.5px solid var(--border-color);
+}
+
+.section-heading {
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.subpitches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.subpitch-item-card {
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.subpitch-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.subpitch-item-surface {
+  color: var(--text-tertiary);
+}
+
+.subpitch-item-price {
+  color: var(--text-tertiary);
+}
+
+.subpitch-item-price strong {
+  color: var(--text-primary);
+}
+
+.book-sub-btn {
+  margin-top: 4px;
+  background-color: rgba(128, 128, 128, 0.08);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 6px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.book-sub-btn:hover {
+  background-color: rgba(128, 128, 128, 0.15);
+}
+
+.available_slot {
+  background: rgba(133, 234, 45, 0.1);
+  color: var(--brand-primary);
+  padding: 2px 6px;
+  border-radius: 12px;
+}
+
+.facilities-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fac-tag-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background-color: rgba(128, 128, 128, 0.06);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  color: var(--text-secondary);
+}
+
+.fac-tag-item i {
+  color: var(--brand-primary);
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.review-item-card {
+  background-color: rgba(128, 128, 128, 0.04);
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+}
+
+.review-user-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.review-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.review-user-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.review-time {
+  color: var(--text-tertiary);
+}
+
+.review-stars {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.review-comment {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.pitch-modal-footer {
+  position: sticky;
+  bottom: 0;
+  background-color: var(--surface-bg);
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.footer-price-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-price-col .caption-sm {
+  color: var(--text-tertiary);
+}
+
+.footer-price-col .heading-lg {
+  color: var(--brand-primary);
+}
+
+.modal-primary-btn {
+  background-color: var(--brand-primary);
+  color: #000000;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 24px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.modal-primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(133, 234, 45, 0.3);
+}
+
+.directions-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(133, 234, 45, 0.12) !important;
+  border: 1px solid var(--brand-primary);
+  color: var(--brand-primary) !important;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.directions-chip:hover {
+  background-color: var(--brand-primary) !important;
+  color: #000000 !important;
+}
+
+/* Map CSS */
+.map-block {
+  margin-top: 0px;
+}
+
+.map-container {
+  width: 100%;
+  height: 280px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  position: relative;
+}
+
+#pitch-popup-map {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+::ng-deep .custom-pitch-marker > div {
+  background: linear-gradient(135deg, var(--brand-primary), #6ec223) !important;
+  color: #000 !important;
+  padding: 8px 16px !important;
+  border-radius: 24px !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+  box-shadow: 0 8px 24px rgba(133, 234, 45, 0.4) !important;
+  border: 2px solid #fff !important;
+  transform: translateY(-50%) !important;
+}
+
+::ng-deep .user-location-marker { position: relative; }
+::ng-deep .pulse-dot { width: 16px; height: 16px; background-color: #3b82f6; border-radius: 50%; border: 3px solid #fff; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+::ng-deep .pulse-ring { width: 40px; height: 40px; background-color: rgba(59, 130, 246, 0.4); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1; animation: pulse 2s infinite ease-out; }
+@keyframes pulse { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; } }
+
+@media (max-width: 768px) {
+  ::ng-deep .custom-pitch-modal {
+    max-width: 100% !important;
+    border-radius: 24px 24px 0 0 !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    height: 95vh;
+  }
+}

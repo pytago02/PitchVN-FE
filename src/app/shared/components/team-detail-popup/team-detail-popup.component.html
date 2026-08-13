@@ -1,0 +1,106 @@
+<p-dialog [(visible)]="visible" (visibleChange)="closeModal()" [modal]="true" [draggable]="false" [resizable]="false" [showHeader]="false"
+  styleClass="custom-team-modal" [dismissableMask]="true" maskStyleClass="custom-modal-mask" appendTo="body">
+  <ng-template #headless>
+    @if (team) {
+    <div class="modal-dialog-inner">
+      <!-- Header -->
+      <div class="modal-dialog-header">
+        <button class="modal-back-btn" (click)="closeModal()">✕</button>
+        <h3 class="heading-lg">Hồ sơ Đội bóng</h3>
+        <div style="width: 24px"></div>
+      </div>
+
+      <div class="modal-dialog-body">
+        <!-- Team Header Card -->
+        <div class="team-profile-top">
+          <img [src]="team.logo" class="team-profile-logo" />
+          <div class="team-profile-titles">
+            <h2 class="heading-xl">{{ team.name }}</h2>
+            <div class="team-profile-badges">
+              <span class="rank-badge-lg heading-lg" [style.color]="getRankInfo(team.rank).color"
+                [style.backgroundColor]="getRankInfo(team.rank).bgLight">
+                Hạng {{ team.rank }} ({{ getRankInfo(team.rank).title }})
+              </span>
+              <span class="team-elo-val heading-lg">{{ team.eloScore }} ELO</span>
+            </div>
+            <span class="caption-sm team-meta-loc">📍 {{ team.homePitch }} ({{ team.district }})</span>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <p class="body-md team-desc-p">{{ team.description }}</p>
+
+        <!-- ELO & Match Statistics Grid -->
+        <div class="stats-overview-grid">
+          <div class="stat-card">
+            <span class="caption-xs stat-title">Tổng số trận</span>
+            <strong class="heading-xl">{{ team.totalMatches }}</strong>
+          </div>
+          <div class="stat-card win">
+            <span class="caption-xs stat-title">Thắng</span>
+            <strong class="heading-xl">{{ team.wins }}</strong>
+          </div>
+          <div class="stat-card draw">
+            <span class="caption-xs stat-title">Hòa</span>
+            <strong class="heading-xl">{{ team.draws }}</strong>
+          </div>
+          <div class="stat-card loss">
+            <span class="caption-xs stat-title">Thua</span>
+            <strong class="heading-xl">{{ team.losses }}</strong>
+          </div>
+        </div>
+
+        <!-- Win Rate & Fairplay Bar -->
+        <div class="team-extra-stats-card">
+          <div class="extra-stat-row">
+            <span class="caption-sm">Tỉ lệ thắng:</span>
+            <strong class="body-md">{{ team.winRate }}%</strong>
+          </div>
+          <div class="extra-stat-row">
+            <span class="caption-sm">Bàn thắng / Bàn thua:</span>
+            <strong class="body-md">{{ team.goalsFor }} / {{ team.goalsAgainst }} (+{{
+              team.goalsFor - team.goalsAgainst }})</strong>
+          </div>
+          <div class="extra-stat-row">
+            <span class="caption-sm">Điểm Fair-Play:</span>
+            <strong class="body-md" style="color: #f59e0b">⭐ {{ team.fairPlayRating }} / 5.0</strong>
+          </div>
+          <div class="extra-stat-row">
+            <span class="caption-sm">Màu áo chính / phụ:</span>
+            <strong class="body-md">{{ team.mainKitColor }} / {{ team.subKitColor }}</strong>
+          </div>
+          <div class="extra-stat-row">
+            <span class="caption-sm">Đội trưởng:</span>
+            <strong class="body-md">{{ team.captainName }} ({{ team.captainPhone }})</strong>
+          </div>
+        </div>
+
+        <!-- Members Roster -->
+        @if (team.members && team.members.length > 0) {
+        <div class="roster-section">
+          <h4 class="caption-sm form-label">Thành viên đội tiêu biểu ({{ team.members.length }})</h4>
+          <div class="roster-list">
+            @for (mem of team.members; track mem.id) {
+            <div class="roster-item">
+              <img [src]="mem.avatar" class="roster-avatar" />
+              <div class="roster-info">
+                <strong class="body-md">{{ mem.name }} (#{{ mem.jerseyNumber }})</strong>
+                <span class="caption-xs">{{ mem.roleTitle }} · {{ mem.position }} · {{ mem.elo }} ELO</span>
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+        }
+      </div>
+
+      <div class="modal-dialog-footer">
+        <button class="modal-cancel-btn body-md" (click)="closeModal()">Đóng</button>
+        <button class="modal-submit-btn heading-lg" (click)="onChallenge()">
+          Gửi lời thách đấu
+        </button>
+      </div>
+    </div>
+    }
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,284 @@
+<div class="detail-container">
+
+  <!-- ─── Sticky Header ─── -->
+  <div class="detail-header">
+    <button class="back-btn" (click)="goBack()" aria-label="Quay lại">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+      </svg>
+    </button>
+    <h2 class="heading-xl">PitchVN</h2>
+    <div style="width: 22px"></div>
+  </div>
+
+  @if (post) {
+
+  <!-- ─── Main Post ─── -->
+  <div class="main-post">
+    <app-post-card [post]="post" [isDetail]="true"></app-post-card>
+  </div>
+
+  <!-- ─── Reply Input ─── -->
+  <div class="reply-input-section">
+    <div class="reply-input-row">
+      <div class="reply-input-thread-col">
+        <img src="https://i.pravatar.cc/150?u=me_user" alt="Avatar của tôi" class="reply-input-avatar" />
+      </div>
+      <div class="reply-input-content">
+        <div class="reply-input-label caption-sm">Trả lời {{ post.author.name }}...</div>
+        <textarea class="reply-textarea body-md" [(ngModel)]="replyText" placeholder="Viết bình luận của bạn..."
+          rows="2" [class.active]="replyText.length > 0"></textarea>
+
+        @if (replyText.length > 0) {
+        <div class="reply-input-actions">
+          <div class="reply-media-btns">
+            <button class="reply-media-btn" title="Thêm ảnh">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+            </button>
+            <button class="reply-media-btn" title="Thêm GIF"
+              style="font-size:9px;font-weight:800;border:1.5px solid var(--text-tertiary);border-radius:4px;padding:2px 4px;">GIF</button>
+          </div>
+          <button class="reply-submit-btn caption-sm" [disabled]="!canSubmitReply" (click)="submitReply()">
+            @if (isSubmittingReply) {
+            <span class="spinner-sm"></span>
+            } @else {
+            Đăng
+            }
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Filter + Activity ─── -->
+  <div class="post-filter-row">
+    <div class="filter-dropdown-container">
+      <div class="filter-dropdown body-md" (click)="toggleFilterDropdown()">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+          <path
+            d="M7 21V7L3 11l-1.5-1.5L8 3l6.5 6.5L13 11l-4-4v14H7z M21 21l-6.5-6.5L16 13l4 4V3h2v14l4-4 1.5 1.5L21 21z" />
+        </svg>
+        {{ activeFilter }}
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+          <path d="M7 10l5 5 5-5z" />
+        </svg>
+      </div>
+      @if (showFilterDropdown) {
+      <div class="dropdown-menu">
+        <div class="dropdown-item" [class.active]="activeFilter === 'Hàng đầu'" (click)="selectFilter('Hàng đầu')">
+          Hàng đầu
+        </div>
+        <div class="dropdown-item" [class.active]="activeFilter === 'Mới đây'" (click)="selectFilter('Mới đây')">
+          Mới đây
+        </div>
+      </div>
+      }
+    </div>
+
+    <div class="view-activity body-md" (click)="openActivityModal()">
+      Xem hoạt động
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+        <path d="M9 18l6-6-6-6-1.4 1.4 4.6 4.6-4.6 4.6z" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- ─── Replies List with Nested Thread Lines ─── -->
+  <div class="replies-list">
+    @for (reply of replies; track reply.id) {
+    <div class="reply-thread-wrapper">
+
+      <!-- Top-level reply card -->
+      <div class="reply-item-container">
+        <app-post-card [post]="reply" [isDetail]="false"></app-post-card>
+
+        <!-- Show/Hide nested replies toggle -->
+        @if (hasNestedReplies(reply.id.toString())) {
+        <div class="nested-toggle-row" (click)="toggleNestedReplies(reply.id.toString())">
+          <div class="nested-mini-avatars">
+            @for (nr of getNestedReplies(reply.id.toString()); track nr.id; let i = $index) {
+            @if (i
+            < 3) { <img [src]="nr.author.avatar" [alt]="nr.author.name" class="nested-mini-avatar" />
+            }
+            }
+          </div>
+          <span class="nested-toggle-label caption-sm">
+            @if (isReplyExpanded(reply.id.toString())) {
+            Ẩn {{ getNestedReplies(reply.id.toString()).length }} câu trả lời
+            } @else {
+            {{ getNestedReplies(reply.id.toString()).length }} câu trả lời từ {{
+            getNestedReplies(reply.id.toString())[0]?.author.name }}
+            @if (getNestedReplies(reply.id.toString()).length > 1) {
+            và {{ getNestedReplies(reply.id.toString()).length - 1 }} người khác
+            }
+            }
+          </span>
+          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"
+            [style.transform]="isReplyExpanded(reply.id.toString()) ? 'rotate(180deg)' : 'none'"
+            style="transition: transform 0.2s; color: var(--text-tertiary)">
+            <path d="M7 10l5 5 5-5z" />
+          </svg>
+        </div>
+        }
+      </div>
+
+      <!-- Nested replies (expanded) -->
+      @if (isReplyExpanded(reply.id.toString())) {
+      <div class="nested-replies-container">
+        @for (nestedReply of getNestedReplies(reply.id.toString()); track nestedReply.id) {
+        <div class="nested-reply-row">
+          <div class="nested-indent-line"></div>
+          <div class="nested-reply-content">
+            <app-post-card [post]="nestedReply" [isDetail]="false"></app-post-card>
+          </div>
+        </div>
+        }
+      </div>
+      }
+
+    </div>
+    }
+
+    @if (replies.length === 0) {
+    <div class="no-replies">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40">
+        <path
+          d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+      </svg>
+      <p class="body-md">Chưa có bình luận nào. Hãy là người đầu tiên!</p>
+    </div>
+    }
+  </div>
+
+  } @else {
+  <div class="not-found">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+    <p class="body-md">Bài viết không tồn tại hoặc đã bị xóa.</p>
+    <button class="go-back-btn body-md" (click)="goBack()">Quay lại</button>
+  </div>
+  }
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PrimeNG Activity Modal
+════════════════════════════════════════════════════════ -->
+<p-dialog [(visible)]="showActivityModal" [modal]="true" [draggable]="false" [resizable]="false" [showHeader]="false"
+  styleClass="custom-activity-modal" [dismissableMask]="true" maskStyleClass="custom-modal-mask">
+  <ng-template #headless>
+    <div class="modal-content-inner">
+      <div class="modal-header">
+        <div style="width: 40px"></div>
+        <h3 class="heading-lg">Hoạt động đối với bài viết</h3>
+
+        <div class="modal-sort-container">
+          <span class="body-base sort-label" (click)="toggleModalSortDropdown()">Sắp xếp</span>
+          @if (showModalSortDropdown) {
+          <div class="dropdown-menu right">
+            <div class="dropdown-item" [class.active]="activeModalSort === 'Mặc định'"
+              (click)="selectModalSort('Mặc định')">Mặc định</div>
+            <div class="dropdown-item" [class.active]="activeModalSort === 'Mới đây nhất'"
+              (click)="selectModalSort('Mới đây nhất')">Mới đây nhất</div>
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Post Snippet -->
+      <div class="modal-post-snippet">
+        <img [src]="post?.author?.avatar" class="snippet-avatar" />
+        <div class="snippet-content">
+          <div class="snippet-author">
+            <strong>{{ post?.author?.name }}</strong>
+            <span class="snippet-time">{{ post?.time }}</span>
+          </div>
+          <div class="snippet-text body-md">{{ (post?.content ?? '') | slice:0:80 }}{{ (post?.content?.length ?? 0) > 80
+            ? '...' : '' }}</div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="modal-stats">
+        <div class="stat-row">
+          <div class="stat-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <span class="body-md">Lượt xem</span>
+          </div>
+          <span class="body-md">{{ activityStats.views }}</span>
+        </div>
+        <div class="stat-row">
+          <div class="stat-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+            <span class="body-md">Lượt thích</span>
+          </div>
+          <div class="stat-right">
+            <span>{{ activityStats.likes }}</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+              <path d="M9 18l6-6-6-6-1.4 1.4 4.6 4.6-4.6 4.6z" />
+            </svg>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+              <path d="M17 1l4 4-4 4" />
+              <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+              <path d="M7 23l-4-4 4-4" />
+              <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+            </svg>
+            <span class="body-md">Lượt đăng lại</span>
+          </div>
+          <div class="stat-right">
+            <span>{{ activityStats.reposts }}</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+              <path d="M9 18l6-6-6-6-1.4 1.4 4.6 4.6-4.6 4.6z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users who liked -->
+      <div class="modal-users-list">
+        @for (user of activityUsers; track user.name) {
+        <div class="user-row">
+          <div class="user-avatar-wrapper">
+            <img [src]="user.avatar" class="user-avatar" />
+            <div class="heart-badge">
+              <svg viewBox="0 0 24 24" fill="white" width="8" height="8">
+                <path
+                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+            </div>
+          </div>
+          <div class="user-info">
+            <div class="user-name">
+              <strong>{{ user.name }}</strong>
+              <span class="user-time">{{ user.time }}</span>
+            </div>
+            <div class="user-fullname body-base">{{ user.fullname }}</div>
+          </div>
+          <button class="follow-btn">Theo dõi</button>
+        </div>
+        }
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- PrimeNG Toast -->
+<p-toast position="top-right" styleClass="custom-toast"></p-toast>
