@@ -1762,7 +1762,63 @@
 }
 
 /* ════════════════════════════════════════════════════════════
-   RESPONSIVE (MOBILE < 768px)
+   RESPONSIVE (TABLET ≤ 1023px)
+════════════════════════════════════════════════════════════ */
+@media screen and (max-width: 1023px) {
+  .challenge-finder-container {
+    height: auto;
+    overflow: visible;
+    padding: 12px 14px 0 14px;
+  }
+
+  .layout-2col {
+    flex-direction: column;
+    overflow: visible;
+    gap: 16px;
+  }
+
+  /* Sidebar becomes a collapsible top panel */
+  .challenge-filters-col {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .challenge-content-col {
+    height: auto;
+    overflow: visible;
+    padding-bottom: 80px;
+  }
+
+  /* Show filters toggle button on tablet */
+  .sidebar-toggle-btn {
+    display: flex !important;
+  }
+
+  /* Filters panel collapsible */
+  .filters-panel {
+    display: none;
+  }
+
+  .filters-panel.filters-open {
+    display: flex;
+  }
+
+  .sidebar-header {
+    cursor: pointer;
+  }
+
+  /* Challenge cards 2-col grid on tablet */
+  .challenges-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE (MOBILE ≤ 767px)
 ════════════════════════════════════════════════════════════ */
 @media screen and (max-width: 767px) {
   .challenge-finder-container {
@@ -1778,6 +1834,31 @@
   .post-challenge-cta {
     width: 100%;
     justify-content: center;
+  }
+
+  /* My team banner compact */
+  .my-team-banner {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .my-team-stats {
+    display: none;
+  }
+
+  /* Layout */
+  .layout-2col {
+    gap: 12px;
+  }
+
+  /* Challenges single column on mobile */
+  .challenges-list {
+    grid-template-columns: 1fr;
+  }
+
+  /* Challenge card */
+  .challenge-card {
+    padding: 14px;
   }
 
   .filter-controls-row {
@@ -1803,6 +1884,35 @@
     margin-left: 0;
   }
 
+  /* Challenge tabs scrollable */
+  .challenge-tabs {
+    overflow-x: auto;
+    scrollbar-width: none;
+    gap: 4px;
+  }
+
+  .challenge-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 8px 14px;
+  }
+
+  /* Individual subtabs */
+  .individual-subtabs-row {
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+  }
+
+  .individual-subtabs-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Modals bottom sheet */
   ::ng-deep .custom-challenge-modal,
   ::ng-deep .custom-team-modal,
   ::ng-deep .custom-chat-dialog,
@@ -1816,6 +1926,38 @@
     margin: 0 !important;
   }
 }
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE (SMALL PHONE ≤ 479px)
+════════════════════════════════════════════════════════════ */
+@media screen and (max-width: 479px) {
+  .header-top-row h1 {
+    font-size: 1.1rem;
+  }
+
+  .my-team-banner {
+    flex-wrap: wrap;
+  }
+
+  .my-team-view-btn {
+    margin-left: auto;
+  }
+
+  .challenge-tabs {
+    gap: 2px;
+  }
+
+  .tab-btn {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .rank-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+}
+
 
 /* ════════════════════════════════════════════════════════════
    ANIMATIONS

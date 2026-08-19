@@ -114,6 +114,41 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
   isSubmittingBooking = false;
   completedBooking: PitchBooking | null = null;
 
+  // ── Custom Time Booking ───────────────────────────────────
+  bookingStartTime: string = '08:00'; // HH:mm
+  bookingDurationHours: number = 1.5; // hours, min 1
+  readonly durationOptions = [1, 1.5, 2, 2.5, 3, 4];
+  readonly startTimeOptions: string[] = (() => {
+    const times: string[] = [];
+    for (let h = 6; h <= 22; h++) {
+      times.push(`${String(h).padStart(2, '0')}:00`);
+      if (h < 22) times.push(`${String(h).padStart(2, '0')}:30`);
+    }
+    return times;
+  })();
+
+  get bookingEndTime(): string {
+    const [hStr, mStr] = this.bookingStartTime.split(':');
+    const totalMins = parseInt(hStr) * 60 + parseInt(mStr) + Math.round(this.bookingDurationHours * 60);
+    const endH = Math.floor(totalMins / 60);
+    const endM = totalMins % 60;
+    return `${String(Math.min(endH, 23)).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+  }
+
+  get bookingTotalPrice(): number {
+    if (!this.selectedSubPitch) return 0;
+    const isGolden = this.isGoldenHourTime(this.bookingStartTime);
+    const pricePerHour = isGolden
+      ? Math.round(this.selectedSubPitch.basePrice * 1.3)
+      : this.selectedSubPitch.basePrice;
+    return Math.round(pricePerHour * this.bookingDurationHours);
+  }
+
+  isGoldenHourTime(time: string): boolean {
+    const [h] = time.split(':').map(Number);
+    return h >= 17 && h <= 20;
+  }
+
   // ── Drag to Scroll State ──────────────────────────────────
   private isDragging = false;
   private startX = 0;
@@ -126,6 +161,20 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.fetchProvinces();
     this.applyFilters();
     this.fetchUserLocation();
+  }
+
+  setViewMode(mode: 'list' | 'map') {
+    this.viewMode = mode;
+    if (mode === 'map' && this.map) {
+      setTimeout(() => {
+        this.map!.invalidateSize();
+        if (this.activeMapMarkerPitch) {
+          this.map!.panTo([this.activeMapMarkerPitch.lat, this.activeMapMarkerPitch.lng]);
+        } else {
+          this.recenterMap();
+        }
+      }, 50);
+    }
   }
 
   fetchProvinces() {
@@ -555,6 +604,14 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+  onStartTimeChange(time: string) {
+    this.bookingStartTime = time;
+  }
+
+  onDurationChange(hours: number) {
+    this.bookingDurationHours = hours;
+  }
+
   selectSlot(slot: TimeSlot) {
     if (slot.status !== 'available') return;
     this.selectedSlot = slot;
@@ -581,14 +638,37 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ── Booking Flow ──────────────────────────────────────────
   proceedToBooking() {
-    if (!this.selectedSlot || !this.selectedPitch || !this.selectedSubPitch) {
+    if (!this.selectedPitch || !this.selectedSubPitch) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Chưa chọn khung giờ',
-        detail: 'Vui lòng chọn 1 khung giờ còn trống để đặt sân.',
+        summary: 'Chưa chọn sân',
+        detail: 'Vui lòng chọn sân con và khung giờ.',
       });
       return;
     }
+
+    if (this.bookingDurationHours < 1) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Thời gian tối thiểu',
+        detail: 'Vui lòng đặt tối thiểu 1 giờ.',
+      });
+      return;
+    }
+
+    // Build synthetic slot from custom time
+    this.selectedSlot = {
+      id: 'custom_' + Date.now(),
+      pitchId: this.selectedPitch.id,
+      subPitchId: this.selectedSubPitch.id,
+      subPitchName: this.selectedSubPitch.name,
+      date: this.selectedDateStr,
+      startTime: this.bookingStartTime,
+      endTime: this.bookingEndTime,
+      price: this.bookingTotalPrice,
+      status: 'available',
+      isGoldenHour: this.isGoldenHourTime(this.bookingStartTime),
+    };
 
     this.showScheduleModal = false;
     this.showDetailModal = false;
@@ -663,9 +743,19 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   selectMapMarker(pitch: Pitch) {
+    // Force active state first
+    this.activeMapMarkerPitch = null;
+    this.cdr.detectChanges();
     this.activeMapMarkerPitch = pitch;
+    this.cdr.detectChanges();
+
     if (this.map) {
-      this.map.panTo([pitch.lat, pitch.lng], { animate: true });
+      this.map.invalidateSize();
+      const isMobile = window.innerWidth <= 767;
+      // On mobile, popup is at the bottom, so we offset the pan slightly up
+      // to keep the marker in the visible center
+      const latOffset = isMobile ? -0.005 : 0; 
+      this.map.panTo([pitch.lat + latOffset, pitch.lng], { animate: true });
     }
 
     // Cập nhật class 'active' thủ công để không hủy đi toàn bộ marker đang được click

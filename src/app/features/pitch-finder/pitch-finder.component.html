@@ -18,14 +18,14 @@
 
       <!-- View Mode Toggle (Mobile / Tablet) -->
       <div class="view-toggle-btns">
-        <button class="toggle-btn" [class.active]="viewMode === 'list'" (click)="viewMode = 'list'"
+        <button class="toggle-btn" [class.active]="viewMode === 'list'" (click)="setViewMode('list')"
           title="Xem dạng danh sách">
           <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
             <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
           </svg>
           <span class="caption-sm">Danh sách</span>
         </button>
-        <button class="toggle-btn" [class.active]="viewMode === 'map'" (click)="viewMode = 'map'"
+        <button class="toggle-btn" [class.active]="viewMode === 'map'" (click)="setViewMode('map')"
           title="Xem trên bản đồ">
           <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
             <path
@@ -80,7 +80,8 @@
         </span>
         <div class="radius-pills">
           @for (r of radiusOptions; track r) {
-          <button class="radius-pill caption-sm" [class.active]="selectedRadius === r && !selectedProvince" (click)="setRadius(r)">
+          <button class="radius-pill caption-sm" [class.active]="selectedRadius === r && !selectedProvince"
+            (click)="setRadius(r)">
             {{ r }} km
           </button>
           }
@@ -116,7 +117,7 @@
 
       <div class="drawer-section">
         <span class="caption-sm section-title">Khu vực & Địa điểm</span>
-        <div class="flex gap-3">
+        <div class="flex gap-3 filter-location">
           <div class="w-full">
             <p-select id="province-select" [options]="provinces" [(ngModel)]="selectedProvince"
               (onChange)="onProvinceChange()" [filter]="true" filterBy="name" optionLabel="name" [showClear]="true"
@@ -157,7 +158,8 @@
         <div class="flex gap-2">
           <div class="">
             <p-datepicker [(ngModel)]="filterDate" dateFormat="dd/mm/yy" [showClear]="true" placeholder="Chọn ngày"
-              [minDate]="today" styleClass="w-full search-box" class="w-full block" (ngModelChange)="applyFilters()"></p-datepicker>
+              [minDate]="today" styleClass="w-full search-box" class="w-full block"
+              (ngModelChange)="applyFilters()"></p-datepicker>
           </div>
           <div class="flex items-center gap-2 mt-2">
             <p-datepicker inputId="filter-time-from" [(ngModel)]="filterTimeFrom" [timeOnly]="true" [showClear]="true"
@@ -447,27 +449,66 @@
           </div>
         </div>
 
-        <!-- 3. Slots Grid -->
+        <!-- 3. Chọn giờ & thời lượng tùy ý -->
         <div class="slots-section">
-          <div class="slots-legend">
-            <span class="legend-item caption-xs"><span class="legend-box available"></span> Còn trống</span>
-            <span class="legend-item caption-xs"><span class="legend-box selected"></span> Đang chọn</span>
-            <span class="legend-item caption-xs"><span class="legend-box booked"></span> Đã đặt</span>
-          </div>
+          <div class="custom-time-picker">
 
-          <div class="slots-grid">
-            @for (slot of timeSlots; track slot.id) {
-            <button class="slot-btn" [class.available]="slot.status === 'available'"
-              [class.booked]="slot.status === 'booked' || slot.status === 'held'"
-              [class.selected]="selectedSlot?.id === slot.id" [disabled]="slot.status !== 'available'"
-              (click)="selectSlot(slot)">
-              @if (slot.isGoldenHour) {
-              <span class="golden-badge caption-xs">Khung vàng</span>
+            <!-- Giờ bắt đầu -->
+            <div class="time-picker-row">
+              <span class="caption-sm selector-label">🕐 Giờ bắt đầu</span>
+              <div class="start-time-scroll grab-scroll-container" #startTimeScroll
+                (mousedown)="startDrag($event, startTimeScroll)" (mousemove)="onDrag($event, startTimeScroll)"
+                (mouseup)="stopDrag()" (mouseleave)="stopDrag()">
+                @for (t of startTimeOptions; track t) {
+                <button class="time-pill caption-sm" [class.active]="bookingStartTime === t"
+                  [class.golden]="isGoldenHourTime(t)" (click)="onStartTimeChange(t)">
+                  {{ t }}
+                  @if (isGoldenHourTime(t)) {
+                  <span class="golden-star">⭐</span>
+                  }
+                </button>
+                }
+              </div>
+              @if (isGoldenHourTime(bookingStartTime)) {
+              <div class="golden-notice caption-xs">
+                ⭐ Khung giờ vàng (17:00–20:00) — giá tăng 30%
+              </div>
               }
-              <span class="slot-time heading-lg">{{ slot.startTime }} - {{ slot.endTime }}</span>
-              <span class="slot-price caption-sm">{{ formatPrice(slot.price) }}</span>
-            </button>
-            }
+            </div>
+
+            <!-- Thời lượng -->
+            <div class="time-picker-row">
+              <span class="caption-sm selector-label">⏱ Thời lượng (tối thiểu 1 giờ)</span>
+              <div class="duration-pills">
+                @for (d of durationOptions; track d) {
+                <button class="duration-pill caption-sm" [class.active]="bookingDurationHours === d"
+                  [disabled]="d < 1" (click)="onDurationChange(d)">
+                  {{ d % 1 === 0 ? d + ' giờ' : d + ' tiếng' }}
+                </button>
+                }
+              </div>
+            </div>
+
+            <!-- Tóm tắt thời gian & giá -->
+            <div class="booking-preview-card">
+              <div class="preview-time-row">
+                <span class="heading-xl preview-time">{{ bookingStartTime }}</span>
+                <span class="caption-sm preview-sep">→</span>
+                <span class="heading-xl preview-time">{{ bookingEndTime }}</span>
+                <span class="caption-sm preview-duration">({{ bookingDurationHours % 1 === 0 ? bookingDurationHours + ' giờ' : bookingDurationHours + ' tiếng' }})</span>
+              </div>
+              <div class="preview-price-row">
+                <span class="caption-sm preview-label">Tổng tiền:</span>
+                <span class="heading-xl preview-price">{{ formatPrice(bookingTotalPrice) }}</span>
+              </div>
+              <div class="preview-calc caption-xs">
+                {{ formatPrice(selectedSubPitch?.basePrice || 0) }}/giờ × {{ bookingDurationHours }}h
+                @if (isGoldenHourTime(bookingStartTime)) {
+                × 1.3 (khung vàng)
+                }
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -475,18 +516,15 @@
       <!-- Footer -->
       <div class="schedule-footer">
         <div class="selected-summary">
-          @if (selectedSlot) {
           <div class="summary-details">
-            <span class="caption-sm">Đã chọn: <strong>{{ selectedSubPitch?.name }}</strong> ({{ selectedSlot.startTime
-              }} - {{ selectedSlot.endTime }})</span>
-            <span class="heading-lg summary-price">{{ formatPrice(selectedSlot.price) }}</span>
+            <span class="caption-sm">Đã chọn: <strong>{{ selectedSubPitch?.name }}</strong>
+              ({{ bookingStartTime }} - {{ bookingEndTime }}, {{ selectedDateStr }})</span>
+            <span class="heading-lg summary-price">{{ formatPrice(bookingTotalPrice) }}</span>
           </div>
-          } @else {
-          <span class="caption-sm select-prompt">Vui lòng chọn 1 khung giờ còn trống ở trên</span>
-          }
         </div>
 
-        <button class="modal-primary-btn heading-lg" [disabled]="!selectedSlot" (click)="proceedToBooking()">
+        <button class="modal-primary-btn heading-lg" [disabled]="bookingDurationHours < 1"
+          (click)="proceedToBooking()">
           Tiếp tục đặt sân
         </button>
       </div>
