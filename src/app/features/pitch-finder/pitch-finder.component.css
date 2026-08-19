@@ -188,6 +188,22 @@
   color: var(--text-tertiary);
   font-weight: 600;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-mode-hint {
+  color: var(--brand-primary);
+  font-weight: 500;
+  font-style: italic;
+}
+
+.filter-mode-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  filter: grayscale(0.3);
 }
 
 .radius-pills,
@@ -407,7 +423,8 @@
 
 .pitch-card.highlighted {
   border-color: var(--brand-primary);
-  box-shadow: 0 0 0 1px var(--brand-primary);
+  box-shadow: 0 0 0 2px var(--brand-primary), 0 8px 24px rgba(133, 234, 45, 0.15);
+  background-color: rgba(133, 234, 45, 0.04);
 }
 
 .pitch-card-media {

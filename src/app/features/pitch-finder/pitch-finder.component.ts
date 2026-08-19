@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -9,6 +9,9 @@ import * as L from 'leaflet';
 import { DialogModule } from 'primeng/dialog';
 import { ToastModule } from 'primeng/toast';
 import { MessageService, SharedModule } from 'primeng/api';
+import { Select } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { MultiSelectModule } from 'primeng/multiselect';
 
 import {
   MOCK_PITCHES,
@@ -23,11 +26,13 @@ import {
   PitchReview,
 } from './mock-pitch-data';
 import { PitchDetailPopupComponent } from '../../shared/components/pitch-detail-popup/pitch-detail-popup.component';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { ProvinceService } from '../../services/provinces/province-service';
 
 @Component({
   selector: 'app-pitch-finder',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogModule, ToastModule, SharedModule, PitchDetailPopupComponent],
+  imports: [CommonModule, FormsModule, DialogModule, ToastModule, SharedModule, PitchDetailPopupComponent, HttpClientModule, Select, DatePickerModule, MultiSelectModule],
   providers: [MessageService],
   templateUrl: './pitch-finder.component.html',
   styleUrls: ['./pitch-finder.component.css'],
@@ -43,12 +48,30 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ── Filters State ─────────────────────────────────────────
   searchQuery = '';
-  selectedRadius = 10; // km
-  radiusOptions = [1, 3, 5, 10, 20];
-  selectedType = 'all'; // 'all' | '5v5' | '7v7' | '11v11'
-  selectedFacilities: string[] = [];
-  sortBy = 'distance'; // 'distance' | 'rating' | 'price'
   showFilterDrawer = false;
+
+  selectedRadius = 10; // km
+  radiusOptions = [3, 5, 10, 15];
+
+  selectedType: 'all' | '5v5' | '7v7' | '11v11' = 'all';
+  selectedFacilities: string[] = [];
+  sortBy: 'distance' | 'rating' | 'price' = 'distance';
+
+  // Province/Location Filters
+  apiVersion: 'v1' | 'v2' = 'v1';
+  isLoadingProvinces = false;
+  provinces: any[] = [];
+  districts: any[] = [];
+  wards: any[] = [];
+  selectedProvince: any = null;
+  selectedDistrict: any = null;
+  selectedWards: any[] = [];
+
+  // Date/Time Filters
+  filterDate: Date | null = null;
+  filterTimeFrom: Date | null = null;
+  filterTimeTo: Date | null = null;
+  today: Date = new Date();
 
   // ── View Mode ─────────────────────────────────────────────
   viewMode: 'list' | 'map' = 'list';
@@ -96,11 +119,124 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
   private startX = 0;
   private startScrollLeft = 0;
 
-  constructor(private messageService: MessageService) {}
+  constructor(private messageService: MessageService, private http: HttpClient, private ngZone: NgZone, private cdr: ChangeDetectorRef, private provinceService: ProvinceService) { }
 
   ngOnInit() {
     this.initDates();
+    this.fetchProvinces();
     this.applyFilters();
+    this.fetchUserLocation();
+  }
+
+  fetchProvinces() {
+    this.isLoadingProvinces = true;
+    this.provinceService.showAllDivisions(this.apiVersion, 3).subscribe({
+      next: (data) => {
+        this.provinces = data;
+        this.isLoadingProvinces = false;
+      },
+      error: (err) => {
+        console.error('Lỗi khi fetch tỉnh thành:', err);
+        this.isLoadingProvinces = false;
+      }
+    });
+  }
+
+  onProvinceChange() {
+    this.selectedDistrict = null;
+    this.selectedWards = [];
+    this.districts = this.selectedProvince?.districts || [];
+    this.wards = [];
+    this.applyFilters();
+  }
+
+  onDistrictChange() {
+    this.selectedWards = [];
+    this.wards = this.selectedDistrict?.wards || [];
+    this.applyFilters();
+  }
+
+  onWardsChange() {
+    this.applyFilters();
+  }
+
+  getWardsLabel(): string {
+    if (!this.selectedWards || this.selectedWards.length === 0) return 'Chọn Xã / Phường';
+    if (this.selectedWards.length === 1) return this.selectedWards[0].name;
+    return `Đã chọn ${this.selectedWards.length}`;
+  }
+
+  normalizeName(name: string): string {
+    if (!name) return '';
+    return name.toLowerCase()
+      .replace(/^(tỉnh|thành phố|thành phố|quận|huyện|thị xã|xã|phường|thị trấn)\s+/i, '')
+      .trim();
+  }
+
+  fetchUserLocation() {
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          this.userLocation.lat = position.coords.latitude;
+          this.userLocation.lng = position.coords.longitude;
+          this.userLocation.name = 'Vị trí hiện tại của bạn';
+
+          // Tạm tính khoảng cách đường chim bay trước
+          this.allPitches.forEach(pitch => {
+            pitch.distanceKm = this.calculateDistance(this.userLocation.lat, this.userLocation.lng, pitch.lat, pitch.lng);
+          });
+
+          this.applyFilters();
+
+          if (this.map && this.userMarker) {
+            this.userMarker.setLatLng([this.userLocation.lat, this.userLocation.lng]);
+            this.recenterMap();
+          }
+
+          // Lấy khoảng cách đường đi thực tế
+          this.fetchDrivingDistances();
+        },
+        (error) => {
+          console.warn('Không thể lấy vị trí hiện tại:', error);
+        }
+      );
+    }
+  }
+
+  fetchDrivingDistances() {
+    this.allPitches.forEach((pitch) => {
+      const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${this.userLocation.lng},${this.userLocation.lat};${pitch.lng},${pitch.lat}?overview=false`;
+
+      this.http.get<any>(osrmUrl).subscribe({
+        next: (data) => {
+          if (data && data.routes && data.routes.length > 0) {
+            const route = data.routes[0];
+            // Convert to km and round to 1 decimal place
+            pitch.distanceKm = Math.round((route.distance / 1000) * 10) / 10;
+            this.applyFilters();
+          }
+        },
+        error: (err) => {
+          console.warn(`Lỗi lấy khoảng cách đường đi cho sân ${pitch.name}:`, err);
+        }
+      });
+    });
+  }
+
+  calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371; // Radius of the earth in km
+    const dLat = this.deg2rad(lat2 - lat1);
+    const dLon = this.deg2rad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Math.round((R * c) * 10) / 10; // Distance in km rounded to 1 decimal place
+  }
+
+  deg2rad(deg: number) {
+    return deg * (Math.PI / 180);
   }
 
   ngAfterViewInit() {
@@ -210,7 +346,9 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
       const marker = L.marker([pitch.lat, pitch.lng], { icon: pitchIcon })
         .addTo(this.map!)
         .on('click', () => {
-          this.selectMapMarker(pitch);
+          this.ngZone.run(() => {
+            this.selectMapMarker(pitch);
+          });
         });
 
       this.pitchMarkers.push(marker);
@@ -251,29 +389,55 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ── Filters & Search ──────────────────────────────────────
   applyFilters() {
-    this.filteredPitches = this.allPitches.filter((pitch) => {
+    this.filteredPitches = this.allPitches.filter((p) => {
       // 1. Search text (name, address, district)
       const q = this.searchQuery.trim().toLowerCase();
       const matchesQuery =
         !q ||
-        pitch.name.toLowerCase().includes(q) ||
-        pitch.address.toLowerCase().includes(q) ||
-        pitch.district.toLowerCase().includes(q);
+        p.name.toLowerCase().includes(q) ||
+        p.address.toLowerCase().includes(q) ||
+        p.district.toLowerCase().includes(q);
 
-      // 2. Radius
-      const matchesRadius = pitch.distanceKm <= this.selectedRadius;
+      // 2. Radius (chỉ áp dụng khi KHÔNG chọn bộ lọc khu vực)
+      const matchesRadius = this.selectedProvince ? true : p.distanceKm <= this.selectedRadius;
 
       // 3. Sub pitch type (5v5 / 7v7 / 11v11)
       const matchesType =
         this.selectedType === 'all' ||
-        pitch.subPitches.some((sp) => sp.type === this.selectedType);
+        p.subPitches.some((sp) => sp.type === this.selectedType);
 
-      // 4. Facilities
-      const matchesFacilities =
-        this.selectedFacilities.length === 0 ||
-        this.selectedFacilities.every((facId) => pitch.facilities.includes(facId));
+      // 4. Facilities filter
+      if (this.selectedFacilities.length > 0) {
+        const hasAllFacilities = this.selectedFacilities.every((fac) => p.facilities.includes(fac));
+        if (!hasAllFacilities) return false;
+      }
 
-      return matchesQuery && matchesRadius && matchesType && matchesFacilities;
+      // 5. Area Filter (Province / District)
+      if (this.selectedProvince) {
+        const provName = this.normalizeName(this.selectedProvince.name);
+        if (!this.normalizeName(p.city).includes(provName) && !provName.includes(this.normalizeName(p.city))) {
+          return false;
+        }
+      }
+
+      if (this.selectedDistrict && !Array.isArray(this.selectedDistrict)) {
+        const distName = this.normalizeName(this.selectedDistrict.name);
+        if (!this.normalizeName(p.district).includes(distName) && !distName.includes(this.normalizeName(p.district))) {
+          return false;
+        }
+      }
+
+      // 6. Date / Time Filter
+      if (this.filterDate || this.filterTimeFrom || this.filterTimeTo) {
+        let hasMatchingSlot = false;
+        // Simple logic for mock data: check if availableSlotsCount > 0 if no slots match exactly,
+        // but let's assume all mock pitches are somewhat matching for demonstration unless strictly filtering.
+        // Actually since we don't have full slot dates in mock pitches, we just pass them if they are available
+        hasMatchingSlot = p.availableSlotsCount > 0;
+        if (!hasMatchingSlot) return false;
+      }
+
+      return matchesQuery && matchesRadius && matchesType;
     });
 
     // Sort
@@ -296,17 +460,29 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setRadius(radius: number) {
     this.selectedRadius = radius;
+    // Xoá bộ lọc khu vực khi chọn bán kính
+    this.selectedProvince = null;
+    this.selectedDistrict = null;
+    this.selectedWards = [];
+    this.districts = [];
+    this.wards = [];
     this.applyFilters();
   }
 
   onCustomRadiusChange(val: number) {
     if (val && val > 0) {
       this.selectedRadius = Number(val);
+      // Xoá bộ lọc khu vực khi nhập bán kính
+      this.selectedProvince = null;
+      this.selectedDistrict = null;
+      this.selectedWards = [];
+      this.districts = [];
+      this.wards = [];
       this.applyFilters();
     }
   }
 
-  setType(type: string) {
+  setType(type: 'all' | '5v5' | '7v7' | '11v11') {
     this.selectedType = type;
     this.applyFilters();
   }
@@ -491,7 +667,25 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.map) {
       this.map.panTo([pitch.lat, pitch.lng], { animate: true });
     }
-    this.updateMapLayers();
+
+    // Cập nhật class 'active' thủ công để không hủy đi toàn bộ marker đang được click
+    document.querySelectorAll('.map-pitch-marker-real').forEach(el => el.classList.remove('active'));
+    const activeMarkerEl = document.getElementById('marker-' + pitch.id);
+    if (activeMarkerEl) {
+      activeMarkerEl.classList.add('active');
+    }
+
+    // Explicitly trigger change detection since Leaflet events might be outside zone
+    // or missed by Angular in some cases.
+    this.cdr.detectChanges();
+
+    // Scroll list card into view
+    setTimeout(() => {
+      const cardEl = document.getElementById('pitch-card-' + pitch.id);
+      if (cardEl) {
+        cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 50);
   }
 
   formatPrice(val: number): string {

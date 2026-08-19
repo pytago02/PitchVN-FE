@@ -1,4 +1,4 @@
-﻿<div class="pitch-finder-container">
+<div class="pitch-finder-container">
 
   <!-- ══════════════════════════════════════════════════════
        1. STICKY HEADER & SEARCH BAR
@@ -71,11 +71,16 @@
 
     <!-- Radius Quick Pills & Custom Input -->
     <div class="radius-filter-row">
-      <div class="radius-control-group">
-        <span class="caption-sm radius-label">Bán kính:</span>
+      <div class="radius-control-group" [class.filter-mode-disabled]="selectedProvince">
+        <span class="caption-sm radius-label">
+          Bán kính:
+          @if (selectedProvince) {
+          <span class="caption-xs filter-mode-hint">(đang dùng lọc khu vực)</span>
+          }
+        </span>
         <div class="radius-pills">
           @for (r of radiusOptions; track r) {
-          <button class="radius-pill caption-sm" [class.active]="selectedRadius === r" (click)="setRadius(r)">
+          <button class="radius-pill caption-sm" [class.active]="selectedRadius === r && !selectedProvince" (click)="setRadius(r)">
             {{ r }} km
           </button>
           }
@@ -107,6 +112,63 @@
       <div class="drawer-header">
         <span class="heading-lg">Bộ lọc chi tiết</span>
         <button class="reset-filter-btn caption-sm" (click)="resetFilters()">Đặt lại</button>
+      </div>
+
+      <div class="drawer-section">
+        <span class="caption-sm section-title">Khu vực & Địa điểm</span>
+        <div class="flex gap-3">
+          <div class="w-full">
+            <p-select id="province-select" [options]="provinces" [(ngModel)]="selectedProvince"
+              (onChange)="onProvinceChange()" [filter]="true" filterBy="name" optionLabel="name" [showClear]="true"
+              placeholder="Tất cả Tỉnh thành" styleClass="w-full search-box">
+              <ng-template #item let-prov>
+                <span>{{ prov.name }}</span>
+              </ng-template>
+            </p-select>
+          </div>
+
+          <div class="w-full">
+            <p-select id="district-select" [options]="districts" [(ngModel)]="selectedDistrict"
+              (onChange)="onDistrictChange()" [disabled]="!selectedProvince" [filter]="true" filterBy="name"
+              optionLabel="name" [showClear]="true" placeholder="Tất cả Quận / Huyện" styleClass="w-full search-box">
+              <ng-template #item let-dist>
+                <span>{{ dist.name }}</span>
+              </ng-template>
+            </p-select>
+          </div>
+
+          <div class="w-full">
+            <p-select id="wards-select" [options]="wards" [(ngModel)]="selectedWards" (onChange)="onWardsChange()"
+              [disabled]="!selectedDistrict" [filter]="true" filterBy="name" optionLabel="name" [showClear]="true"
+              placeholder="Tất cả Xã / Phường" styleClass="w-full search-box">
+              <ng-template #selecteditems let-value>
+                <span>{{ getWardsLabel() }}</span>
+              </ng-template>
+              <ng-template #item let-dist>
+                <span>{{ dist.name }}</span>
+              </ng-template>
+            </p-select>
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <span class="caption-sm section-title">Ngày & Khung giờ</span>
+        <div class="flex gap-2">
+          <div class="">
+            <p-datepicker [(ngModel)]="filterDate" dateFormat="dd/mm/yy" [showClear]="true" placeholder="Chọn ngày"
+              [minDate]="today" styleClass="w-full search-box" class="w-full block" (ngModelChange)="applyFilters()"></p-datepicker>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <p-datepicker inputId="filter-time-from" [(ngModel)]="filterTimeFrom" [timeOnly]="true" [showClear]="true"
+              class="w-full flex-1" styleClass="w-full search-box" placeholder="Từ giờ"
+              (ngModelChange)="applyFilters()"></p-datepicker>
+            <span>-</span>
+            <p-datepicker inputId="filter-time-to" [(ngModel)]="filterTimeTo" [timeOnly]="true" [showClear]="true"
+              class="w-full flex-1" styleClass="w-full search-box" placeholder="Đến giờ"
+              (ngModelChange)="applyFilters()"></p-datepicker>
+          </div>
+        </div>
       </div>
 
       <div class="drawer-section">
@@ -152,8 +214,8 @@
 
       <div class="pitches-cards-stream">
         @for (pitch of filteredPitches; track pitch.id) {
-        <div class="pitch-card" [class.highlighted]="activeMapMarkerPitch?.id === pitch.id"
-          (click)="selectMapMarker(pitch)">
+        <div [id]="'pitch-card-' + pitch.id" class="pitch-card"
+          [class.highlighted]="activeMapMarkerPitch?.id === pitch.id" (click)="selectMapMarker(pitch)">
           <!-- Card Image Box -->
           <div class="pitch-card-media" (click)="openPitchDetail(pitch)">
             <div class="pitch-turf-pattern">
@@ -323,7 +385,8 @@
 <!-- ══════════════════════════════════════════════════════
      3. PRIME NG MODAL: PITCH DETAIL MODAL (#headless)
 ════════════════════════════════════════════════════════ -->
-<app-pitch-detail-popup [(visible)]="showDetailModal" [pitch]="selectedPitch" (onBookSchedule)="openSchedule($event.pitch, $event.subPitch)"></app-pitch-detail-popup>
+<app-pitch-detail-popup [(visible)]="showDetailModal" [pitch]="selectedPitch"
+  (onBookSchedule)="openSchedule($event.pitch, $event.subPitch)"></app-pitch-detail-popup>
 
 <!-- ══════════════════════════════════════════════════════
      4. PRIME NG MODAL: TIME SLOT PICKER MODAL (#headless)
@@ -586,4 +649,3 @@
 
 <!-- PrimeNG Toast -->
 <p-toast position="top-right" styleClass="custom-toast"></p-toast>
-
