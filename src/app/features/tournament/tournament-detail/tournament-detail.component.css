@@ -1,0 +1,905 @@
+.tournament-detail-container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.hero-section {
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.hero-cover {
+  position: relative;
+  height: 320px;
+  width: 100%;
+}
+.hero-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.2) 100%);
+}
+
+.hero-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.badges-row {
+  display: flex;
+  align-items: center;
+}
+
+.rank-badge {
+  background: rgba(245, 158, 11, 0.9);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  backdrop-filter: blur(4px);
+}
+
+.org-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.org-avatar {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.text-white {
+  color: #fff;
+}
+.mr-2 {
+  margin-right: 8px;
+}
+.mb-2 {
+  margin-bottom: 8px;
+}
+.mb-3 {
+  margin-bottom: 12px;
+}
+.mt-3 {
+  margin-top: 12px;
+}
+.mt-4 {
+  margin-top: 16px;
+}
+.pt-3 {
+  padding-top: 12px;
+}
+.w-full {
+  width: 100%;
+}
+.font-medium {
+  font-weight: 500;
+}
+.border-top {
+  border-top: 1px solid var(--border-color);
+}
+
+/* Main Layout: 2 columns on desktop */
+.main-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+/* Tabs */
+.content-column {
+  background: var(--card-bg);
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+::ng-deep .custom-tabview .p-tabview-nav {
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 16px;
+}
+::ng-deep .custom-tabview .p-tabview-panels {
+  background: transparent;
+  padding: 0;
+}
+.tab-content-panel {
+  padding: 24px;
+}
+
+/* Widget Card */
+.widget-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.info-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  padding: 24px;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.info-item i {
+  font-size: 20px;
+  width: 24px;
+  text-align: center;
+  margin-top: 2px;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 64px 20px;
+  background: var(--card-bg);
+  border: 1px dashed var(--border-color);
+  border-radius: 16px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-cover {
+    height: 240px;
+  }
+  .hero-content {
+    padding: 20px;
+  }
+  .display-3xl {
+    font-size: 22px;
+    line-height: 28px;
+  }
+
+  .tab-content-panel {
+    padding: 0;
+  }
+}
+
+/* ── Overview Dashboard Styles ── */
+.overview-dashboard {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+.overview-main-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.overview-side-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.overview-section,
+.mini-standings-card,
+.mini-bracket-card {
+  background: var(--nav-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.view-all-link {
+  background: none;
+  border: none;
+  color: var(--brand-primary);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s;
+}
+
+.view-all-link:hover {
+  opacity: 0.8;
+}
+
+.matches-list-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mini-match-item {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mini-match-round {
+  font-weight: 500;
+}
+
+.mini-match-teams {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.mini-team {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mini-team.flex-reverse {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.mini-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: var(--border-color);
+  flex-shrink: 0;
+}
+
+.mini-vs {
+  font-weight: 600;
+  flex-shrink: 0;
+  padding: 0 4px;
+}
+
+.mini-scores {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.mini-score.winner-text {
+  color: var(--brand-primary);
+}
+
+.winner-text {
+  font-weight: 600;
+  color: var(--text-primary) !important;
+}
+
+.mini-match-badge-col {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mini-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.mini-badge.live {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.mini-badge.finished {
+  background: var(--border-color);
+  color: var(--text-tertiary);
+}
+
+.mini-match-time {
+  text-align: right;
+}
+
+/* ── Mini Table Styles ── */
+.mini-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.mini-table th {
+  padding: 6px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-tertiary);
+  font-weight: 600;
+  text-align: center;
+}
+
+.mini-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.mini-table-team {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.mini-table-logo {
+  width: 18px;
+  height: 18px;
+  object-fit: cover;
+  border-radius: 3px;
+  background: var(--border-color);
+  flex-shrink: 0;
+}
+
+.mini-rounds-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mini-round-tag {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* ── Standings Tab Styles ── */
+.standings-tab-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.group-title-label {
+  color: var(--text-primary);
+  margin-top: 8px;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--nav-bg);
+}
+
+.sofascore-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.sofascore-table th {
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-align: center;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sofascore-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.sofascore-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.sofascore-table tbody tr:hover {
+  background-color: var(--nav-item-hover-bg);
+}
+
+.pos-cell {
+  font-weight: 700;
+  color: var(--text-tertiary);
+}
+
+.table-team-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.table-team-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: var(--border-color);
+  flex-shrink: 0;
+}
+
+.team-name {
+  color: var(--text-primary);
+}
+
+.points-col {
+  color: var(--brand-primary);
+}
+
+.points-cell {
+  color: var(--brand-primary);
+  font-size: 14px;
+}
+
+/* Sofascore promotion zone border indicator */
+.promo-row td:first-child {
+  position: relative;
+}
+
+.promo-row td:first-child::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background: var(--brand-primary);
+  border-radius: 0 2px 2px 0;
+}
+
+/* ── Knockout Bracket Styles ── */
+.bracket-container {
+  width: 100%;
+}
+
+.bracket-scroll-wrapper {
+  overflow-x: auto;
+  padding: 20px 0;
+  scrollbar-width: thin;
+}
+
+.bracket-rounds-wrapper {
+  display: flex;
+  gap: 48px;
+  min-width: max-content;
+  padding: 10px;
+  position: relative;
+}
+
+.bracket-round-column {
+  display: flex;
+  flex-direction: column;
+  width: 260px;
+}
+
+.bracket-round-header {
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 12px;
+  margin-bottom: 24px;
+  color: var(--text-primary);
+}
+
+.bracket-matches-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  height: 100%;
+  gap: 32px;
+}
+
+.bracket-match-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.bracket-match-card {
+  background: var(--nav-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  width: 100%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.bracket-match-card:hover {
+  border-color: var(--brand-primary);
+  transform: translateY(-1px);
+}
+
+.bracket-team-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.bracket-team-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+  border-radius: 50%;
+  background: var(--border-color);
+  flex-shrink: 0;
+}
+
+.bracket-team-name {
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.bracket-team-score {
+  color: var(--text-tertiary);
+  font-size: 13px;
+  min-width: 16px;
+  text-align: center;
+}
+
+.bracket-match-card.finished .winner .bracket-team-name {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.bracket-match-card.finished .winner .bracket-team-score {
+  color: var(--brand-primary);
+  font-weight: 700;
+}
+
+.bracket-match-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background: var(--card-bg);
+}
+
+.mini-live-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Bracket connection lines */
+.bracket-round-column:not(:first-child) .bracket-match-wrapper::before {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 50%;
+  width: 24px;
+  height: 2px;
+  background: var(--border-color);
+}
+
+.bracket-round-column:not(:last-child) .bracket-match-wrapper::after {
+  content: '';
+  position: absolute;
+  right: -24px;
+  top: 50%;
+  width: 24px;
+  height: 2px;
+  background: var(--border-color);
+}
+
+/* ── Common Matches list structure by round ── */
+.matches-by-round-group {
+  margin-bottom: 24px;
+}
+
+.round-group-title {
+  color: var(--text-primary);
+  border-left: 3px solid var(--brand-primary);
+  padding-left: 8px;
+}
+
+/* ── Matches Tab Styles ── */
+.matches-flex {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.match-card {
+  background: var(--nav-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.match-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.match-round {
+  color: var(--text-secondary);
+}
+
+.match-status-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.match-status-badge.live {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  background: #ef4444;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse 1.5s infinite;
+}
+
+.live-dot-mini {
+  width: 5px;
+  height: 5px;
+  background: #ef4444;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+}
+
+.match-status-badge.finished {
+  background: var(--border-color);
+  color: var(--text-tertiary);
+}
+
+.match-status-badge.scheduled {
+  background: rgba(133, 234, 45, 0.1);
+  color: var(--brand-primary);
+}
+
+.match-main {
+  display: grid;
+  grid-template-columns: 1fr 100px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.match-team {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.team-left {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.team-right {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.match-team-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 50%;
+  background: var(--border-color);
+  flex-shrink: 0;
+}
+
+.match-team-name {
+  color: var(--text-primary);
+}
+
+.match-score-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.match-scores {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.score-num {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  min-width: 20px;
+  text-align: center;
+}
+
+.score-num.winner {
+  color: var(--brand-primary);
+}
+
+.score-divider {
+  font-size: 20px;
+  color: var(--text-tertiary);
+}
+
+.match-vs {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.match-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.match-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.match-meta-item i {
+  font-size: 12px;
+}
+
+/* ── Common Empty Tab Styles ── */
+.empty-tab-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 16px;
+  gap: 8px;
+}
+
+.empty-tab-state i {
+  font-size: 2.5rem;
+  color: var(--text-tertiary);
+}
+
+/* ── Mobile styling ── */
+@media (max-width: 992px) {
+  .overview-dashboard {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .match-main {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    justify-items: center;
+  }
+  .team-left {
+    justify-content: center;
+    text-align: center;
+    flex-direction: column-reverse;
+  }
+  .team-right {
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+  }
+  .match-score-area {
+    margin: 8px 0;
+  }
+  .match-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
+
+/* ── Clickable elements hover states ── */
+.clickable-team,
+.clickable-pitch {
+  cursor: pointer;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease;
+}
+
+.clickable-team:hover,
+.clickable-pitch:hover {
+  opacity: 0.8;
+  color: var(--brand-primary) !important;
+}
+
+/* Specific hover tweak for tables or brackets */
+.sofascore-table tr.clickable-team:hover td {
+  color: var(--brand-primary);
+}
+.bracket-team-row.clickable-team:hover .bracket-team-name {
+  color: var(--brand-primary);
+}

@@ -1,0 +1,150 @@
+<div class="tournament-list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-title">
+      <h1 class="heading-xl">Giải đấu</h1>
+      <p class="caption-sm text-tertiary page-subtitle">Khám phá và tham gia các giải đấu phong trào</p>
+    </div>
+    <!-- View Mode Toggle — hidden on mobile -->
+    <div class="view-toggle-desktop">
+      <p-selectbutton [options]="viewModes" [ngModel]="currentViewMode()" (ngModelChange)="currentViewMode.set($event)"
+        optionLabel="label" optionValue="value" styleClass="custom-select-button view-mode-toggle">
+        <ng-template #item let-item>
+          <i [class]="item.icon"></i>
+        </ng-template>
+      </p-selectbutton>
+    </div>
+  </div>
+
+  <!-- Status Filter Tabs — horizontal scrollable -->
+  <div class="filter-tabs-wrapper">
+    <p-tabs [value]="currentStatus()" (valueChange)="updateStatus($event)">
+      <p-tablist>
+        <ng-container *ngFor="let tab of statusFilters">
+          <p-tab [value]="tab.value">
+            <span>{{ tab.label }}</span>
+          </p-tab>
+        </ng-container>
+      </p-tablist>
+    </p-tabs>
+  </div>
+
+  <!-- Content -->
+  <div class="tournaments-wrapper" [ngClass]="currentViewMode()">
+    <!-- ===== GRID VIEW (default, also used on mobile) ===== -->
+    <ng-container *ngIf="currentViewMode() === 'grid'">
+      <a *ngFor="let tournament of filteredTournaments()"
+         class="tournament-card"
+         [routerLink]="['/giai-dau', tournament.id]">
+        <!-- Cover Image -->
+        <div class="card-cover">
+          <img [src]="tournament.thumbnail" [alt]="tournament.name" loading="lazy" />
+          <div class="card-cover-overlay"></div>
+          <div class="cover-badges">
+            <p-tag [value]="getStatusLabel(tournament.status)"
+              [severity]="getStatusSeverity(tournament.status)"></p-tag>
+            <span class="rank-badge">Hạng {{ tournament.minRank }}</span>
+          </div>
+          <!-- Prize on cover (mobile-friendly) -->
+          <div class="cover-prize">
+            <i class="pi pi-trophy"></i>
+            <span>{{ tournament.prize }}</span>
+          </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body">
+          <!-- Organizer -->
+          <div class="org-row">
+            <img [src]="tournament.organizer.avatar" [alt]="tournament.organizer.name" class="org-avatar" />
+            <span class="caption-xs text-tertiary">{{ tournament.organizer.name }}</span>
+          </div>
+
+          <!-- Title -->
+          <h2 class="card-title">{{ tournament.name }}</h2>
+
+          <!-- Meta chips -->
+          <div class="meta-chips">
+            <div class="meta-chip">
+              <i class="pi pi-calendar"></i>
+              <span>{{ tournament.startDate | date:'dd/MM' }} - {{ tournament.endDate | date:'dd/MM' }}</span>
+            </div>
+            <div class="meta-chip">
+              <i class="pi pi-map-marker"></i>
+              <span class="line-clamp-1">{{ tournament.location }}</span>
+            </div>
+          </div>
+
+          <!-- Team slots progress -->
+          <div class="team-progress">
+            <div class="team-progress-header">
+              <span class="caption-xs text-tertiary">
+                <i class="pi pi-users"></i>
+                Đội đăng ký
+              </span>
+              <span class="caption-xs">
+                <strong>{{ tournament.registeredTeams }}</strong>/{{ tournament.maxTeams }}
+              </span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="(tournament.registeredTeams / tournament.maxTeams) * 100"></div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </ng-container>
+
+    <!-- ===== LIST VIEW (desktop only) ===== -->
+    <ng-container *ngIf="currentViewMode() === 'list'">
+      <a *ngFor="let tournament of filteredTournaments()"
+         class="tournament-list-item"
+         [routerLink]="['/giai-dau', tournament.id]">
+        <img [src]="tournament.thumbnail" [alt]="tournament.name" class="list-cover" loading="lazy" />
+
+        <div class="list-body">
+          <div class="list-top">
+            <div class="list-title-row">
+              <h2 class="heading-lg line-clamp-1">{{ tournament.name }}</h2>
+              <p-tag [value]="getStatusLabel(tournament.status)"
+                [severity]="getStatusSeverity(tournament.status)"></p-tag>
+            </div>
+            <div class="org-row">
+              <img [src]="tournament.organizer.avatar" [alt]="tournament.organizer.name" class="org-avatar-sm" />
+              <span class="caption-sm text-tertiary">{{ tournament.organizer.name }}</span>
+              <span class="dot-separator text-tertiary">•</span>
+              <span class="rank-badge-inline">Hạng {{ tournament.minRank }}</span>
+            </div>
+            <p class="body-base text-secondary line-clamp-2">{{ tournament.description }}</p>
+          </div>
+
+          <div class="list-bottom">
+            <div class="list-meta">
+              <div class="meta-chip">
+                <i class="pi pi-calendar text-tertiary"></i>
+                <span class="caption-sm">{{ tournament.startDate | date:'dd/MM' }} - {{ tournament.endDate | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <div class="meta-chip">
+                <i class="pi pi-users text-tertiary"></i>
+                <span class="caption-sm">{{ tournament.registeredTeams }}/{{ tournament.maxTeams }} Đội</span>
+              </div>
+              <div class="meta-chip">
+                <i class="pi pi-map-marker text-tertiary"></i>
+                <span class="caption-sm line-clamp-1">{{ tournament.location }}</span>
+              </div>
+            </div>
+            <div class="list-prize">
+              <span class="heading-lg text-primary">{{ tournament.prize }}</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </ng-container>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredTournaments().length === 0" class="empty-state">
+      <i class="pi pi-inbox text-tertiary" style="font-size: 2.5rem"></i>
+      <h3 class="heading-lg">Không có giải đấu nào</h3>
+      <p class="caption-sm text-tertiary">Không tìm thấy giải đấu nào phù hợp với bộ lọc hiện tại.</p>
+    </div>
+  </div>
+</div>

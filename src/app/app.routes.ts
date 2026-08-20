@@ -36,6 +36,20 @@ export const routes: Routes = [
             (m) => m.ChallengeFinderComponent
           ),
       },
+      {
+        path: 'giai-dau',
+        loadComponent: () =>
+          import('./features/tournament/tournament-list/tournament-list.component').then(
+            (m) => m.TournamentListComponent
+          ),
+      },
+      {
+        path: 'giai-dau/:id',
+        loadComponent: () =>
+          import('./features/tournament/tournament-detail/tournament-detail.component').then(
+            (m) => m.TournamentDetailComponent
+          ),
+      },
     ],
   },
   {

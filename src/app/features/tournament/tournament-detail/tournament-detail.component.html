@@ -1,0 +1,420 @@
+<div class="tournament-detail-container" *ngIf="tournament(); let t">
+  <!-- Back Navigation -->
+  <div class="back-nav mb-3">
+    <p-button icon="pi pi-arrow-left" label="Quay lại danh sách" [routerLink]="['/giai-dau']" styleClass="p-button-text p-button-sm text-secondary"></p-button>
+  </div>
+
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <div class="hero-cover">
+      <img [src]="t.thumbnail" [alt]="t.name" />
+      <div class="hero-overlay"></div>
+      
+      <div class="hero-content">
+        <div class="badges-row mb-2">
+          <p-tag [value]="getStatusLabel(t.status)" [severity]="getStatusSeverity(t.status)" styleClass="mr-2"></p-tag>
+          <span class="rank-badge">Hạng {{ t.minRank }}</span>
+        </div>
+        <h1 class="display-3xl text-white">{{ t.name }}</h1>
+        <div class="org-info mt-3">
+          <img [src]="t.organizer.avatar" [alt]="t.organizer.name" class="org-avatar" />
+          <span class="body-base text-white">Được tổ chức bởi <strong>{{ t.organizer.name }}</strong></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <div class="main-layout mt-4">
+    <!-- Left Column: Content Tabs -->
+    <div class="content-column">
+      <p-tabs [value]="activeTab()" (valueChange)="activeTab.set($event)" styleClass="custom-tabview">
+        <p-tablist>
+          <p-tab [value]="0">Tổng quan</p-tab>
+          <p-tab [value]="1">Trận đấu</p-tab>
+          <p-tab [value]="2" *ngIf="t.format !== 'loai_truc_tiep'">Bảng xếp hạng</p-tab>
+          <p-tab [value]="3" *ngIf="t.format !== 'vong_bang'">Sơ đồ thi đấu</p-tab>
+        </p-tablist>
+        
+        <p-tabpanels>
+          <!-- Tab 0: Tổng quan (Overview) -->
+          <p-tabpanel [value]="0">
+            <div class="tab-content-panel">
+              <div class="overview-dashboard">
+                <!-- Left Column: Details, Form, Recent/Next Matches -->
+                <div class="overview-main-col">
+                  <!-- Description Section -->
+                  <div class="overview-section">
+                    <h3 class="heading-lg mb-3">Giới thiệu giải đấu</h3>
+                    <p class="body-md text-secondary" style="white-space: pre-wrap;">{{ t.description }}</p>
+                  </div>
+
+                  <!-- Next Matches Preview -->
+                  <div class="overview-section mt-4" *ngIf="nextMatches().length > 0">
+                    <div class="section-header-row mb-3">
+                      <h3 class="heading-lg m-0">Trận đấu sắp tới</h3>
+                      <button class="view-all-link caption-sm" (click)="activeTab.set(1)">Xem tất cả</button>
+                    </div>
+                    <div class="matches-list-mini">
+                      <div class="mini-match-item" *ngFor="let match of nextMatches()">
+                        <span class="mini-match-round caption-xs text-tertiary">{{ match.round }}</span>
+                        <div class="mini-match-teams">
+                          <div class="mini-team clickable-team" (click)="openTeamDetail(match.teamA.name, undefined, match.teamA.logo)">
+                            <img [src]="match.teamA.logo" class="mini-logo" />
+                            <span class="body-sm text-primary-color line-clamp-1">{{ match.teamA.name }}</span>
+                          </div>
+                          <span class="mini-vs caption-xs text-tertiary">vs</span>
+                          <div class="mini-team flex-reverse clickable-team" (click)="openTeamDetail(match.teamB.name, undefined, match.teamB.logo)">
+                            <img [src]="match.teamB.logo" class="mini-logo" />
+                            <span class="body-sm text-primary-color line-clamp-1">{{ match.teamB.name }}</span>
+                          </div>
+                        </div>
+                        <div class="mini-match-time">
+                          <span class="caption-xs text-secondary">{{ match.time }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Recent Matches Preview -->
+                  <div class="overview-section mt-4" *ngIf="recentMatches().length > 0">
+                    <div class="section-header-row mb-3">
+                      <h3 class="heading-lg m-0">Kết quả gần đây</h3>
+                      <button class="view-all-link caption-sm" (click)="activeTab.set(1)">Xem tất cả</button>
+                    </div>
+                    <div class="matches-list-mini">
+                      <div class="mini-match-item" *ngFor="let match of recentMatches()">
+                        <span class="mini-match-round caption-xs text-tertiary">{{ match.round }}</span>
+                        <div class="mini-match-teams">
+                          <div class="mini-team clickable-team" (click)="openTeamDetail(match.teamA.name, undefined, match.teamA.logo)">
+                            <img [src]="match.teamA.logo" class="mini-logo" />
+                            <span class="body-sm text-primary-color line-clamp-1" [class.winner-text]="match.status === 'finished' && match.teamA.score! > match.teamB.score!">{{ match.teamA.name }}</span>
+                          </div>
+                          <div class="mini-scores font-medium">
+                            <span class="mini-score" [class.winner-text]="match.status === 'finished' && match.teamA.score! > match.teamB.score!">{{ match.teamA.score }}</span>
+                            <span>-</span>
+                            <span class="mini-score" [class.winner-text]="match.status === 'finished' && match.teamB.score! > match.teamA.score!">{{ match.teamB.score }}</span>
+                          </div>
+                          <div class="mini-team flex-reverse clickable-team" (click)="openTeamDetail(match.teamB.name, undefined, match.teamB.logo)">
+                            <img [src]="match.teamB.logo" class="mini-logo" />
+                            <span class="body-sm text-primary-color line-clamp-1" [class.winner-text]="match.status === 'finished' && match.teamB.score! > match.teamA.score!">{{ match.teamB.name }}</span>
+                          </div>
+                        </div>
+                        <div class="mini-match-badge-col">
+                          <span class="mini-badge live" *ngIf="match.status === 'live'"><span class="live-dot-mini"></span> Trực tiếp</span>
+                          <span class="mini-badge finished" *ngIf="match.status === 'finished'">Hết giờ</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right Column: Mini Standing Table / Mini Bracket -->
+                <div class="overview-side-col">
+                  <!-- Mini Standings Preview -->
+                  <div class="mini-standings-card" *ngIf="t.format !== 'loai_truc_tiep' && groupStandings().length > 0">
+                    <div class="section-header-row mb-3">
+                      <h4 class="heading-md m-0">Bảng xếp hạng</h4>
+                      <button class="view-all-link caption-sm" (click)="activeTab.set(2)">Xem chi tiết</button>
+                    </div>
+                    <div class="mini-group-container mb-3" *ngFor="let group of groupStandings()">
+                      <div class="mini-group-title caption-xs font-bold text-tertiary mb-2" *ngIf="t.format === 'ket_hop'">{{ group.groupName }}</div>
+                      <table class="mini-table">
+                        <thead>
+                          <tr>
+                            <th style="width: 24px">#</th>
+                            <th style="text-align: left">Đội</th>
+                            <th style="width: 24px">ST</th>
+                            <th style="width: 24px">Đ</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let team of group.standings.slice(0, 4); let idx = index" [class.promo-row]="idx < 2"
+                              class="clickable-team" (click)="openTeamDetail(team.name, undefined, team.logo, team.points)">
+                            <td>{{ idx + 1 }}</td>
+                            <td style="text-align: left">
+                              <div class="mini-table-team">
+                                <img [src]="team.logo" class="mini-table-logo" />
+                                <span class="line-clamp-1 body-sm">{{ team.name }}</span>
+                              </div>
+                            </td>
+                            <td>{{ team.played }}</td>
+                            <td class="font-bold">{{ team.points }}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <!-- Mini Bracket Preview -->
+                  <div class="mini-bracket-card mt-3" *ngIf="t.format !== 'vong_bang' && bracketRounds().length > 0">
+                    <div class="section-header-row mb-3">
+                      <h4 class="heading-md m-0">Vòng knockout</h4>
+                      <button class="view-all-link caption-sm" (click)="activeTab.set(3)">Xem sơ đồ</button>
+                    </div>
+                    <p class="caption-sm text-secondary">Giải đấu đang ở giai đoạn loại trực tiếp với các vòng đấu:</p>
+                    <div class="mini-rounds-list mt-2">
+                      <div class="mini-round-tag caption-xs" *ngFor="let round of bracketRounds()">
+                        🏆 {{ round.roundName }} ({{ round.matches.length }} trận)
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </p-tabpanel>
+          
+          <!-- Tab 1: Trận đấu (Matches) -->
+          <p-tabpanel [value]="1">
+            <div class="tab-content-panel">
+              <div class="matches-list-container" *ngIf="matchesByRound().length > 0; else noMatches">
+                <div class="matches-by-round-group" *ngFor="let roundGroup of matchesByRound()">
+                  <h3 class="round-group-title heading-lg mb-3 mt-3">{{ roundGroup.roundName }}</h3>
+                  
+                  <div class="matches-flex">
+                    <div class="match-card" *ngFor="let match of roundGroup.matches">
+                      <div class="match-header">
+                        <span class="match-round font-medium caption-sm">{{ match.round }}</span>
+                        <span class="match-status-badge live" *ngIf="match.status === 'live'">
+                          <span class="live-dot"></span> TRỰC TIẾP
+                        </span>
+                        <span class="match-status-badge finished" *ngIf="match.status === 'finished'">
+                          Đã kết thúc
+                        </span>
+                        <span class="match-status-badge scheduled" *ngIf="match.status === 'scheduled'">
+                          Lịch đấu
+                        </span>
+                      </div>
+
+                      <div class="match-main">
+                        <!-- Team A -->
+                        <div class="match-team team-left clickable-team" (click)="openTeamDetail(match.teamA.name, undefined, match.teamA.logo)">
+                          <img [src]="match.teamA.logo" [alt]="match.teamA.name" class="match-team-logo" />
+                          <span class="match-team-name font-medium body-md line-clamp-1" [class.winner-text]="match.status === 'finished' && match.teamA.score! > match.teamB.score!">{{ match.teamA.name }}</span>
+                        </div>
+
+                        <!-- Score / VS Area -->
+                        <div class="match-score-area">
+                          <div class="match-scores" *ngIf="match.status !== 'scheduled'">
+                            <span class="score-num" [class.winner]="match.status === 'finished' && match.teamA.score! > match.teamB.score!">{{ match.teamA.score }}</span>
+                            <span class="score-divider">-</span>
+                            <span class="score-num" [class.winner]="match.status === 'finished' && match.teamB.score! > match.teamA.score!">{{ match.teamB.score }}</span>
+                          </div>
+                          <div class="match-vs font-medium text-tertiary" *ngIf="match.status === 'scheduled'">
+                            VS
+                          </div>
+                        </div>
+
+                        <!-- Team B -->
+                        <div class="match-team team-right clickable-team" (click)="openTeamDetail(match.teamB.name, undefined, match.teamB.logo)">
+                          <span class="match-team-name font-medium body-md line-clamp-1" [class.winner-text]="match.status === 'finished' && match.teamB.score! > match.teamA.score!">{{ match.teamB.name }}</span>
+                          <img [src]="match.teamB.logo" [alt]="match.teamB.name" class="match-team-logo" />
+                        </div>
+                      </div>
+
+                      <div class="match-footer mt-2 pt-2 border-top">
+                        <div class="match-meta-item">
+                          <i class="pi pi-clock text-tertiary"></i>
+                          <span class="caption-sm text-secondary">{{ match.time }}</span>
+                        </div>
+                        <div class="match-meta-item clickable-pitch" (click)="openPitchDetail(match.pitch)">
+                          <i class="pi pi-map-marker text-tertiary"></i>
+                          <span class="caption-sm text-secondary line-clamp-1">{{ match.pitch }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <ng-template #noMatches>
+                <div class="empty-tab-state">
+                  <i class="pi pi-calendar-times text-tertiary" style="font-size: 2.5rem; margin-bottom: 8px;"></i>
+                  <p class="body-md text-secondary">Lịch thi đấu đang được cập nhật. Ban tổ chức sẽ công bố sau khi chốt danh sách đội.</p>
+                </div>
+              </ng-template>
+            </div>
+          </p-tabpanel>
+
+          <!-- Tab 2: Bảng xếp hạng (Standings) -->
+          <p-tabpanel [value]="2" *ngIf="t.format !== 'loai_truc_tiep'">
+            <div class="tab-content-panel">
+              <div class="standings-tab-container" *ngIf="groupStandings().length > 0; else noStandings">
+                <!-- Group tables or single table -->
+                <div class="group-standing-block mb-4" *ngFor="let group of groupStandings()">
+                  <h3 class="group-title-label heading-lg mb-3" *ngIf="t.format === 'ket_hop'">{{ group.groupName }}</h3>
+                  
+                  <div class="table-responsive">
+                    <table class="sofascore-table">
+                      <thead>
+                        <tr>
+                          <th style="width: 40px">#</th>
+                          <th style="text-align: left">Đội bóng</th>
+                          <th style="width: 60px">ST</th>
+                          <th style="width: 50px">T</th>
+                          <th style="width: 50px">H</th>
+                          <th style="width: 50px">B</th>
+                          <th style="width: 80px">Hiệu số</th>
+                          <th style="width: 70px" class="points-col">Điểm</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let team of group.standings; let idx = index" [class.promo-row]="idx < 2"
+                            class="clickable-team" (click)="openTeamDetail(team.name, undefined, team.logo, team.points)">
+                          <td class="pos-cell">{{ idx + 1 }}</td>
+                          <td style="text-align: left">
+                            <div class="table-team-cell">
+                              <img [src]="team.logo" class="table-team-logo" />
+                              <span class="body-md font-medium team-name">{{ team.name }}</span>
+                            </div>
+                          </td>
+                          <td>{{ team.played }}</td>
+                          <td>{{ team.won }}</td>
+                          <td>{{ team.drawn }}</td>
+                          <td>{{ team.lost }}</td>
+                          <td>{{ team.goalsFor }}:{{ team.goalsAgainst }}</td>
+                          <td class="points-cell font-bold">{{ team.points }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <ng-template #noStandings>
+                <div class="empty-tab-state">
+                  <i class="pi pi-list text-tertiary"></i>
+                  <p class="body-md text-secondary">Chưa có thông tin bảng xếp hạng cho giải đấu này.</p>
+                </div>
+              </ng-template>
+            </div>
+          </p-tabpanel>
+
+          <!-- Tab 3: Sơ đồ thi đấu (Knockout Bracket) -->
+          <p-tabpanel [value]="3" *ngIf="t.format !== 'vong_bang'">
+            <div class="tab-content-panel">
+              <div class="bracket-container" *ngIf="bracketRounds().length > 0; else noBracket">
+                <div class="bracket-scroll-wrapper">
+                  <div class="bracket-rounds-wrapper">
+                    <!-- Column for each round -->
+                    <div class="bracket-round-column" *ngFor="let round of bracketRounds(); let roundIdx = index">
+                      <h4 class="bracket-round-header heading-md text-secondary text-center mb-4">{{ round.roundName }}</h4>
+                      
+                      <div class="bracket-matches-list">
+                        <div class="bracket-match-wrapper" *ngFor="let match of round.matches; let matchIdx = index" 
+                             [attr.data-round]="roundIdx" [attr.data-match]="matchIdx">
+                          <div class="bracket-match-card" [class.live]="match.status === 'live'" [class.finished]="match.status === 'finished'">
+                            
+                            <!-- Team A -->
+                            <div class="bracket-team-row clickable-team" (click)="openTeamDetail(match.teamA.name, undefined, match.teamA.logo)">
+                              <img [src]="match.teamA.logo" class="bracket-team-logo" />
+                              <span class="bracket-team-name body-sm font-medium line-clamp-1">{{ match.teamA.name }}</span>
+                              <span class="bracket-team-score font-bold" *ngIf="match.status !== 'scheduled'">{{ match.teamA.score }}</span>
+                            </div>
+                            
+                            <!-- Team B -->
+                            <div class="bracket-team-row border-top clickable-team" (click)="openTeamDetail(match.teamB.name, undefined, match.teamB.logo)">
+                              <img [src]="match.teamB.logo" class="bracket-team-logo" />
+                              <span class="bracket-team-name body-sm font-medium line-clamp-1">{{ match.teamB.name }}</span>
+                              <span class="bracket-team-score font-bold" *ngIf="match.status !== 'scheduled'">{{ match.teamB.score }}</span>
+                            </div>
+
+                            <!-- Match Info Footer -->
+                            <div class="bracket-match-info border-top">
+                              <span class="caption-xs text-tertiary">{{ match.time }}</span>
+                              <span class="mini-live-badge live" *ngIf="match.status === 'live'"><span class="live-dot-mini"></span> Trực tiếp</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <ng-template #noBracket>
+                <div class="empty-tab-state">
+                  <i class="pi pi-sitemap text-tertiary"></i>
+                  <p class="body-md text-secondary">Sơ đồ thi đấu vòng trực tiếp đang được cập nhật.</p>
+                </div>
+              </ng-template>
+            </div>
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
+    </div>
+
+    <!-- Right Column: Info Widget -->
+    <div class="widget-column">
+      <div class="info-card">
+        <h3 class="heading-lg mb-3">Thông tin chi tiết</h3>
+        
+        <div class="info-list">
+          <div class="info-item">
+            <i class="pi pi-calendar text-primary"></i>
+            <div>
+              <div class="caption-sm text-tertiary">Thời gian diễn ra</div>
+              <div class="body-md font-medium">{{ t.startDate | date:'dd/MM/yyyy' }} - {{ t.endDate | date:'dd/MM/yyyy' }}</div>
+            </div>
+          </div>
+          
+          <div class="info-item clickable-pitch" (click)="openPitchDetail(t.location)">
+            <i class="pi pi-map-marker text-primary"></i>
+            <div>
+              <div class="caption-sm text-tertiary">Địa điểm</div>
+              <div class="body-md font-medium">{{ t.location }}</div>
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <i class="pi pi-users text-primary"></i>
+            <div>
+              <div class="caption-sm text-tertiary">Số đội tham gia</div>
+              <div class="body-md font-medium">{{ t.registeredTeams }} / {{ t.maxTeams }} Đội</div>
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <i class="pi pi-money-bill text-primary"></i>
+            <div>
+              <div class="caption-sm text-tertiary">Lệ phí đăng ký</div>
+              <div class="body-md font-medium text-danger">{{ t.fee | number:'1.0-0' }}đ / Đội</div>
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <i class="pi pi-trophy text-primary"></i>
+            <div>
+              <div class="caption-sm text-tertiary">Giải thưởng</div>
+              <div class="heading-lg text-primary">{{ t.prize }}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-4 pt-3 border-top">
+          <p-button *ngIf="t.status === 'upcoming'" label="Đăng ký tham gia" icon="pi pi-check-circle" styleClass="p-button-primary w-full p-button-rounded"></p-button>
+          <p-button *ngIf="t.status !== 'upcoming'" label="Đã đóng đăng ký" [disabled]="true" styleClass="p-button-secondary w-full p-button-rounded"></p-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tournament-detail-container" *ngIf="!tournament()">
+  <div class="empty-state">
+    <i class="pi pi-exclamation-triangle text-tertiary" style="font-size: 3rem"></i>
+    <h3 class="heading-lg mt-3">Không tìm thấy giải đấu</h3>
+    <p class="body-base text-tertiary">Giải đấu không tồn tại hoặc đã bị xoá.</p>
+    <p-button label="Quay lại" [routerLink]="['/giai-dau']" styleClass="mt-3"></p-button>
+  </div>
+</div>
+
+<!-- Popups for Team and Pitch details -->
+<app-team-detail-popup 
+  [visible]="teamPopupVisible()" 
+  (visibleChange)="teamPopupVisible.set($event)"
+  [team]="selectedTeam()">
+</app-team-detail-popup>
+
+<app-pitch-detail-popup 
+  [visible]="pitchPopupVisible()" 
+  (visibleChange)="pitchPopupVisible.set($event)"
+  [pitch]="selectedPitch()">
+</app-pitch-detail-popup>
