@@ -24,6 +24,7 @@ export const appConfig: ApplicationConfig = {
           darkModeSelector: '.dark'
         }
       },
+      license: 'eyJpZCI6IjRlMDM0MzI3LWEyZmEtNDZkZC05ODIwLTE0NDVhMTE5NGJlMiIsInByb2R1Y3QiOiJwcmltZXVpIiwidGllciI6ImNvbW11bml0eSIsInR5cGUiOiJkZXYiLCJpYXQiOjE3ODcxOTU0OTQsImV4cCI6MTgxODczMTQ5NH0.LI89onesLzFDACflQ3M1DXa79mszxebspp-pPuPhQspSXyH0SeKatPdakybhJlUELQmhT84DwPG2d1GkYaKvCg'
     }),
   ],
 };

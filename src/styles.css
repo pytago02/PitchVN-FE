@@ -156,10 +156,22 @@ body {
 }
 
 /* Ensure PrimeNG components stretch full width in forms */
-p-select, p-datepicker, .p-select, .p-datepicker, p-multiselect, .p-multiselect {
+p-select,
+p-datepicker,
+.p-select,
+.p-datepicker,
+p-multiselect,
+.p-multiselect {
   width: 100%;
 }
 
+p-select,
+p-datepicker,
+p-multiselect {
+  display: flex;
+}
 
-p-select, p-datepicker, p-multiselect { display: flex; }
-
+/* Hide PrimeNG License Watermark */
+#p-license-host {
+  display: none !important;
+}
