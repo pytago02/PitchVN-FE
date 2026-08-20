@@ -50,6 +50,27 @@ export const routes: Routes = [
             (m) => m.TournamentDetailComponent
           ),
       },
+      {
+        path: 'xep-hang',
+        loadComponent: () =>
+          import('./features/ranking/ranking.component').then(
+            (m) => m.RankingComponent
+          ),
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/profile/profile.component').then(
+            (m) => m.ProfileComponent
+          ),
+      },
+      {
+        path: 'tin-nhan',
+        loadComponent: () =>
+          import('./features/chat/chat.component').then(
+            (m) => m.ChatComponent
+          ),
+      },
     ],
   },
   {

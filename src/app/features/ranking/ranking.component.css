@@ -1,0 +1,581 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.ranking-container {
+  width: 100%;
+  padding: 12px 12px 70px 12px;
+}
+
+@media (min-width: 768px) {
+  .ranking-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+/* Header */
+.ranking-header {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.ranking-header h1 {
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.ranking-header .subtitle {
+  color: var(--text-tertiary);
+}
+
+/* Segmented Tabs (Cầu thủ / Đội bóng) */
+.main-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 12px 8px;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  transition: all 0.2s ease;
+  position: relative;
+  text-align: center;
+}
+
+.tab-btn.active {
+  color: var(--text-primary);
+}
+
+.tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--text-primary);
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
+.tab-btn.active::after {
+  transform: scaleX(1);
+}
+
+/* Filter Section */
+.filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* Search Box */
+.search-box {
+  position: relative;
+  width: 100%;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--text-tertiary);
+}
+
+::ng-deep .search-input.p-inputtext {
+  width: 100%;
+  background-color: var(--nav-item-hover-bg);
+  border: 1px solid transparent;
+  color: var(--text-primary);
+  padding: 10px 12px 10px 40px;
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+::ng-deep .search-input.p-inputtext:focus {
+  border-color: var(--border-color);
+  background-color: var(--surface-bg);
+  box-shadow: none;
+}
+
+/* Dropdown Filters */
+.dropdown-group {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.select-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+::ng-deep .custom-p-select.p-select {
+  width: 100%;
+  background-color: var(--nav-item-hover-bg);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  transition: all 0.15s ease;
+}
+
+::ng-deep .custom-p-select.p-select:hover {
+  border-color: var(--border-color);
+}
+
+::ng-deep .custom-p-select.p-select.p-focus {
+  border-color: var(--border-color);
+  background-color: var(--surface-bg);
+}
+
+::ng-deep .custom-p-select.p-select .p-select-label {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: var(--body-base-size);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+}
+
+::ng-deep .custom-p-select.p-select .p-select-dropdown {
+  color: var(--text-tertiary);
+  padding-right: 12px;
+}
+
+/* Horizontal Rank Pills Ribbon */
+.rank-ribbon {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 20px;
+  scrollbar-width: none; /* Firefox */
+}
+
+.rank-ribbon::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.rank-pill {
+  flex: 0 0 auto;
+  background-color: var(--nav-item-hover-bg);
+  border: 1px solid transparent;
+  color: var(--text-tertiary);
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-weight: 500;
+}
+
+.rank-pill:hover {
+  color: var(--text-primary);
+}
+
+.rank-pill.active {
+  background-color: var(--text-primary);
+  color: var(--surface-bg);
+  border-color: var(--text-primary);
+}
+
+/* Ranking Table & Layout */
+.ranking-table-card {
+  background-color: var(--surface-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.ranking-table th,
+.ranking-table td {
+  padding: 14px 12px;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.ranking-table th {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Columns widths & alignments */
+.col-rank {
+  width: 48px;
+  text-align: center;
+}
+
+.col-name {
+  min-width: 160px;
+}
+
+.col-elo {
+  width: 70px;
+}
+
+.col-tier {
+  width: 65px;
+}
+
+.col-trend {
+  width: 60px;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+/* Medals for Top 3 */
+.medal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 13px;
+  color: #ffffff;
+}
+
+.medal-1 {
+  background: linear-gradient(135deg, #ffd700, #ffa500);
+  box-shadow: 0 2px 6px rgba(255, 215, 0, 0.4);
+}
+
+.medal-2 {
+  background: linear-gradient(135deg, #c0c0c0, #808080);
+  box-shadow: 0 2px 6px rgba(192, 192, 192, 0.4);
+}
+
+.medal-3 {
+  background: linear-gradient(135deg, #cd7f32, #8b4513);
+  box-shadow: 0 2px 6px rgba(205, 127, 50, 0.4);
+}
+
+/* Name & Avatar Cell */
+.name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.entity-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: crop;
+  border: 1px solid var(--border-color);
+  background-color: var(--nav-item-hover-bg);
+}
+
+.name-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.block-text {
+  display: block;
+}
+
+/* Rank Badge Style (coding-style.md 2.2.3 / 2.5) */
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.tier-S {
+  background-color: rgba(239, 159, 39, 0.15);
+  color: #ef9f27;
+}
+
+.tier-A {
+  background-color: rgba(29, 158, 117, 0.15);
+  color: #1d9e75;
+}
+
+.tier-B {
+  background-color: rgba(55, 138, 221, 0.15);
+  color: #378add;
+}
+
+.tier-C {
+  background-color: rgba(99, 153, 34, 0.15);
+  color: #639922;
+}
+
+.tier-D {
+  background-color: rgba(216, 90, 48, 0.15);
+  color: #d85a30;
+}
+
+.tier-E {
+  background-color: rgba(212, 83, 126, 0.15);
+  color: #d4537e;
+}
+
+.tier-F {
+  background-color: rgba(136, 135, 128, 0.15);
+  color: #888780;
+}
+
+/* Trend Icons */
+.trend-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.trend-icon.up {
+  color: #1d9e75;
+}
+
+.trend-icon.down {
+  color: var(--danger);
+}
+
+.trend-icon.stable {
+  color: var(--text-tertiary);
+}
+
+/* Row interaction styles */
+.ranking-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.ranking-row:hover {
+  background-color: var(--nav-item-hover-bg);
+}
+
+.ranking-row.expanded {
+  background-color: var(--nav-item-hover-bg);
+}
+
+.ranking-row.expanded td {
+  border-bottom-color: transparent;
+}
+
+/* Expandable Details Container */
+.details-row td {
+  padding: 0 !important;
+  border-bottom: none;
+}
+
+.expanded-card-content {
+  overflow: hidden;
+  background-color: var(--nav-item-hover-bg);
+  border-bottom: 1px solid var(--border-color);
+  padding: 16px;
+  animation: slideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 500px;
+  }
+}
+
+/* Details Grid */
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 580px) {
+  .details-grid {
+    grid-template-columns: 1.2fr 1.8fr;
+  }
+}
+
+/* Stats Card UI */
+.stats-card {
+  background-color: var(--surface-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.stats-card h4,
+.chart-card h4 {
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.stats-grid-inner {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--nav-item-hover-bg);
+  border-radius: 8px;
+  padding: 6px 4px;
+  text-align: center;
+}
+
+.stat-item.full-width {
+  grid-column: span 3;
+  padding: 8px 4px;
+}
+
+.stat-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+/* Chart Card UI */
+.chart-card {
+  background-color: var(--surface-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.chart-container-inner {
+  position: relative;
+  width: 100%;
+  height: 120px;
+}
+
+.sparkline-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.grid-line {
+  stroke: var(--border-color);
+  stroke-width: 1;
+  stroke-dasharray: 4, 4;
+}
+
+.chart-point-text {
+  font-size: 9px;
+  fill: var(--text-tertiary);
+  font-weight: 600;
+}
+
+.chart-x-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 8px 0 8px;
+  border-top: 1px dashed var(--border-color);
+  margin-top: 8px;
+}
+
+/* Utility Text Colors */
+.text-green {
+  color: #1d9e75 !important;
+}
+
+.text-red {
+  color: var(--danger) !important;
+}
+
+.text-yellow {
+  color: #ef9f27 !important;
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-tertiary {
+  color: var(--text-tertiary);
+}
+
+/* Responsive Rules */
+.desktop-only {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .desktop-only {
+    display: table-cell;
+  }
+  
+  .filter-section {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .search-box {
+    flex: 1.5;
+  }
+  
+  .dropdown-group {
+    flex: 1;
+  }
+
+  .ranking-container {
+    padding-top: 32px;
+  }
+}

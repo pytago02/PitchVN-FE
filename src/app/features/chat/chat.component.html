@@ -1,0 +1,356 @@
+<div class="chat-layout-container">
+  <div class="chat-split-view" [class.conversation-active]="selectedConversation() !== null">
+    
+    <!-- LEFT PANEL: Conversation Sidebar (Inbox) -->
+    <aside class="conversations-sidebar">
+      <!-- Sidebar Header -->
+      <div class="sidebar-header">
+        <h2 class="heading-xl">Tin nhắn</h2>
+        <button class="new-chat-btn" (click)="openNewChatDialog()" title="Tin nhắn mới">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Search Inbox -->
+      <div class="inbox-search">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input 
+            pInputText
+            type="text" 
+            [ngModel]="searchQuery()" 
+            (ngModelChange)="searchQuery.set($event)"
+            placeholder="Tìm kiếm cuộc trò chuyện..." 
+            class="body-base search-input-field" />
+        </div>
+      </div>
+
+      <!-- Conversation List Items -->
+      <div class="conversations-list-scroll">
+        @if (filteredConversations().length === 0) {
+          <div class="empty-inbox text-center py-8">
+            <p class="body-base text-tertiary">Không tìm thấy cuộc hội thoại nào.</p>
+          </div>
+        } @else {
+          @for (conv of filteredConversations(); track conv.id) {
+            <div 
+              class="conversation-item" 
+              [class.active]="selectedConversation()?.id === conv.id"
+              (click)="selectConversation(conv)">
+              
+              <!-- Avatar & Status badge -->
+              <div class="avatar-container">
+                <img [src]="conv.avatar" [alt]="conv.name" class="inbox-avatar" />
+                @if (conv.status === 'online') {
+                  <span class="status-indicator online"></span>
+                }
+              </div>
+
+              <!-- Text Info -->
+              <div class="inbox-details">
+                <div class="inbox-row">
+                  <span class="heading-lg name text-primary">{{ conv.name }}</span>
+                  <span class="time caption-xs text-tertiary">{{ conv.lastMessageTime }}</span>
+                </div>
+                <div class="inbox-row mt-1">
+                  <span class="message-snippet body-base" [class.font-bold]="conv.unreadCount > 0">
+                    {{ conv.lastMessage }}
+                  </span>
+                  @if (conv.unreadCount > 0) {
+                    <span class="unread-badge">{{ conv.unreadCount }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </aside>
+
+    <!-- RIGHT PANEL: Active Chat View / Empty State -->
+    <main class="chat-messages-panel">
+      @if (selectedConversation() === null) {
+        <!-- Empty State View -->
+        <div class="chat-empty-state">
+          <div class="empty-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5" width="48" height="48">
+              <path d="M22 2L11 13"></path>
+              <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+            </svg>
+          </div>
+          <h3 class="heading-xl mt-4">Tin nhắn của bạn</h3>
+          <p class="body-base text-tertiary text-center mt-2 px-6">
+            Gửi tin nhắn riêng tư, chốt kèo hoặc trao đổi nhanh với đồng đội và các chủ sân bóng.
+          </p>
+          <button class="start-chat-btn mt-6" (click)="openNewChatDialog()">
+            <span class="body-md">Gửi tin nhắn</span>
+          </button>
+        </div>
+      } @else {
+        <!-- Active Chat Window -->
+        <div class="active-chat-window">
+          <!-- Chat Header -->
+          <header class="chat-header">
+            <!-- Mobile back trigger -->
+            <button class="back-to-list-btn" (click)="deselectConversation()" title="Quay lại">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+
+            <!-- Chat Info Header -->
+            <div class="header-user-info">
+              <div class="avatar-container">
+                <img [src]="selectedConversation()!.avatar" [alt]="selectedConversation()!.name" class="header-avatar" />
+                @if (selectedConversation()!.status === 'online') {
+                  <span class="status-indicator online"></span>
+                }
+              </div>
+              <div class="user-meta">
+                <span class="heading-lg text-primary">{{ selectedConversation()!.name }}</span>
+                <span class="status-text caption-xs text-tertiary">
+                  {{ selectedConversation()!.status === 'online' ? 'Đang hoạt động' : selectedConversation()!.status }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Header Action Button (optional info) -->
+            <button class="header-action-btn" title="Thông tin" (click)="toggleInfoPanel()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            </button>
+          </header>
+
+          <!-- Chat Messages Scroll Container -->
+          <div class="message-history-list" #messageHistoryScroll>
+            @for (msg of selectedConversation()!.messages; track msg.id) {
+              <div class="message-row" [class.outgoing]="msg.senderId === 'p2'" [class.incoming]="msg.senderId !== 'p2'">
+                
+                <!-- Sender Avatar (incoming only) -->
+                @if (msg.senderId !== 'p2') {
+                  <img [src]="msg.senderAvatar" [alt]="msg.senderName" class="bubble-avatar" />
+                }
+
+                <div class="bubble-wrapper">
+                  <!-- Group chat sender name -->
+                  @if (selectedConversation()!.type === 'group' && msg.senderId !== 'p2') {
+                    <span class="sender-name caption-xs text-tertiary">{{ msg.senderName }}</span>
+                  }
+                  
+                  <!-- Bubble bubble content -->
+                  <div class="message-bubble">
+                    @if (msg.content) {
+                      <p class="body-md">{{ msg.content }}</p>
+                    }
+                    @if (msg.image) {
+                      <img [src]="msg.image" alt="Uploaded media" class="bubble-image" />
+                    }
+                  </div>
+
+                  <span class="message-time caption-xs text-tertiary">{{ msg.timestamp }}</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Chat Input Bar Footer -->
+          <footer class="chat-input-footer">
+            <div class="input-actions">
+              <!-- Image attachment picker button -->
+              <button class="input-action-btn" (click)="mockAttachImage()" title="Đính kèm ảnh">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Input textbox -->
+            <div class="input-box-container">
+              <input 
+                pInputText
+                type="text" 
+                [(ngModel)]="messageText" 
+                (keyup.enter)="sendMessage()"
+                placeholder="Nhắn tin..." 
+                class="body-md chat-text-input" />
+            </div>
+
+            <!-- Send button -->
+            <button 
+              class="chat-send-btn" 
+              [disabled]="!messageText.trim()"
+              (click)="sendMessage()">
+              <span class="heading-lg">Gửi</span>
+            </button>
+          </footer>
+        </div>
+
+        <!-- RIGHT PANEL: Slide-out Info/Details Panel -->
+        @if (showInfoPanel()) {
+          <aside class="chat-info-panel">
+            <!-- Info Panel Header -->
+            <div class="info-header">
+              <span class="heading-lg text-primary">Chi tiết</span>
+              <button class="close-info-btn" (click)="showInfoPanel.set(false)" title="Đóng chi tiết">
+                <i class="pi pi-times"></i>
+              </button>
+            </div>
+
+            <!-- Info Panel Content Scroll -->
+            <div class="info-body">
+              <!-- Participant profile detail card -->
+              <div class="info-user-card">
+                <img [src]="selectedConversation()!.avatar" class="info-avatar" alt="User avatar" />
+                <h4 class="heading-xl text-primary mt-2">{{ selectedConversation()!.name }}</h4>
+                <p class="caption-sm text-tertiary">
+                  {{ selectedConversation()!.type === 'group' ? 'Nhóm trò chuyện' : 'Tài khoản cá nhân' }}
+                </p>
+              </div>
+
+              <hr class="info-divider" />
+
+              <!-- Quick action actions -->
+              <div class="info-actions-list">
+                @if (selectedConversation()!.type !== 'group') {
+                  <a routerLink="/profile" class="info-action-item">
+                    <i class="pi pi-user text-tertiary"></i>
+                    <span class="body-md text-primary">Xem trang cá nhân</span>
+                  </a>
+                }
+
+                <div class="info-action-item toggle-item">
+                  <div class="action-label">
+                    <i class="pi pi-bell-slash text-tertiary"></i>
+                    <span class="body-md text-primary">Tắt thông báo</span>
+                  </div>
+                  <input type="checkbox" class="custom-toggle" />
+                </div>
+
+                <button class="info-action-item danger-item" (click)="mockDeleteChat()">
+                  <i class="pi pi-trash"></i>
+                  <span class="body-md">Xóa cuộc hội thoại</span>
+                </button>
+
+                <button class="info-action-item danger-item">
+                  <i class="pi pi-ban"></i>
+                  <span class="body-md">Chặn người dùng</span>
+                </button>
+              </div>
+
+              <!-- Group Members section -->
+              @if (selectedConversation()!.type === 'group') {
+                <hr class="info-divider" />
+                <div class="info-section">
+                  <h5 class="heading-lg text-primary mb-2">Thành viên cuộc gọi (5)</h5>
+                  <div class="members-list">
+                    <div class="member-item">
+                      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" class="member-avatar" alt="Member" />
+                      <span class="body-md text-primary font-medium">Nguyễn Tiến Linh</span>
+                    </div>
+                    <div class="member-item">
+                      <img src="https://images.unsplash.com/photo-1500048993953-d23a436266cf?w=150" class="member-avatar" alt="Member" />
+                      <span class="body-md text-primary font-medium">Đặng Văn Lâm</span>
+                    </div>
+                    <div class="member-item">
+                      <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" class="member-avatar" alt="Member" />
+                      <span class="body-md text-primary font-medium">Phạm Tuấn Hải (Bạn)</span>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <!-- Shared Media Photos gallery -->
+              @if (getSharedImages().length > 0) {
+                <hr class="info-divider" />
+                <div class="info-section">
+                  <h5 class="heading-lg text-primary mb-2">Ảnh đã chia sẻ</h5>
+                  <div class="shared-media-grid">
+                    @for (img of getSharedImages(); track img) {
+                      <div class="shared-media-wrapper">
+                        <img [src]="img" class="shared-media-item" alt="Shared media file" />
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </aside>
+        }
+      }
+    </main>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PrimeNG: Headless p-dialog for Starting New Chats
+     ════════════════════════════════════════════════════════ -->
+<p-dialog
+  [(visible)]="showNewChatDialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [showHeader]="false"
+  styleClass="custom-new-chat-dialog"
+  [dismissableMask]="true"
+  maskStyleClass="custom-modal-mask"
+  appendTo="body">
+  
+  <ng-template #headless>
+    <div class="new-chat-dialog-inner">
+      <!-- Header -->
+      <div class="dialog-header">
+        <h3 class="heading-xl">Tin nhắn mới</h3>
+        <button class="close-dialog-btn" (click)="closeNewChatDialog()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <!-- Search Input -->
+      <div class="search-contact-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+          pInputText
+          type="text" 
+          [ngModel]="contactSearchQuery()" 
+          (ngModelChange)="contactSearchQuery.set($event)"
+          placeholder="Tìm cầu thủ, chủ sân hoặc đội..." 
+          class="body-md search-contact-input" />
+      </div>
+
+      <!-- Contacts List -->
+      <div class="contacts-list-scroll">
+        @if (filteredContacts().length === 0) {
+          <div class="empty-contacts text-center py-6">
+            <p class="body-base text-tertiary">Không tìm thấy bạn bè phù hợp.</p>
+          </div>
+        } @else {
+          @for (contact of filteredContacts(); track contact.id) {
+            <div class="contact-item" (click)="startNewChat(contact)">
+              <img [src]="contact.avatar" [alt]="contact.name" class="contact-avatar" />
+              <div class="contact-info">
+                <span class="heading-lg contact-name text-primary">{{ contact.name }}</span>
+                <span class="caption-sm text-tertiary">@{{ contact.handle }} • {{ contact.role }}</span>
+              </div>
+              <i class="pi pi-angle-right text-tertiary"></i>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>

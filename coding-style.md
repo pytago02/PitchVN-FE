@@ -109,7 +109,8 @@ Giao diện Threads sử dụng ngôn ngữ bo tròn mềm mại và nhất quá
 
 - **Desktop (>= 1024px)**:
   - Sidebar cố định bên trái (`position: fixed; width: 260px; padding: 24px`).
-  - Cột chính căn giữa màn hình với `max-width: 620px; margin: 0 auto`.
+  - Cột chính Bảng tin (Feed) & Chi tiết bài đăng: Căn giữa với `max-width: 620px; margin: 0 auto` để tối ưu trải nghiệm đọc.
+  - Các trang chức năng rộng và hồ sơ (Giải đấu `/giai-dau`, Xếp hạng `/xep-hang`, Bản đồ `/tim-san`, Trang cá nhân `/profile`, v.v.): Cột nội dung mở rộng tối đa `max-width: 1200px; margin: 0 auto; width: 100%` để hiển thị bảng dữ liệu, bản đồ, sơ đồ giải đấu và các chỉ số thống kê một cách trực quan nhất.
   - Nút soạn thảo nhanh FAB ở góc dưới bên phải (`right: 32px; bottom: 32px`).
 - **Tablet (768px - 1023px)**:
   - Sidebar thu nhỏ còn `80px`, ẩn text menu, chỉ hiển thị icon căn giữa.
@@ -119,6 +120,9 @@ Giao diện Threads sử dụng ngôn ngữ bo tròn mềm mại và nhất quá
   - Hiển thị **Bottom Tab Bar** cố định dưới đáy màn hình (`height: 60px; z-index: 1000; background: var(--nav-bg); backdrop-filter: blur(8px)`).
   - Main content mở rộng `width: 100%`, thêm `padding-bottom: 70px`.
   - Các Dialog soạn bài / trả lời tự động chuyển thành **Bottom Sheet** (chiếm 100% chiều rộng, dính đáy, bo tròn 2 góc trên `20px 20px 0 0`).
+
+> [!IMPORTANT]
+> **Quy tắc Angular `:host`**: Các Angular Standalone components khi biên dịch sẽ render ra một thẻ tùy chỉnh (ví dụ: `<app-profile>`, `<app-ranking>`) có thuộc tính hiển thị mặc định của trình duyệt là `display: inline`. Điều này dễ gây lỗi co rút chiều rộng (như trên tab Chỉ số). Do đó, **bắt buộc** phải khai báo quy tắc `:host { display: block; width: 100%; }` ở ngay đầu mỗi file component CSS để đảm bảo layout co giãn chính xác theo đúng tỷ lệ màn hình thiết kế.
 
 ---
 
@@ -205,6 +209,35 @@ Dự án sử dụng **PrimeNG phiên bản 22** với các component chính:
   - Class name item label: `.p-menu-item-label` (nằm bên trái `order: 1`)
   - Class name item icon: `.p-menu-item-icon` (nằm bên phải `order: 2`)
   - Mục nguy hiểm / cảnh báo: Gán `styleClass: 'menu-item-danger'` (đổi màu chữ và icon sang `var(--danger)`).
+
+### 4. `p-select` (Dùng cho ô lựa chọn / Dropdown)
+- **Quy chuẩn sử dụng**: Tất cả các bộ chọn dropdown trong ứng dụng **phải** sử dụng component `<p-select>` của PrimeNG thay cho thẻ `<select>` và `<option>` HTML gốc.
+- **Định dạng dữ liệu**: Ưu tiên ánh xạ dữ liệu sang định dạng `{ label: string, value: any }` và cấu hình thuộc tính `optionLabel="label"` và `optionValue="value"` cho component để dễ dàng tùy biến giao diện nhãn hiển thị.
+- **Tùy biến CSS**: Sử dụng `::ng-deep` để ghi đè các lớp giao diện nội bộ của PrimeNG:
+  ```css
+  ::ng-deep .custom-p-select.p-select {
+    width: 100%;
+    background-color: var(--nav-item-hover-bg);
+    border: 1px solid transparent;
+    border-radius: 12px;
+  }
+  ::ng-deep .custom-p-select.p-select .p-select-label {
+    color: var(--text-primary);
+    font-size: var(--body-base-size);
+    padding: 10px 12px;
+  }
+  ```
+
+### 5. `pInputText` (Dùng cho ô nhập liệu / Textbox)
+- **Quy chuẩn sử dụng**: Mọi thẻ `<input>` nhập liệu văn bản thông thường (như tìm kiếm, nhập số lượng, text...) **phải** sử dụng directive `pInputText` của PrimeNG để có giao diện đồng nhất.
+- **Tùy biến Focus Shadow**: Để tuân thủ Threads Style tối giản, bắt buộc phải loại bỏ hiệu ứng bóng mờ (box-shadow) màu xanh mặc định khi focus của PrimeNG:
+  ```css
+  ::ng-deep .search-input.p-inputtext:focus {
+    border-color: var(--border-color);
+    background-color: var(--surface-bg);
+    box-shadow: none; /* Bắt buộc loại bỏ shadow thô */
+  }
+  ```
 
 ---
 

@@ -1,0 +1,456 @@
+<div class="profile-container">
+  <!-- Profile Cover Photo -->
+  <div class="profile-cover">
+    <img [src]="profile().coverPhoto" alt="Cover banner" class="cover-img" />
+    <div class="cover-overlay"></div>
+  </div>
+
+  <!-- Profile Header Info Card -->
+  <div class="profile-header-card">
+    <div class="avatar-and-actions">
+      <!-- Overlapping Avatar -->
+      <img [src]="profile().avatar" [alt]="profile().name" class="profile-avatar" />
+      
+      <!-- CTA Button to Edit Profile -->
+      <button class="edit-profile-btn" (click)="openEditDialog()">
+        <span class="body-base">Chỉnh sửa trang cá nhân</span>
+      </button>
+    </div>
+
+    <!-- Profile Text Info -->
+    <div class="profile-info-text">
+      <div class="name-row">
+        <h2 class="display-2xl">{{ profile().name }}</h2>
+        <span class="rank-badge tier-{{ profile().stats.rankTier }}" [title]="'Hạng ELO: ' + profile().stats.rankTier">
+          {{ profile().stats.rankTier }}
+        </span>
+      </div>
+      <p class="handle-text caption-sm">@{{ profile().handle }}</p>
+      
+      <!-- Bio -->
+      <p class="bio-text body-md">{{ profile().bio }}</p>
+
+      <!-- Followers & Province -->
+      <div class="profile-meta-row">
+        <span class="caption-sm text-tertiary font-medium">
+          {{ profile().followersCount }} người theo dõi • {{ profile().followingCount }} đang theo dõi
+        </span>
+        <span class="dot-separator">•</span>
+        <span class="caption-sm text-tertiary">
+          <i class="pi pi-map-marker mr-1" style="font-size: 11px"></i>{{ profile().province }}
+        </span>
+        @if (profile().isPrivate) {
+          <span class="dot-separator">•</span>
+          <span class="caption-xs private-badge">
+            <i class="pi pi-lock mr-1" style="font-size: 9px"></i>Riêng tư
+          </span>
+        }
+      </div>
+
+      <!-- Social Networks Links -->
+      <div class="social-links-row">
+        @if (profile().socialLinks.facebook) {
+          <a [href]="profile().socialLinks.facebook" target="_blank" class="social-link-btn" title="Facebook">
+            <i class="pi pi-facebook"></i>
+          </a>
+        }
+        @if (profile().socialLinks.instagram) {
+          <a [href]="profile().socialLinks.instagram" target="_blank" class="social-link-btn" title="Instagram">
+            <i class="pi pi-instagram"></i>
+          </a>
+        }
+        @if (profile().socialLinks.zalo) {
+          <a href="javascript:void(0)" class="social-link-btn" [title]="'Zalo SĐT: ' + profile().socialLinks.zalo">
+            <i class="pi pi-phone"></i>
+          </a>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Segmented Tabs -->
+  <div class="profile-tabs">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'posts'"
+      (click)="activeTab.set('posts')">
+      <span class="heading-lg">Bài đăng</span>
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'stats'"
+      (click)="activeTab.set('stats')">
+      <span class="heading-lg">Chỉ số & Thành tích</span>
+    </button>
+  </div>
+
+  <!-- Tab 1: Posts Stream -->
+  @if (activeTab() === 'posts') {
+    <div class="posts-stream">
+      @if (posts().length === 0) {
+        <div class="empty-state text-center py-12">
+          <p class="body-md text-tertiary">Không có bài đăng nào.</p>
+        </div>
+      } @else {
+        @for (post of posts(); track post.id) {
+          <article class="thread-post">
+            <!-- Left Column: Avatar & Connector Line -->
+            <div class="thread-left">
+              <img [src]="profile().avatar" class="thread-avatar" alt="User avatar" />
+              <div class="thread-line"></div>
+            </div>
+
+            <!-- Right Column: Content -->
+            <div class="thread-right">
+              <!-- Header -->
+              <div class="thread-header">
+                <div class="author-row">
+                  <span class="heading-lg author-name">{{ profile().name }}</span>
+                  <span class="rank-badge-inline tier-{{ profile().stats.rankTier }}">{{ profile().stats.rankTier }}</span>
+                  <span class="time-text caption-xs text-tertiary">• {{ post.time }}</span>
+                </div>
+                <span class="badge badge-type-{{ post.type }}">{{ post.typeLabel }}</span>
+              </div>
+
+              <!-- Body Text -->
+              <div class="thread-body">
+                <p class="body-md text-primary">{{ post.content }}</p>
+              </div>
+
+              <!-- Media Images Grid -->
+              @if (post.images.length > 0) {
+                <div class="media-container" [class.grid-multiple]="post.images.length > 1">
+                  @for (img of post.images; track img) {
+                    <img [src]="img" alt="Post media image" class="media-item" />
+                  }
+                </div>
+              }
+
+              <!-- Action Buttons -->
+              <div class="thread-actions">
+                <!-- Like Button -->
+                <button class="action-btn" [class.liked]="post.isLiked" (click)="toggleLike(post)">
+                  <svg class="action-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                  <span class="caption-sm action-count">{{ post.likes }}</span>
+                </button>
+
+                <!-- Reply -->
+                <button class="action-btn">
+                  <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                  <span class="caption-sm action-count">{{ post.comments }}</span>
+                </button>
+
+                <!-- Repost -->
+                <button class="action-btn" [class.reposted]="post.isReposted" (click)="toggleRepost(post)">
+                  <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="17 1 21 5 17 9"></polyline>
+                    <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                    <polyline points="7 23 3 19 7 15"></polyline>
+                    <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+                  </svg>
+                  <span class="caption-sm action-count">{{ post.reposts }}</span>
+                </button>
+
+                <!-- Share -->
+                <button class="action-btn">
+                  <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                  </svg>
+                  <span class="caption-sm action-count">{{ post.shares }}</span>
+                </button>
+              </div>
+            </div>
+          </article>
+        }
+      }
+    </div>
+  }
+
+  <!-- Tab 2: Stats & Achievements -->
+  @if (activeTab() === 'stats') {
+    <div class="stats-tab-content">
+      <!-- Player Info Details Cards -->
+      <div class="profile-details-grid">
+        <!-- Play Style Card -->
+        <div class="info-card style-card">
+          <h3 class="heading-lg text-primary mb-3">Phong cách thi đấu</h3>
+          <div class="style-details">
+            <div class="style-item">
+              <span class="style-label caption-sm text-tertiary">Vị trí sở trường</span>
+              <span class="style-val body-md font-semibold">{{ profile().preferredPosition }}</span>
+            </div>
+            <div class="style-item">
+              <span class="style-label caption-sm text-tertiary">Chân thuận</span>
+              <span class="style-val body-md font-semibold">{{ profile().preferredFoot }}</span>
+            </div>
+            <div class="style-item">
+              <span class="style-label caption-sm text-tertiary">Khu vực phủi</span>
+              <span class="style-val body-md font-semibold">{{ profile().province }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance Stats Card -->
+        <div class="info-card stats-detail-card">
+          <h3 class="heading-lg text-primary mb-3 font-bold">Thống kê chỉ số</h3>
+          <div class="stats-numbers-grid">
+            <div class="metric-box">
+              <span class="metric-val text-primary">{{ profile().stats.matches }}</span>
+              <span class="metric-lbl caption-xs text-tertiary">Trận</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-val text-green">{{ profile().stats.won }}</span>
+              <span class="metric-lbl caption-xs text-tertiary">Thắng</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-val text-yellow">{{ profile().stats.drawn }}</span>
+              <span class="metric-lbl caption-xs text-tertiary">Hòa</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-val text-red">{{ profile().stats.lost }}</span>
+              <span class="metric-lbl caption-xs text-tertiary">Thua</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-val">{{ profile().stats.goals }}</span>
+              <span class="metric-lbl caption-xs text-tertiary">Bàn thắng</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-val">{{ profile().stats.assists }}</span>
+              <span class="metric-lbl caption-xs text-tertiary">Kiến tạo</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-val text-yellow">{{ profile().stats.yellowCards }}</span>
+              <span class="metric-lbl caption-xs text-tertiary">Thẻ vàng</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-val text-red">{{ profile().stats.redCards }}</span>
+              <span class="metric-lbl caption-xs text-tertiary">Thẻ đỏ</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-val text-green font-bold">{{ profile().stats.winRate }}%</span>
+              <span class="metric-lbl caption-xs text-tertiary">Tỷ lệ thắng</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ELO Progress SVG Chart -->
+      <div class="info-card chart-card">
+        <div class="chart-header">
+          <h3 class="heading-lg text-primary font-bold">Biến động điểm ELO</h3>
+          <span class="caption-sm text-tertiary">10 trận đấu gần nhất</span>
+        </div>
+
+        <div class="chart-wrapper">
+          <svg class="elo-chart-svg" viewBox="0 0 580 160">
+            <!-- Grid Lines -->
+            <line x1="30" y1="20" x2="550" y2="20" class="chart-grid-line" />
+            <line x1="30" y1="60" x2="550" y2="60" class="chart-grid-line" />
+            <line x1="30" y1="100" x2="550" y2="100" class="chart-grid-line" />
+            <line x1="30" y1="140" x2="550" y2="140" class="chart-grid-line" />
+
+            <!-- Gradient Shadow under the line -->
+            <defs>
+              <linearGradient [id]="'elo-gradient-' + profile().id" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--brand-primary)" stop-opacity="0.3"></stop>
+                <stop offset="100%" stop-color="var(--brand-primary)" stop-opacity="0.0"></stop>
+              </linearGradient>
+            </defs>
+
+            <!-- Gradient Area -->
+            <path [attr.d]="getEloAreaPath(profile().eloHistory)" [attr.fill]="'url(#elo-gradient-' + profile().id + ')'" />
+
+            <!-- Stroke Line -->
+            <path [attr.d]="getEloLinePath(profile().eloHistory)" fill="none" stroke="var(--brand-primary)" stroke-width="3" stroke-linecap="round" />
+
+            <!-- Chart Points and Text values -->
+            @for (pt of getEloPoints(profile().eloHistory); track $index) {
+              <g class="chart-dot-group">
+                <!-- Outer glow ring -->
+                <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="5" fill="var(--brand-primary)" opacity="0.3" class="glow-ring" />
+                
+                <!-- Center dot -->
+                <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="3.5" fill="var(--surface-bg)" stroke="var(--brand-primary)" stroke-width="2.5" />
+                
+                <!-- Display ELO score value above dot -->
+                <text [attr.x]="pt.x" [attr.y]="pt.y - 10" class="chart-text-value" text-anchor="middle">
+                  {{ pt.value }}
+                </text>
+              </g>
+            }
+          </svg>
+        </div>
+
+        <div class="chart-x-axis caption-xs text-tertiary">
+          <span>Trận -9</span>
+          <span>Trận -8</span>
+          <span>Trận -7</span>
+          <span>Trận -6</span>
+          <span>Trận -5</span>
+          <span>Trận -4</span>
+          <span>Trận -3</span>
+          <span>Trận -2</span>
+          <span>Trận -1</span>
+          <span class="font-bold text-primary">Hiện tại</span>
+        </div>
+      </div>
+
+      <!-- Achievements Shelf -->
+      <div class="info-card achievements-card">
+        <h3 class="heading-lg text-primary mb-4 font-bold">Thành tích & Danh hiệu</h3>
+        <div class="achievements-list">
+          @for (ach of achievements(); track ach.id) {
+            <div class="achievement-item">
+              <div class="ach-icon-wrapper" [style.background-color]="ach.color + '15'" [style.border-color]="ach.color + '30'">
+                <span class="ach-icon">{{ ach.icon }}</span>
+              </div>
+              <div class="ach-text">
+                <div class="ach-title-row">
+                  <h4 class="heading-lg ach-title">{{ ach.title }}</h4>
+                  <span class="caption-xs text-tertiary font-medium">{{ ach.earnedAt }}</span>
+                </div>
+                <p class="caption-sm text-tertiary ach-desc">{{ ach.description }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PrimeNG: Headless p-dialog for Profile Editing
+     ════════════════════════════════════════════════════════ -->
+<p-dialog
+  [(visible)]="showEditDialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [showHeader]="false"
+  styleClass="custom-edit-profile-dialog"
+  [dismissableMask]="true"
+  maskStyleClass="custom-modal-mask"
+  appendTo="body">
+  
+  <ng-template #headless>
+    <div class="edit-dialog-inner">
+      <!-- Dialog Header -->
+      <div class="dialog-header">
+        <h3 class="heading-xl">Chỉnh sửa trang cá nhân</h3>
+        <button class="close-dialog-btn" (click)="closeEditDialog()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <!-- Dialog Body -->
+      <div class="dialog-body">
+        <!-- Field 1: Name -->
+        <div class="field-item">
+          <label class="field-label caption-sm text-tertiary">Họ và Tên</label>
+          <input 
+            pInputText
+            type="text" 
+            [(ngModel)]="editName" 
+            class="body-md field-input" 
+            placeholder="Nhập họ tên đầy đủ..." />
+        </div>
+
+        <!-- Field 2: Bio -->
+        <div class="field-item">
+          <label class="field-label caption-sm text-tertiary">Tiểu sử (Bio)</label>
+          <textarea 
+            pInputText
+            [(ngModel)]="editBio" 
+            class="body-md field-input textarea-field" 
+            placeholder="Mô tả bản thân..." 
+            rows="3">
+          </textarea>
+        </div>
+
+        <!-- Row: Position & Foot -->
+        <div class="field-row">
+          <div class="field-item flex-1">
+            <label class="field-label caption-sm text-tertiary">Vị trí ưa thích</label>
+            <p-select 
+              [options]="positionOptions" 
+              [(ngModel)]="editPosition"
+              styleClass="custom-p-select">
+            </p-select>
+          </div>
+
+          <div class="field-item flex-1">
+            <label class="field-label caption-sm text-tertiary">Chân thuận</label>
+            <p-select 
+              [options]="footOptions" 
+              [(ngModel)]="editFoot"
+              styleClass="custom-p-select">
+            </p-select>
+          </div>
+        </div>
+
+        <!-- Field 5: Privacy -->
+        <div class="field-item">
+          <label class="field-label caption-sm text-tertiary">Chế độ trang cá nhân</label>
+          <p-select 
+            [options]="privacyOptions" 
+            optionLabel="label"
+            optionValue="value"
+            [(ngModel)]="editIsPrivate"
+            styleClass="custom-p-select">
+          </p-select>
+        </div>
+
+        <!-- Social Networks Links group -->
+        <div class="field-item-group-title caption-sm text-tertiary font-bold mt-2">Mạng xã hội & liên hệ</div>
+
+        <!-- Facebook -->
+        <div class="field-item mt-1">
+          <label class="field-label caption-sm text-tertiary">Liên kết Facebook</label>
+          <input 
+            pInputText
+            type="text" 
+            [(ngModel)]="editFb" 
+            class="body-md field-input" 
+            placeholder="https://facebook.com/username..." />
+        </div>
+
+        <!-- Instagram -->
+        <div class="field-item">
+          <label class="field-label caption-sm text-tertiary">Username Instagram</label>
+          <input 
+            pInputText
+            type="text" 
+            [(ngModel)]="editInsta" 
+            class="body-md field-input" 
+            placeholder="Tên tài khoản Instagram..." />
+        </div>
+
+        <!-- Zalo -->
+        <div class="field-item">
+          <label class="field-label caption-sm text-tertiary">Số điện thoại Zalo</label>
+          <input 
+            pInputText
+            type="text" 
+            [(ngModel)]="editZalo" 
+            class="body-md field-input" 
+            placeholder="Nhập số điện thoại..." />
+        </div>
+      </div>
+
+      <!-- Dialog Footer -->
+      <div class="dialog-footer">
+        <button class="footer-btn btn-secondary" (click)="closeEditDialog()">Hủy</button>
+        <button class="footer-btn btn-primary" (click)="saveProfileChanges()">Lưu thay đổi</button>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
