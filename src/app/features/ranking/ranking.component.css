@@ -526,7 +526,7 @@
 .chart-x-labels {
   display: flex;
   justify-content: space-between;
-  padding: 6px 8px 0 8px;
+  padding: 6px 6.25% 0 6.25%;
   border-top: 1px dashed var(--border-color);
   margin-top: 8px;
 }

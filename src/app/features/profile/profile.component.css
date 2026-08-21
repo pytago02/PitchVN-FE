@@ -11,7 +11,7 @@
 @media (min-width: 768px) {
   .profile-container {
     padding: 0 20px 70px 20px;
-    max-width: 1200px;
+    max-width: 750px;
     margin: 0 auto;
   }
 }
@@ -249,8 +249,11 @@
 .thread-avatar {
   width: 36px;
   height: 36px;
+  min-width: 36px;
+  min-height: 36px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
 }
 
 .thread-line {
@@ -342,6 +345,20 @@
   object-fit: cover;
 }
 
+::ng-deep .media-item-wrapper {
+  width: 100%;
+}
+
+::ng-deep .media-item-wrapper p-image,
+::ng-deep .media-item-wrapper .p-image {
+  display: block;
+  width: 100%;
+}
+
+::ng-deep .media-item-wrapper .p-image-preview-indicator {
+  height: 180px;
+}
+
 /* Interaction Actions */
 .thread-actions {
   display: flex;
@@ -382,10 +399,18 @@
 }
 
 @keyframes heartbeat {
-  0% { transform: scale(1); }
-  35% { transform: scale(1.3); }
-  65% { transform: scale(0.9); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.3);
+  }
+  65% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* Green Repost when active */
@@ -536,7 +561,7 @@
   display: flex;
   justify-content: space-between;
   border-top: 1px dashed var(--border-color);
-  padding-top: 8px;
+  padding: 8px 5.17% 0 5.17%;
   margin-top: 8px;
   font-weight: 500;
 }
@@ -835,7 +860,7 @@
     max-height: 85vh !important;
     animation: slideUpBottomSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
-  
+
   .dialog-body {
     max-height: 55vh;
   }

@@ -6,31 +6,56 @@ import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { Select } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
+import { ChartModule } from 'primeng/chart';
+import { PopoverModule } from 'primeng/popover';
+import { AvatarModule } from 'primeng/avatar';
+
+import { PostCardComponent } from '../../shared/components/post-card/post-card.component';
+import { Post } from '../feed/mock-feed-data';
 
 import { 
   MOCK_PROFILE, 
   MOCK_PROFILE_POSTS, 
   MOCK_ACHIEVEMENTS, 
   PlayerProfile, 
-  ProfilePost, 
   ProfileAchievement 
 } from './mock-profile.data';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogModule, Select, InputTextModule],
+  imports: [
+    CommonModule, FormsModule, DialogModule, Select, InputTextModule, 
+    ChartModule, PopoverModule, AvatarModule, PostCardComponent
+  ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
 export class ProfileComponent {
   // ── States (Signals) ──────────────────────────────────────
   profile = signal<PlayerProfile>(MOCK_PROFILE);
-  posts = signal<ProfilePost[]>(MOCK_PROFILE_POSTS);
+  posts = signal<Post[]>(MOCK_PROFILE_POSTS);
   achievements = signal<ProfileAchievement[]>(MOCK_ACHIEVEMENTS);
   
   activeTab = signal<'posts' | 'stats'>('posts');
   showEditDialog = signal<boolean>(false);
+  isDarkMode = false;
+
+  ngOnInit() {
+    this.isDarkMode = document.body.classList.contains('dark');
+  }
+
+  toggleTheme() {
+    this.isDarkMode = !this.isDarkMode;
+    if (this.isDarkMode) {
+      document.body.classList.add('dark');
+      document.body.classList.remove('light');
+    } else {
+      document.body.classList.add('light');
+      document.body.classList.remove('dark');
+    }
+    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+  }
 
   // ── Form Model Fields ─────────────────────────────────────
   editName = '';
@@ -55,7 +80,7 @@ export class ProfileComponent {
   ];
 
   // ── Social Media & Action Handlers ────────────────────────
-  toggleLike(post: ProfilePost) {
+  toggleLike(post: Post) {
     this.posts.update(prev => 
       prev.map(p => {
         if (p.id === post.id) {
@@ -71,7 +96,7 @@ export class ProfileComponent {
     );
   }
 
-  toggleRepost(post: ProfilePost) {
+  toggleRepost(post: Post) {
     this.posts.update(prev => 
       prev.map(p => {
         if (p.id === post.id) {
@@ -127,54 +152,61 @@ export class ProfileComponent {
     this.closeEditDialog();
   }
 
-  // ── SVG ELO Chart Calculations ───────────────────────────
-  getEloPoints(history: number[]): { x: number; y: number; value: number }[] {
-    if (!history || history.length === 0) return [];
+  // ── PrimeNG Chart Helpers ─────────────────────────────────
+  getChartData(history: number[]) {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const primaryColor = documentStyle.getPropertyValue('--brand-primary').trim() || '#22c55e';
+    const primaryColorLight = primaryColor + '30';
 
-    const minElo = Math.min(...history);
-    const maxElo = Math.max(...history);
-    
-    const chartWidth = 580;
-    const chartHeight = 160;
-    const paddingX = 30;
-    const paddingY = 20;
+    return {
+      labels: ['Trận -9', 'Trận -8', 'Trận -7', 'Trận -6', 'Trận -5', 'Trận -4', 'Trận -3', 'Trận -2', 'Trận -1', 'Hiện tại'],
+      datasets: [
+        {
+          label: 'Điểm ELO',
+          data: history,
+          fill: true,
+          borderColor: primaryColor,
+          backgroundColor: primaryColorLight,
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: documentStyle.getPropertyValue('--surface-bg').trim() || '#ffffff',
+          pointBorderColor: primaryColor,
+          pointBorderWidth: 2
+        }
+      ]
+    };
+  }
 
-    const widthSpan = chartWidth - 2 * paddingX;
-    const heightSpan = chartHeight - 2 * paddingY;
-    const numPoints = history.length;
+  getChartOptions(history: number[]) {
+    const minElo = Math.min(...history) || 1000;
+    const maxElo = Math.max(...history) || 1500;
+    const offset = (maxElo - minElo) * 0.1; // Add some padding
 
-    return history.map((elo, index) => {
-      // Space out points evenly along X axis
-      const x = paddingX + index * (widthSpan / (numPoints - 1));
-      
-      let y = paddingY + heightSpan / 2; // Default horizontal center line
-      
-      if (maxElo !== minElo) {
-        // High ELO score goes to top (paddingY)
-        // Low ELO score goes to bottom (paddingY + heightSpan)
-        const ratio = (elo - minElo) / (maxElo - minElo);
-        y = paddingY + (1 - ratio) * heightSpan;
+    return {
+      maintainAspectRatio: false,
+      aspectRatio: 3.6,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function (context: any) {
+              return 'ELO: ' + context.raw;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          display: false,
+        },
+        y: {
+          suggestedMin: Math.max(0, minElo - offset),
+          suggestedMax: maxElo + offset,
+          display: false
+        }
       }
-      
-      return { x, y, value: elo };
-    });
-  }
-
-  getEloLinePath(history: number[]): string {
-    const points = this.getEloPoints(history);
-    if (points.length === 0) return '';
-    return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-  }
-
-  getEloAreaPath(history: number[]): string {
-    const points = this.getEloPoints(history);
-    if (points.length === 0) return '';
-    
-    const linePath = this.getEloLinePath(history);
-    const chartHeight = 160;
-    const lastX = points[points.length - 1].x;
-    const firstX = points[0].x;
-
-    return `${linePath} L ${lastX} ${chartHeight} L ${firstX} ${chartHeight} Z`;
+    };
   }
 }

@@ -294,11 +294,11 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
                   <polygon points="3 11 22 2 13 21 11 13 3 11" />
                 </svg>
-                <span class="caption-sm">Đường đi</span>
+                <span class="font-bold">Đường đi</span>
               </button>
-              <button class="detail-outline-btn body-md" (click)="openPitchDetail(pitch)">
+              <!-- <button class="detail-outline-btn body-md" (click)="openPitchDetail(pitch)">
                 Chi tiết
-              </button>
+              </button> -->
               <button class="book-now-btn body-md" (click)="openSchedule(pitch)">
                 Đặt sân
               </button>
@@ -481,8 +481,8 @@
               <span class="caption-sm selector-label">⏱ Thời lượng (tối thiểu 1 giờ)</span>
               <div class="duration-pills">
                 @for (d of durationOptions; track d) {
-                <button class="duration-pill caption-sm" [class.active]="bookingDurationHours === d"
-                  [disabled]="d < 1" (click)="onDurationChange(d)">
+                <button class="duration-pill caption-sm" [class.active]="bookingDurationHours === d" [disabled]="d < 1"
+                  (click)="onDurationChange(d)">
                   {{ d % 1 === 0 ? d + ' giờ' : d + ' tiếng' }}
                 </button>
                 }
@@ -495,7 +495,8 @@
                 <span class="heading-xl preview-time">{{ bookingStartTime }}</span>
                 <span class="caption-sm preview-sep">→</span>
                 <span class="heading-xl preview-time">{{ bookingEndTime }}</span>
-                <span class="caption-sm preview-duration">({{ bookingDurationHours % 1 === 0 ? bookingDurationHours + ' giờ' : bookingDurationHours + ' tiếng' }})</span>
+                <span class="caption-sm preview-duration">({{ bookingDurationHours % 1 === 0 ? bookingDurationHours + '
+                  giờ' : bookingDurationHours + ' tiếng' }})</span>
               </div>
               <div class="preview-price-row">
                 <span class="caption-sm preview-label">Tổng tiền:</span>
@@ -523,8 +524,7 @@
           </div>
         </div>
 
-        <button class="modal-primary-btn heading-lg" [disabled]="bookingDurationHours < 1"
-          (click)="proceedToBooking()">
+        <button class="modal-primary-btn heading-lg" [disabled]="bookingDurationHours < 1" (click)="proceedToBooking()">
           Tiếp tục đặt sân
         </button>
       </div>

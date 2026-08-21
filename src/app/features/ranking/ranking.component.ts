@@ -10,11 +10,12 @@ import {
 } from './mock-ranking.data';
 import { Select } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
+import { ChartModule } from 'primeng/chart';
 
 @Component({
   selector: 'app-ranking',
   standalone: true,
-  imports: [CommonModule, FormsModule, Select, InputTextModule],
+  imports: [CommonModule, FormsModule, Select, InputTextModule, ChartModule],
   templateUrl: './ranking.component.html',
   styleUrls: ['./ranking.component.css']
 })
@@ -76,59 +77,66 @@ export class RankingComponent {
     }
   }
 
-  // ── SVG Sparkline Chart Helpers ──────────────────────────
-  /**
-   * Calculate coordinates for SVG ranking history path.
-   * Ranking position 1 is best, so it maps to top of Y axis.
-   */
-  getPoints(history: number[]): { x: number; y: number; value: number }[] {
-    if (!history || history.length === 0) return [];
-    
-    const minRank = Math.min(...history);
-    const maxRank = Math.max(...history);
-    const chartWidth = 320;
-    const chartHeight = 120;
-    const paddingX = 20;
-    const paddingY = 20;
+  // ── PrimeNG Chart Helpers ─────────────────────────────────
+  getChartData(history: number[]) {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const primaryColor = documentStyle.getPropertyValue('--brand-primary').trim() || '#22c55e';
+    const primaryColorLight = primaryColor + '30'; // adding some opacity for fill
 
-    const widthSpan = chartWidth - 2 * paddingX;
-    const heightSpan = chartHeight - 2 * paddingY;
-    const numPoints = history.length;
+    return {
+      labels: ['Tuần -5', 'Tuần -4', 'Tuần -3', 'Tuần -2', 'Tuần -1', 'Hiện tại'],
+      datasets: [
+        {
+          label: 'Thứ hạng',
+          data: history,
+          fill: true,
+          borderColor: primaryColor,
+          backgroundColor: primaryColorLight,
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: documentStyle.getPropertyValue('--surface-bg').trim() || '#ffffff',
+          pointBorderColor: primaryColor,
+          pointBorderWidth: 2
+        }
+      ]
+    };
+  }
 
-    return history.map((rank, index) => {
-      // Divide X axis evenly
-      const x = paddingX + index * (widthSpan / (numPoints - 1));
-      
-      let y = paddingY + heightSpan / 2; // Default horizontal center line
-      
-      if (maxRank !== minRank) {
-        // Map rank to Y-axis. 
-        // Best rank (minRank) goes to top (paddingY)
-        // Worst rank (maxRank) goes to bottom (paddingY + heightSpan)
-        const ratio = (rank - minRank) / (maxRank - minRank);
-        y = paddingY + ratio * heightSpan;
+  getChartOptions(history: number[]) {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--text-primary').trim() || '#1f2937';
+    const textColorSecondary = documentStyle.getPropertyValue('--text-tertiary').trim() || '#6b7280';
+    const surfaceBorder = documentStyle.getPropertyValue('--border-color').trim() || '#e5e7eb';
+
+    const minRank = Math.min(...history) || 1;
+    const maxRank = Math.max(...history) || 100;
+
+    return {
+      maintainAspectRatio: false,
+      aspectRatio: 3,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function (context: any) {
+              return 'Thứ hạng: #' + context.raw;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          display: false,
+        },
+        y: {
+          reverse: true, // Best rank is at top
+          suggestedMin: minRank,
+          suggestedMax: maxRank,
+          display: false
+        }
       }
-      
-      return { x, y, value: rank };
-    });
-  }
-
-  getSvgLinePath(history: number[]): string {
-    const points = this.getPoints(history);
-    if (points.length === 0) return '';
-    return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-  }
-
-  getSvgAreaPath(history: number[]): string {
-    const points = this.getPoints(history);
-    if (points.length === 0) return '';
-    
-    const linePath = this.getSvgLinePath(history);
-    const chartHeight = 120;
-    const lastX = points[points.length - 1].x;
-    const firstX = points[0].x;
-
-    // Connect line to bottom right and bottom left to close the area path
-    return `${linePath} L ${lastX} ${chartHeight} L ${firstX} ${chartHeight} Z`;
+    };
   }
 }

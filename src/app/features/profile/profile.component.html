@@ -9,12 +9,17 @@
   <div class="profile-header-card">
     <div class="avatar-and-actions">
       <!-- Overlapping Avatar -->
-      <img [src]="profile().avatar" [alt]="profile().name" class="profile-avatar" />
+      <p-avatar [image]="profile().avatar" styleClass="profile-avatar" shape="circle"></p-avatar>
       
       <!-- CTA Button to Edit Profile -->
-      <button class="edit-profile-btn" (click)="openEditDialog()">
-        <span class="body-base">Chỉnh sửa trang cá nhân</span>
-      </button>
+      <div class="action-buttons" style="display: flex; gap: 8px;">
+        <button class="edit-profile-btn" (click)="openEditDialog()">
+          <span class="body-base">Chỉnh sửa trang cá nhân</span>
+        </button>
+        <button class="edit-profile-btn settings-btn" (click)="profileSettings.toggle($event)" style="padding: 0 12px;">
+          <i class="pi pi-cog"></i>
+        </button>
+      </div>
     </div>
 
     <!-- Profile Text Info -->
@@ -93,82 +98,7 @@
         </div>
       } @else {
         @for (post of posts(); track post.id) {
-          <article class="thread-post">
-            <!-- Left Column: Avatar & Connector Line -->
-            <div class="thread-left">
-              <img [src]="profile().avatar" class="thread-avatar" alt="User avatar" />
-              <div class="thread-line"></div>
-            </div>
-
-            <!-- Right Column: Content -->
-            <div class="thread-right">
-              <!-- Header -->
-              <div class="thread-header">
-                <div class="author-row">
-                  <span class="heading-lg author-name">{{ profile().name }}</span>
-                  <span class="rank-badge-inline tier-{{ profile().stats.rankTier }}">{{ profile().stats.rankTier }}</span>
-                  <span class="time-text caption-xs text-tertiary">• {{ post.time }}</span>
-                </div>
-                <span class="badge badge-type-{{ post.type }}">{{ post.typeLabel }}</span>
-              </div>
-
-              <!-- Body Text -->
-              <div class="thread-body">
-                <p class="body-md text-primary">{{ post.content }}</p>
-              </div>
-
-              <!-- Media Images Grid -->
-              @if (post.images.length > 0) {
-                <div class="media-container" [class.grid-multiple]="post.images.length > 1">
-                  @for (img of post.images; track img) {
-                    <img [src]="img" alt="Post media image" class="media-item" />
-                  }
-                </div>
-              }
-
-              <!-- Action Buttons -->
-              <div class="thread-actions">
-                <!-- Like Button -->
-                <button class="action-btn" [class.liked]="post.isLiked" (click)="toggleLike(post)">
-                  <svg class="action-icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                  </svg>
-                  <span class="caption-sm action-count">{{ post.likes }}</span>
-                </button>
-
-                <!-- Reply -->
-                <button class="action-btn">
-                  <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                  </svg>
-                  <span class="caption-sm action-count">{{ post.comments }}</span>
-                </button>
-
-                <!-- Repost -->
-                <button class="action-btn" [class.reposted]="post.isReposted" (click)="toggleRepost(post)">
-                  <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <polyline points="17 1 21 5 17 9"></polyline>
-                    <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
-                    <polyline points="7 23 3 19 7 15"></polyline>
-                    <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
-                  </svg>
-                  <span class="caption-sm action-count">{{ post.reposts }}</span>
-                </button>
-
-                <!-- Share -->
-                <button class="action-btn">
-                  <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="18" cy="5" r="3"></circle>
-                    <circle cx="6" cy="12" r="3"></circle>
-                    <circle cx="18" cy="19" r="3"></circle>
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                  </svg>
-                  <span class="caption-sm action-count">{{ post.shares }}</span>
-                </button>
-              </div>
-            </div>
-          </article>
+          <app-post-card [post]="post"></app-post-card>
         }
       }
     </div>
@@ -249,44 +179,8 @@
           <span class="caption-sm text-tertiary">10 trận đấu gần nhất</span>
         </div>
 
-        <div class="chart-wrapper">
-          <svg class="elo-chart-svg" viewBox="0 0 580 160">
-            <!-- Grid Lines -->
-            <line x1="30" y1="20" x2="550" y2="20" class="chart-grid-line" />
-            <line x1="30" y1="60" x2="550" y2="60" class="chart-grid-line" />
-            <line x1="30" y1="100" x2="550" y2="100" class="chart-grid-line" />
-            <line x1="30" y1="140" x2="550" y2="140" class="chart-grid-line" />
-
-            <!-- Gradient Shadow under the line -->
-            <defs>
-              <linearGradient [id]="'elo-gradient-' + profile().id" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="var(--brand-primary)" stop-opacity="0.3"></stop>
-                <stop offset="100%" stop-color="var(--brand-primary)" stop-opacity="0.0"></stop>
-              </linearGradient>
-            </defs>
-
-            <!-- Gradient Area -->
-            <path [attr.d]="getEloAreaPath(profile().eloHistory)" [attr.fill]="'url(#elo-gradient-' + profile().id + ')'" />
-
-            <!-- Stroke Line -->
-            <path [attr.d]="getEloLinePath(profile().eloHistory)" fill="none" stroke="var(--brand-primary)" stroke-width="3" stroke-linecap="round" />
-
-            <!-- Chart Points and Text values -->
-            @for (pt of getEloPoints(profile().eloHistory); track $index) {
-              <g class="chart-dot-group">
-                <!-- Outer glow ring -->
-                <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="5" fill="var(--brand-primary)" opacity="0.3" class="glow-ring" />
-                
-                <!-- Center dot -->
-                <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="3.5" fill="var(--surface-bg)" stroke="var(--brand-primary)" stroke-width="2.5" />
-                
-                <!-- Display ELO score value above dot -->
-                <text [attr.x]="pt.x" [attr.y]="pt.y - 10" class="chart-text-value" text-anchor="middle">
-                  {{ pt.value }}
-                </text>
-              </g>
-            }
-          </svg>
+        <div class="chart-wrapper" style="height: 160px; padding: 0 10px;">
+          <p-chart type="line" [data]="getChartData(profile().eloHistory)" [options]="getChartOptions(profile().eloHistory)"></p-chart>
         </div>
 
         <div class="chart-x-axis caption-xs text-tertiary">
@@ -454,3 +348,64 @@
     </div>
   </ng-template>
 </p-dialog>
+
+<!-- ══════════════════════════════════════════════════════
+     PrimeNG: Popover Menu for Profile Settings (Xem thêm)
+════════════════════════════════════════════════════════ -->
+<p-popover #profileSettings styleClass="custom-sidebar-popover" appendTo="body">
+  <div class="sidebar-more-menu">
+    <!-- Nút chuyển giao diện Sáng / Tối -->
+    <button class="more-menu-item" (click)="toggleTheme(); profileSettings.hide()">
+      <span>{{ isDarkMode ? 'Chế độ sáng' : 'Chế độ tối' }}</span>
+      @if (isDarkMode) {
+      <!-- Sun icon -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <circle cx="12" cy="12" r="5" />
+        <line x1="12" y1="1" x2="12" y2="3" />
+        <line x1="12" y1="21" x2="12" y2="23" />
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+        <line x1="1" y1="12" x2="3" y2="12" />
+        <line x1="21" y1="12" x2="23" y2="12" />
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+      </svg>
+      } @else {
+      <!-- Moon icon -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      </svg>
+      }
+    </button>
+
+    <button class="more-menu-item" (click)="profileSettings.hide()">
+      <span>Cài đặt</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <circle cx="12" cy="12" r="3" />
+        <path
+          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+      </svg>
+    </button>
+
+    <button class="more-menu-item" (click)="profileSettings.hide()">
+      <span>Báo cáo sự cố</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+    </button>
+
+    <div class="more-menu-divider"></div>
+
+    <button class="more-menu-item danger" (click)="profileSettings.hide()">
+      <span>Đăng xuất</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <polyline points="16 17 21 12 16 7" />
+        <line x1="21" y1="12" x2="9" y2="12" />
+      </svg>
+    </button>
+  </div>
+</p-popover>
+

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -314,32 +314,15 @@ export class ChallengeFinderComponent implements OnInit {
 
   onProvinceChange() {
     this.selectedDistrict = null;
-    console.log(this.selectedProvince);
     this.selectedWards = [];
+    this.districts = this.selectedProvince?.districts || [];
     this.wards = [];
-    if (this.selectedProvince) {
-      this.districts = this.selectedProvince.districts || [];
-    } else {
-      this.districts = [];
-    }
     this.applyFilters();
   }
 
   onDistrictChange() {
     this.selectedWards = [];
-    this.wards = [];
-    if (this.selectedDistrict) {
-      // Sửa lỗi lấy nhầm province.code thành districtCode
-      const districtCode = this.selectedDistrictCode || (Array.isArray(this.selectedDistrict) ? this.selectedDistrict[0]?.code || this.selectedDistrict[0] : this.selectedProvince.code);
-      this.provinceService.getDistrictsByCode(districtCode, this.apiVersion, 3).subscribe({
-        next: (data) => {
-          this.wards = data.wards || [];
-        },
-        error: (err) => {
-          console.error('Lỗi khi fetch phường xã:', err);
-        }
-      });
-    }
+    this.wards = this.selectedDistrict?.wards || [];
     this.applyFilters();
   }
 
@@ -503,7 +486,7 @@ export class ChallengeFinderComponent implements OnInit {
         if (matchTimeParts.length === 2) {
           const startParts = matchTimeParts[0].trim().split(':');
           const endParts = matchTimeParts[1].trim().split(':');
-          
+
           if (startParts.length === 2 && endParts.length === 2) {
             const matchStartMins = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
             const matchEndMins = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
@@ -646,26 +629,13 @@ export class ChallengeFinderComponent implements OnInit {
     this.newDistrictObj = null;
     this.newWardObj = null;
     this.newWards = [];
-    if (this.newProvinceObj) {
-      this.newDistricts = this.newProvinceObj.districts || [];
-    } else {
-      this.newDistricts = [];
-    }
+    this.newDistricts = this.newProvinceObj?.districts || [];
     this.updateDefaultTitle();
   }
 
   onNewDistrictChange() {
     this.newWardObj = null;
-    if (this.newDistrictObj) {
-      this.provinceService.getDistrictsByCode(this.newDistrictObj.code, this.apiVersion, 3).subscribe({
-        next: (data) => {
-          this.newWards = data.wards || [];
-        },
-        error: (err) => console.error(err)
-      });
-    } else {
-      this.newWards = [];
-    }
+    this.newWards = this.newDistrictObj?.wards || [];
     this.updateDefaultTitle();
   }
 
@@ -694,8 +664,8 @@ export class ChallengeFinderComponent implements OnInit {
       const wardName = this.newWardObj ? this.newWardObj.name + ', ' : '';
       const districtName = this.newDistrictObj ? this.newDistrictObj.name : 'Chưa rõ';
       this.newTitle = 'Cầu thủ tự do tìm đội ghép đá tối nay tại khu vực ' + wardName + districtName;
-      const positionsStr = this.newPreferredPosition && this.newPreferredPosition.length > 0 
-        ? this.newPreferredPosition.join(', ') 
+      const positionsStr = this.newPreferredPosition && this.newPreferredPosition.length > 0
+        ? this.newPreferredPosition.join(', ')
         : 'bất kỳ';
       this.newNote = 'Mình đá vị trí ' + positionsStr + ', thể lực tốt, thi đấu nhiệt tình và có trách nhiệm.';
     }
@@ -728,8 +698,8 @@ export class ChallengeFinderComponent implements OnInit {
         format: this.newFormat,
         formatLabel: this.newFormat === '5v5' ? 'Sân 5' : this.newFormat === '7v7' ? 'Sân 7' : 'Sân 11',
         matchDate: this.newDate,
-        matchTime: (this.newTimeFrom && this.newTimeTo) 
-          ? `${this.newTimeFrom.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - ${this.newTimeTo.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}` 
+        matchTime: (this.newTimeFrom && this.newTimeTo)
+          ? `${this.newTimeFrom.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - ${this.newTimeTo.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`
           : '19:00 - 20:30',
         pitchName: this.newPitch,
         pitchAddress: `${this.newPitch}, ${this.newDistrictObj?.name || ''}, ${this.newProvinceObj?.name || 'Hà Nội'}`,
@@ -784,7 +754,7 @@ export class ChallengeFinderComponent implements OnInit {
   // ── Modals / Actions ───────────────────────────────────────
   openPitchDetail(challenge: Challenge, event?: Event) {
     if (event) event.stopPropagation();
-    
+
     const foundPitch = MOCK_PITCHES.find(p => p.name === challenge.pitchName);
     if (foundPitch) {
       this.selectedPitch = foundPitch;

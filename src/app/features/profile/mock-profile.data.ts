@@ -1,3 +1,5 @@
+import { Post } from '../feed/mock-feed-data';
+
 export interface PlayerProfile {
   id: string;
   name: string;
@@ -30,22 +32,6 @@ export interface PlayerProfile {
     winRate: number;
   };
   eloHistory: number[]; // ELO history over last 10 matches
-}
-
-export interface ProfilePost {
-  id: string;
-  type: 'general' | 'available_slot' | 'promotion' | 'event' | 'challenge' | 'result' | 'media';
-  typeLabel: string;
-  time: string;
-  content: string;
-  images: string[];
-  likes: number;
-  comments: number;
-  reposts: number;
-  shares: number;
-  views: number;
-  isLiked: boolean;
-  isReposted: boolean;
 }
 
 export interface ProfileAchievement {
@@ -91,16 +77,26 @@ export const MOCK_PROFILE: PlayerProfile = {
   eloHistory: [1920, 1940, 1930, 1960, 1990, 1980, 2010, 2040, 2070, 2080]
 };
 
-export const MOCK_PROFILE_POSTS: ProfilePost[] = [
+const profileAuthor = {
+  id: MOCK_PROFILE.id,
+  name: MOCK_PROFILE.name,
+  username: MOCK_PROFILE.handle,
+  avatar: MOCK_PROFILE.avatar,
+  verified: true,
+  role: 'player' as const,
+};
+
+export const MOCK_PROFILE_POSTS: Post[] = [
   {
     id: 'post_p1',
-    type: 'result',
+    author: profileAuthor,
+    type: 'general',
     typeLabel: 'Kết quả',
     time: '2 ngày trước',
     content: 'Chiến thắng nghẹt thở 4-3 trước FC Cường Quốc tối nay! Mình may mắn lập được một hat-trick và 1 kiến tạo. Trận đấu cực kỳ chất lượng, đúng nghĩa Siêu phủi Hà Nội. Cảm ơn anh em đã chiến đấu hết mình! 🏆⚽',
     images: [
-      'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=600&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1543326301-88543b53fa5e?w=600&auto=format&fit=crop&q=80'
+      { url: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=600&auto=format&fit=crop&q=80', alt: 'Trận đấu 1' },
+      { url: 'https://images.unsplash.com/photo-1543326301-88543b53fa5e?w=600&auto=format&fit=crop&q=80', alt: 'Trận đấu 2' }
     ],
     likes: 128,
     comments: 24,
@@ -112,6 +108,7 @@ export const MOCK_PROFILE_POSTS: ProfilePost[] = [
   },
   {
     id: 'post_p2',
+    author: profileAuthor,
     type: 'challenge',
     typeLabel: 'Tìm kèo',
     time: '5 ngày trước',
@@ -127,12 +124,13 @@ export const MOCK_PROFILE_POSTS: ProfilePost[] = [
   },
   {
     id: 'post_p3',
+    author: profileAuthor,
     type: 'general',
     typeLabel: 'Tin tức',
     time: '1 tuần trước',
     content: 'Mới tậu đôi giày mới để chiến giải phủi HPL sắp tới. Cảm giác ôm chân cực kỳ, sút bóng đầm tay hẳn. Anh em nào cần review chi tiết dòng này thì comment bên dưới nhé! 👟⚽',
     images: [
-      'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600&auto=format&fit=crop&q=80'
+      { url: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600&auto=format&fit=crop&q=80', alt: 'Giày mới' }
     ],
     likes: 92,
     comments: 31,

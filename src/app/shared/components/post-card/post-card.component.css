@@ -176,6 +176,7 @@
   overflow: hidden;
   border: 1px solid var(--border-color);
   cursor: pointer;
+  margin-top: 8px;
 }
 
 .thread-img-single {
@@ -194,6 +195,7 @@
   overflow: hidden;
   border: 1px solid var(--border-color);
   cursor: pointer;
+  margin-top: 8px;
 }
 
 .media-grid.media-grid-2 {
@@ -761,5 +763,53 @@
     left: 0 !important;
     right: 0 !important;
     margin: 0 !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   GALLERY NAVIGATION
+════════════════════════════════════════════════════════════ */
+.gallery-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.2s ease;
+}
+
+.gallery-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.gallery-nav-btn.prev {
+  left: 24px;
+}
+
+.gallery-nav-btn.next {
+  right: 24px;
+}
+
+@media screen and (max-width: 767px) {
+  .gallery-nav-btn {
+    width: 36px;
+    height: 36px;
+  }
+  .gallery-nav-btn.prev {
+    left: 12px;
+  }
+  .gallery-nav-btn.next {
+    right: 12px;
   }
 }

@@ -9,6 +9,14 @@ import { Popover, PopoverModule } from 'primeng/popover';
 import { MenuModule } from 'primeng/menu';
 import { ToastModule } from 'primeng/toast';
 import { MessageService, SharedModule } from 'primeng/api';
+import { CarouselModule } from 'primeng/carousel';
+import { GalleryModule } from 'primeng/gallery';
+
+import { Replay } from '@primeicons/angular/replay';
+import { Refresh } from '@primeicons/angular/refresh';
+import { SearchPlus } from '@primeicons/angular/search-plus';
+import { SearchMinus } from '@primeicons/angular/search-minus';
+import { Times } from '@primeicons/angular/times';
 
 import { Post, MOCK_USERS } from '../../../features/feed/mock-feed-data';
 
@@ -23,6 +31,9 @@ import { Post, MOCK_USERS } from '../../../features/feed/mock-feed-data';
     MenuModule,
     ToastModule,
     SharedModule,
+    CarouselModule,
+    GalleryModule,
+    Replay, Refresh, SearchPlus, SearchMinus, Times
   ],
   providers: [MessageService],
   templateUrl: './post-card.component.html',
@@ -56,10 +67,13 @@ export class PostCardComponent implements OnInit {
   // More Menu items (PrimeNG)
   moreMenuItems: any[] = [];
 
+  // Gallery preview state
+  openGallery = false;
+
   constructor(
     private router: Router,
     private messageService: MessageService
-  ) {}
+  ) { }
 
   ngOnInit() {
     // Initialize local state from post
@@ -94,6 +108,33 @@ export class PostCardComponent implements OnInit {
     } else {
       this.isLiked = true;
       this.likeCount++;
+    }
+  }
+
+  // ── Gallery ───────────────────────────────────────────────
+  activeGalleryIndex = 0;
+
+  get activeGalleryImage(): string {
+    return this.post?.images?.[this.activeGalleryIndex]?.url || '';
+  }
+
+  openGalleryPreview(event: Event, index: number) {
+    event.stopPropagation();
+    this.activeGalleryIndex = index;
+    this.openGallery = true;
+  }
+
+  prevGalleryImage(event: Event) {
+    event.stopPropagation();
+    if (this.post?.images && this.activeGalleryIndex > 0) {
+      this.activeGalleryIndex--;
+    }
+  }
+
+  nextGalleryImage(event: Event) {
+    event.stopPropagation();
+    if (this.post?.images && this.activeGalleryIndex < this.post.images.length - 1) {
+      this.activeGalleryIndex++;
     }
   }
 
@@ -268,7 +309,7 @@ export class PostCardComponent implements OnInit {
 
   private copyPostLink() {
     const link = `https://pitchvn.com/post/${this.post?.id}`;
-    navigator.clipboard.writeText(link).catch(() => {});
+    navigator.clipboard.writeText(link).catch(() => { });
     this.messageService.add({
       severity: 'success',
       summary: 'Đã sao chép',

@@ -237,58 +237,8 @@
                         <div class="chart-card">
                           <h4 class="caption-sm text-tertiary">Biến động thứ hạng (6 tuần qua)</h4>
                           
-                          <div class="chart-container-inner">
-                            <!-- SVG Chart -->
-                            <svg class="sparkline-svg" viewBox="0 0 320 120">
-                              <!-- Background Grid Lines (Horizontal) -->
-                              <line x1="20" y1="20" x2="300" y2="20" class="grid-line" />
-                              <line x1="20" y1="60" x2="300" y2="60" class="grid-line" />
-                              <line x1="20" y1="100" x2="300" y2="100" class="grid-line" />
-
-                              <!-- Gradient Shadow under the line -->
-                              <defs>
-                                <linearGradient [id]="'gradient-' + item.id" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="0%" stop-color="var(--brand-primary)" stop-opacity="0.3"></stop>
-                                  <stop offset="100%" stop-color="var(--brand-primary)" stop-opacity="0.0"></stop>
-                                </linearGradient>
-                              </defs>
-
-                              <!-- Area Path -->
-                              <path 
-                                [attr.d]="getSvgAreaPath(item.rankHistory)" 
-                                [attr.fill]="'url(#gradient-' + item.id + ')'" />
-
-                              <!-- Stroke Path -->
-                              <path 
-                                [attr.d]="getSvgLinePath(item.rankHistory)" 
-                                fill="none" 
-                                stroke="var(--brand-primary)" 
-                                stroke-width="3" 
-                                stroke-linecap="round" />
-
-                              <!-- Data Points & Tooltips -->
-                              @for (pt of getPoints(item.rankHistory); track $index) {
-                                <g class="chart-point-group">
-                                  <!-- Point Circle -->
-                                  <circle 
-                                    [attr.cx]="pt.x" 
-                                    [attr.cy]="pt.y" 
-                                    r="4" 
-                                    fill="var(--surface-bg)" 
-                                    stroke="var(--brand-primary)" 
-                                    stroke-width="2" />
-                                  
-                                  <!-- Label above point -->
-                                  <text 
-                                    [attr.x]="pt.x" 
-                                    [attr.y]="pt.y - 8" 
-                                    class="chart-point-text" 
-                                    text-anchor="middle">
-                                    #{{ pt.value }}
-                                  </text>
-                                </g>
-                              }
-                            </svg>
+                          <div class="chart-container-inner" style="height: 120px;">
+                            <p-chart type="line" [data]="getChartData(item.rankHistory)" [options]="getChartOptions(item.rankHistory)"></p-chart>
                           </div>
                           
                           <!-- X-axis Labels -->

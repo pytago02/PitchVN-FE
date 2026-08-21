@@ -125,18 +125,24 @@
           d="M14 6l-3.8 5 3 3.8-1.6 1.6-3.8-3-5 3.8L1 15.6l5-3.8-3-3.8 1.6-1.6 3.8 3 5-3.8L14 6zm7.4 9.6L16.6 20.4l-1.6-1.6 3-3.8-5-3.8 1.6-1.6 3.8 5 3-3.8 1.6 1.6-4 5z" />
       </svg>
     </a>
-    <!-- Giải đấu -->
-    <a routerLink="/giai-dau" routerLinkActive="active" class="tab-item">
+    <!-- Xếp hạng -->
+    <a routerLink="/xep-hang" routerLinkActive="active" class="tab-item">
       <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
-        <path d="M19 3H5v2h14V3zm-2 4H7v5.4c0 3.1 2.3 5.7 5.4 5.9v2.7h-4v2h12v-2h-4v-2.7c3.1-.2 5.4-2.8 5.4-5.9V7z" />
+        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
       </svg>
     </a>
-    <!-- Xem thêm / Theme (Mobile) -->
-    <button class="tab-item more-tab-btn" (click)="moreMenu.toggle($event)">
+    <!-- Tin nhắn -->
+    <a routerLink="/tin-nhan" routerLinkActive="active" class="tab-item">
       <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
-        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+        <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
       </svg>
-    </button>
+    </a>
+    <!-- Trang cá nhân -->
+    <a routerLink="/profile" routerLinkActive="active" class="tab-item">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+      </svg>
+    </a>
   </nav>
 </div>
 
