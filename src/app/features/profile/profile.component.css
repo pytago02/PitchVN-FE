@@ -5,7 +5,6 @@
 
 .profile-container {
   width: 100%;
-  padding: 0 0 70px 0;
 }
 
 @media (min-width: 768px) {
@@ -66,8 +65,8 @@
 }
 
 .profile-avatar {
-  width: 80px;
-  height: 80px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   border: 4px solid var(--surface-bg);
   background-color: var(--surface-bg);
@@ -876,7 +875,259 @@
 }
 
 /* Mask Background custom */
+/* ══════════════════════════════════════════
+   PrimeNG Dialog & Custom Form Layouts
+   ══════════════════════════════════════════ */
+.edit-dialog-inner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.close-dialog-btn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.close-dialog-btn:hover {
+  color: var(--text-primary);
+}
+
+.close-dialog-btn i {
+  font-size: 16px;
+}
+
+.dialog-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.field-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+
+.field-label {
+  font-weight: 600;
+}
+
+.field-input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+
+/* Custom PrimeNG textbox directive override */
+::ng-deep .custom-edit-profile-dialog .p-inputtext {
+  background-color: var(--nav-item-hover-bg);
+  border: 1px solid transparent;
+  color: var(--text-primary);
+  padding: 8px 12px;
+  border-radius: 10px;
+  transition: all 0.15s ease;
+}
+
+::ng-deep .custom-edit-profile-dialog .p-inputtext:focus {
+  border-color: var(--border-color);
+  background-color: var(--surface-bg);
+  box-shadow: none;
+}
+
+.textarea-field {
+  resize: vertical;
+}
+
+/* PrimeNG drop-down select overrides for dialog */
+::ng-deep .custom-edit-profile-dialog .custom-p-select.p-select {
+  width: 100%;
+  background-color: var(--nav-item-hover-bg);
+  border: 1px solid transparent;
+  border-radius: 10px;
+}
+
+::ng-deep .custom-edit-profile-dialog .custom-p-select.p-select:hover {
+  border-color: var(--border-color);
+}
+
+::ng-deep .custom-edit-profile-dialog .custom-p-select.p-select.p-focus {
+  border-color: var(--border-color);
+  background-color: var(--surface-bg);
+}
+
+::ng-deep .custom-edit-profile-dialog .custom-p-select.p-select .p-select-label {
+  color: var(--text-primary);
+  font-size: var(--body-base-size);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+}
+
+::ng-deep .custom-edit-profile-dialog .custom-p-select.p-select .p-select-dropdown {
+  color: var(--text-tertiary);
+  padding-right: 12px;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.footer-btn {
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+
+.btn-primary {
+  background-color: var(--text-primary);
+  color: var(--surface-bg);
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  background-color: var(--nav-item-hover-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--nav-item-active-bg);
+}
+
+/* ══════════════════════════════════════════
+   PrimeNG Dialog Mobile Responsive (Bottom Sheet)
+   ══════════════════════════════════════════ */
+::ng-deep .custom-edit-profile-dialog.p-dialog {
+  background-color: var(--surface-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45) !important;
+  width: 92%;
+  max-width: 520px;
+}
+
+@media (max-width: 580px) {
+  ::ng-deep .custom-edit-profile-dialog.p-dialog {
+    width: 100% !important;
+    max-width: 100% !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    border-radius: 20px 20px 0 0 !important; /* Dính đáy, bo tròn 2 góc trên */
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    max-height: 85vh !important;
+    animation: slideUpBottomSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .dialog-body {
+    max-height: 55vh;
+  }
+}
+
+@keyframes slideUpBottomSheet {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Mask Background custom */
 ::ng-deep .custom-modal-mask {
   background-color: rgba(0, 0, 0, 0.65) !important;
   backdrop-filter: blur(3px) !important;
+}
+
+::ng-deep .mobile-more-drawer.p-drawer {
+  background-color: var(--card-bg);
+  border-left: 1px solid var(--border-color);
+}
+
+::ng-deep .mobile-more-drawer .p-drawer-header {
+  display: none;
+}
+
+.sidebar-more-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.more-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  width: 100%;
+  text-align: left;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.more-menu-item svg {
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.more-menu-item:hover {
+  background-color: var(--nav-item-hover-bg);
+}
+
+.more-menu-item.danger {
+  color: var(--danger, #dc3545);
+}
+
+.more-menu-item.danger svg {
+  color: var(--danger, #dc3545);
+}
+
+.more-menu-divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 6px 4px;
 }

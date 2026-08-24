@@ -296,7 +296,8 @@
      PrimeNG: Gallery for Image Preview
 ════════════════════════════════════════════════════════ -->
 @if (openGallery) {
-<p-gallery [fullscreen]="true" (onFullscreenChange)="openGallery = $event">
+<p-gallery styleClass="fixed inset-0 z-[9999] flex flex-col bg-black/90"
+  style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; display: flex; flex-direction: column;">
   <p-gallery-backdrop (click)="stopPropagation($event)"></p-gallery-backdrop>
   <p-gallery-header class="justify-end gap-0.5" (click)="stopPropagation($event)">
     <button pGalleryRotateLeft>
@@ -311,31 +312,32 @@
     <button pGalleryZoomOut>
       <svg data-p-icon="search-minus"></svg>
     </button>
-    <button class="p-gallery-action" (click)="openGallery = false">
+    <button class="p-gallery-action" (click)="closeGallery()">
       <svg data-p-icon="times"></svg>
     </button>
   </p-gallery-header>
-  <p-gallery-content (click)="stopPropagation($event)" style="position: relative; display: flex; align-items: center; justify-content: center;">
+  <p-gallery-content (click)="stopPropagation($event)"
+    style="position: relative; display: flex; align-items: center; justify-content: center;">
     @if (activeGalleryIndex > 0) {
-      <button class="gallery-nav-btn prev" (click)="prevGalleryImage($event)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="24" height="24">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
-      </button>
+    <button class="gallery-nav-btn prev" (click)="prevGalleryImage($event)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="24" height="24">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
     }
-    
+
     <p-gallery-item>
       <img [src]="activeGalleryImage" alt="preview image"
         style="max-width: 100vw; max-height: 100vh; object-fit: contain;" />
     </p-gallery-item>
 
-    @if (activeGalleryIndex < (post?.images?.length || 0) - 1) {
-      <button class="gallery-nav-btn next" (click)="nextGalleryImage($event)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="24" height="24">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
+    @if (activeGalleryIndex < (post?.images?.length || 0) - 1) { <button class="gallery-nav-btn next"
+      (click)="nextGalleryImage($event)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="24" height="24">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
       </button>
-    }
+      }
   </p-gallery-content>
 </p-gallery>
 }

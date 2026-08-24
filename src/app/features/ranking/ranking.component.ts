@@ -11,6 +11,7 @@ import {
 import { Select } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { ChartModule } from 'primeng/chart';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 @Component({
   selector: 'app-ranking',
@@ -27,6 +28,8 @@ export class RankingComponent {
   selectedPeriod = signal<string>('all');
   selectedTier = signal<string>('all');
   expandedRowId = signal<string | null>(null);
+  
+  chartPlugins = [ChartDataLabels];
 
   // ── Static Metadata ──────────────────────────────────────
   provincesOptions = MOCK_PROVINCES.map(p => ({
@@ -102,7 +105,7 @@ export class RankingComponent {
     };
   }
 
-  getChartOptions(history: number[]) {
+  getChartOptions(history: number[]): any {
     const documentStyle = getComputedStyle(document.documentElement);
     const textColor = documentStyle.getPropertyValue('--text-primary').trim() || '#1f2937';
     const textColorSecondary = documentStyle.getPropertyValue('--text-tertiary').trim() || '#6b7280';
@@ -114,9 +117,24 @@ export class RankingComponent {
     return {
       maintainAspectRatio: false,
       aspectRatio: 3,
+      layout: {
+        padding: {
+          top: 20
+        }
+      },
       plugins: {
         legend: {
           display: false
+        },
+        datalabels: {
+          align: 'top',
+          anchor: 'end',
+          color: () => getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#1f2937',
+          font: {
+            weight: 'bold',
+            size: 11
+          },
+          formatter: (value: any) => value
         },
         tooltip: {
           callbacks: {

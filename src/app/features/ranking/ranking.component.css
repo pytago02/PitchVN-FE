@@ -5,7 +5,7 @@
 
 .ranking-container {
   width: 100%;
-  padding: 12px 12px 70px 12px;
+  padding: 16px 12px 0 16px;
 }
 
 @media (min-width: 768px) {
@@ -298,8 +298,10 @@
 .entity-avatar {
   width: 36px;
   height: 36px;
+  min-width: 36px;
   border-radius: 50%;
-  object-fit: crop;
+  object-fit: cover;
+  flex-shrink: 0;
   border: 1px solid var(--border-color);
   background-color: var(--nav-item-hover-bg);
 }
@@ -561,16 +563,16 @@
   .desktop-only {
     display: table-cell;
   }
-  
+
   .filter-section {
     flex-direction: row;
     align-items: center;
   }
-  
+
   .search-box {
     flex: 1.5;
   }
-  
+
   .dropdown-group {
     flex: 1;
   }

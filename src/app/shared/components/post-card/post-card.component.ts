@@ -122,6 +122,12 @@ export class PostCardComponent implements OnInit {
     event.stopPropagation();
     this.activeGalleryIndex = index;
     this.openGallery = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeGallery() {
+    this.openGallery = false;
+    document.body.style.overflow = '';
   }
 
   prevGalleryImage(event: Event) {

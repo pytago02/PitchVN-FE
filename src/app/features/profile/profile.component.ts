@@ -9,6 +9,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ChartModule } from 'primeng/chart';
 import { PopoverModule } from 'primeng/popover';
 import { AvatarModule } from 'primeng/avatar';
+import { DrawerModule } from 'primeng/drawer';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 import { PostCardComponent } from '../../shared/components/post-card/post-card.component';
 import { Post } from '../feed/mock-feed-data';
@@ -26,7 +28,7 @@ import {
   standalone: true,
   imports: [
     CommonModule, FormsModule, DialogModule, Select, InputTextModule, 
-    ChartModule, PopoverModule, AvatarModule, PostCardComponent
+    ChartModule, PopoverModule, AvatarModule, PostCardComponent, DrawerModule
   ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
@@ -40,6 +42,9 @@ export class ProfileComponent {
   activeTab = signal<'posts' | 'stats'>('posts');
   showEditDialog = signal<boolean>(false);
   isDarkMode = false;
+  isDrawerOpen = false;
+  
+  chartPlugins = [ChartDataLabels];
 
   ngOnInit() {
     this.isDarkMode = document.body.classList.contains('dark');
@@ -177,7 +182,8 @@ export class ProfileComponent {
     };
   }
 
-  getChartOptions(history: number[]) {
+  getChartOptions(history: number[]): any {
+    const documentStyle = getComputedStyle(document.documentElement);
     const minElo = Math.min(...history) || 1000;
     const maxElo = Math.max(...history) || 1500;
     const offset = (maxElo - minElo) * 0.1; // Add some padding
@@ -185,9 +191,24 @@ export class ProfileComponent {
     return {
       maintainAspectRatio: false,
       aspectRatio: 3.6,
+      layout: {
+        padding: {
+          top: 20
+        }
+      },
       plugins: {
         legend: {
           display: false
+        },
+        datalabels: {
+          align: 'top',
+          anchor: 'end',
+          color: () => getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#1f2937',
+          font: {
+            weight: 'bold',
+            size: 11
+          },
+          formatter: (value: any) => value
         },
         tooltip: {
           callbacks: {

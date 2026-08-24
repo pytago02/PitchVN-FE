@@ -48,9 +48,9 @@
   flex: 1;
   min-width: 0;
   height: 100%;
+  width: 100%;
   overflow-y: auto;
   scrollbar-width: none; /* Firefox */
-  padding-bottom: 60px;
 }
 
 .challenge-content-col::-webkit-scrollbar {
@@ -1788,7 +1788,6 @@
   .challenge-content-col {
     height: auto;
     overflow: visible;
-    padding-bottom: 80px;
   }
 
   /* Show filters toggle button on tablet */
@@ -1822,13 +1821,14 @@
 ════════════════════════════════════════════════════════════ */
 @media screen and (max-width: 767px) {
   .challenge-finder-container {
-    padding: 0 10px 80px 10px;
+    padding: 0 16px 0 16px;
   }
 
   .header-top-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
+    padding-top: 18px;
   }
 
   .post-challenge-cta {
@@ -1957,7 +1957,6 @@
     padding: 2px 6px;
   }
 }
-
 
 /* ════════════════════════════════════════════════════════════
    ANIMATIONS

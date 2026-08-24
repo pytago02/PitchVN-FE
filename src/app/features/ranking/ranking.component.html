@@ -238,7 +238,7 @@
                           <h4 class="caption-sm text-tertiary">Biến động thứ hạng (6 tuần qua)</h4>
                           
                           <div class="chart-container-inner" style="height: 120px;">
-                            <p-chart type="line" [data]="getChartData(item.rankHistory)" [options]="getChartOptions(item.rankHistory)"></p-chart>
+                            <p-chart type="line" [data]="getChartData(item.rankHistory)" [options]="getChartOptions(item.rankHistory)" [plugins]="chartPlugins"></p-chart>
                           </div>
                           
                           <!-- X-axis Labels -->
