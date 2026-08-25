@@ -97,7 +97,21 @@
           </tr>
         </thead>
         <tbody>
-          @if (filteredData().length === 0) {
+          @if (isLoading()) {
+            @for (i of [1,2,3,4,5]; track i) {
+              <tr class="ranking-row">
+                <td class="col-rank"><p-skeleton></p-skeleton></td>
+                <td class="col-name"><p-skeleton width="150px" height="40px" borderRadius="20px"></p-skeleton></td>
+                <td class="col-elo text-right"><p-skeleton width="40px"></p-skeleton></td>
+                <td class="col-tier text-center"><p-skeleton width="40px"></p-skeleton></td>
+                <td class="col-matches text-center desktop-only"><p-skeleton width="20px"></p-skeleton></td>
+                <td class="col-wdl text-center desktop-only"><p-skeleton width="50px"></p-skeleton></td>
+                <td class="col-gd text-center desktop-only"><p-skeleton width="20px"></p-skeleton></td>
+                <td class="col-winrate text-center desktop-only"><p-skeleton width="30px"></p-skeleton></td>
+                <td class="col-trend text-center"><p-skeleton width="20px"></p-skeleton></td>
+              </tr>
+            }
+          } @else if (filteredData().length === 0) {
             <tr>
               <td colspan="9" class="text-center no-data py-8 body-md">
                 Không tìm thấy dữ liệu phù hợp.

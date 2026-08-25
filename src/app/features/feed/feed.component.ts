@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -6,14 +6,18 @@ import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { ToastModule } from 'primeng/toast';
 import { MessageService, SharedModule } from 'primeng/api';
+import { SkeletonModule } from 'primeng/skeleton';
 
-import { MOCK_FEED, MOCK_FOLLOWING_FEED, Post, MOCK_USERS } from './mock-feed-data';
+import { Post as UIPost, PostUser, MOCK_USERS } from './mock-feed-data';
 import { PostCardComponent } from '../../shared/components/post-card/post-card.component';
+import { PostService } from '../../services/post/post.service';
+import { UserService } from '../../services/user/user.service';
+import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-feed',
   standalone: true,
-  imports: [CommonModule, FormsModule, PostCardComponent, DialogModule, ToastModule, SharedModule],
+  imports: [CommonModule, FormsModule, PostCardComponent, DialogModule, ToastModule, SharedModule, SkeletonModule],
   providers: [MessageService],
   templateUrl: 'feed.component.html',
   styleUrls: ['feed.component.css'],
@@ -21,8 +25,9 @@ import { PostCardComponent } from '../../shared/components/post-card/post-card.c
 export class FeedComponent implements OnInit {
   // ── Tab state ────────────────────────────────────────────
   activeTab = 'foryou'; // 'foryou' | 'following'
-  feedList: Post[] = [];
+  feedList: UIPost[] = [];
   isTransitioning = false;
+  isLoading = true; // Added loading state
 
   // ── Compose dialog ───────────────────────────────────────
   showComposeDialog = false;
@@ -41,17 +46,104 @@ export class FeedComponent implements OnInit {
   ];
   showVisibilityMenu = false;
 
-  constructor(private messageService: MessageService) {}
+  constructor(
+    private messageService: MessageService,
+    private postService: PostService,
+    private userService: UserService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
-    this.feedList = MOCK_FEED;
+    this.loadFeed();
+  }
+
+  loadFeed() {
+    this.isLoading = true;
+    this.feedList = [];
+    
+    this.userService.getAll().subscribe({
+      next: (users) => {
+        const userMap = new Map<string, User>();
+        if (Array.isArray(users)) {
+          users.forEach(u => {
+            if (u && u.id) userMap.set(u.id, u);
+          });
+        }
+
+        this.postService.getAll().subscribe({
+          next: (posts) => {
+            if (!Array.isArray(posts)) {
+              this.feedList = [];
+              this.isLoading = false;
+              this.cdr.detectChanges();
+              return;
+            }
+
+            this.feedList = posts.map(p => {
+              try {
+                if (!p) return null;
+                const authorId = p['authorId'] || '';
+                const u = userMap.get(authorId) || {} as User;
+              const author: PostUser = {
+                id: u.id || p['authorId'],
+                name: u['username'] || 'Unknown',
+                username: u['username'] || 'unknown',
+                avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + u['username'],
+                role: u['role'] as any || 'player'
+              };
+
+              let images = [];
+              try {
+                if (p['images']) images = JSON.parse(p['images']).map((img: string) => ({ url: img }));
+              } catch (e) {}
+
+              return {
+                id: p.id || '',
+                author: author,
+                type: 'general',
+                typeLabel: p['postType'] === 'general' ? 'Tin tức' : 'Thông báo',
+                time: new Date(p['createdAt']).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }),
+                content: p['content'] || '',
+                images: images,
+                likes: p['likesCount'] || 0,
+                comments: p['commentsCount'] || 0,
+                reposts: p['repostsCount'] || 0,
+                shares: p['sharesCount'] || 0,
+                isLiked: false,
+                isReposted: false,
+                location: p['pitchName'] || p['location'] || undefined
+              };
+              } catch (e) {
+                console.error('Error mapping post:', e);
+                return null;
+              }
+            }).filter(Boolean) as any[];
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          }
+        });
+      },
+      error: () => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   // ── Tab switching ─────────────────────────────────────────
   setTab(tab: string) {
     if (this.activeTab === tab) return;
     this.activeTab = tab;
-    this.feedList = tab === 'foryou' ? MOCK_FEED : MOCK_FOLLOWING_FEED;
+    this.isTransitioning = true;
+    setTimeout(() => {
+      this.isTransitioning = false;
+      this.cdr.detectChanges();
+    }, 300);
+    // You could reload filtered feed here based on tab
   }
 
   // ── Compose ───────────────────────────────────────────────
@@ -72,37 +164,26 @@ export class FeedComponent implements OnInit {
 
     this.isPosting = true;
 
-    // Simulate a short async delay (API call)
-    setTimeout(() => {
-      const newPost: Post = {
-        id: 'new_' + Date.now(),
-        author: this.currentUser,
-        type: 'general',
-        typeLabel: 'Tin tức',
-        time: 'Vừa xong',
-        content: this.composeText.trim(),
-        images: [],
-        likes: 0,
-        comments: 0,
-        reposts: 0,
-        shares: 0,
-        views: 0,
-        isLiked: false,
-        isReposted: false,
-      };
-
-      // Prepend to feed
-      this.feedList = [newPost, ...this.feedList];
-      this.isPosting = false;
-      this.closeCompose();
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Đã đăng!',
-        detail: 'Bài viết của bạn đã được đăng.',
-        life: 2500,
-      });
-    }, 600);
+    // Use service to create real post
+    this.postService.create({
+      authorId: '00000000-0000-0000-0000-000000000007', // Hardcoded a user for now
+      authorType: 'player',
+      postType: 'general',
+      content: this.composeText.trim(),
+      likesCount: 0,
+      commentsCount: 0
+    }).subscribe({
+      next: (res) => {
+        this.isPosting = false;
+        this.closeCompose();
+        this.loadFeed(); // Reload feed to see new post
+        this.messageService.add({ severity: 'success', summary: 'Đã đăng!', detail: 'Bài viết của bạn đã được đăng.', life: 2500 });
+      },
+      error: () => {
+        this.isPosting = false;
+        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể đăng bài viết.', life: 2500 });
+      }
+    });
   }
 
   // ── Visibility ────────────────────────────────────────────

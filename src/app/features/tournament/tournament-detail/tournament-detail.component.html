@@ -1,4 +1,20 @@
-<div class="tournament-detail-container" *ngIf="tournament(); let t">
+<div *ngIf="isLoading()" class="tournament-detail-container">
+  <div class="back-nav mb-3">
+    <p-button icon="pi pi-arrow-left" label="Quay lại danh sách" [routerLink]="['/giai-dau']" styleClass="p-button-text p-button-sm text-secondary"></p-button>
+  </div>
+  <p-skeleton width="100%" height="300px" borderRadius="16px" styleClass="mb-4"></p-skeleton>
+  <div class="main-layout mt-4" style="display: flex; gap: 24px;">
+    <div class="content-column" style="flex: 2;">
+      <p-skeleton width="100%" height="40px" styleClass="mb-4"></p-skeleton>
+      <p-skeleton width="100%" height="300px" borderRadius="12px"></p-skeleton>
+    </div>
+    <div class="sidebar-column" style="flex: 1;">
+      <p-skeleton width="100%" height="400px" borderRadius="12px"></p-skeleton>
+    </div>
+  </div>
+</div>
+
+<div class="tournament-detail-container" *ngIf="!isLoading() && tournament(); let t">
   <!-- Back Navigation -->
   <div class="back-nav mb-3">
     <p-button icon="pi pi-arrow-left" label="Quay lại danh sách" [routerLink]="['/giai-dau']" styleClass="p-button-text p-button-sm text-secondary"></p-button>

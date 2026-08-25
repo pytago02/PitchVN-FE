@@ -12,6 +12,7 @@ import { MessageService, SharedModule } from 'primeng/api';
 import { Select } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { SkeletonModule } from 'primeng/skeleton';
 
 import {
   MOCK_PITCHES,
@@ -28,11 +29,12 @@ import {
 import { PitchDetailPopupComponent } from '../../shared/components/pitch-detail-popup/pitch-detail-popup.component';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ProvinceService } from '../../services/provinces/province-service';
+import { PitchService } from '../../services/pitch/pitch.service';
 
 @Component({
   selector: 'app-pitch-finder',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogModule, ToastModule, SharedModule, PitchDetailPopupComponent, HttpClientModule, Select, DatePickerModule, MultiSelectModule],
+  imports: [CommonModule, FormsModule, DialogModule, ToastModule, SharedModule, PitchDetailPopupComponent, HttpClientModule, Select, DatePickerModule, MultiSelectModule, SkeletonModule],
   providers: [MessageService],
   templateUrl: './pitch-finder.component.html',
   styleUrls: ['./pitch-finder.component.css'],
@@ -42,7 +44,8 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('dateScroll') dateScrollRef?: ElementRef<HTMLElement>;
 
   // ── Data Sources ──────────────────────────────────────────
-  allPitches: Pitch[] = MOCK_PITCHES;
+  allPitches: Pitch[] = [];
+  isLoading = true;
   filteredPitches: Pitch[] = [];
   facilitiesList: PitchFacility[] = ALL_FACILITIES;
 
@@ -154,13 +157,75 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
   private startX = 0;
   private startScrollLeft = 0;
 
-  constructor(private messageService: MessageService, private http: HttpClient, private ngZone: NgZone, private cdr: ChangeDetectorRef, private provinceService: ProvinceService) { }
+  constructor(private messageService: MessageService, private http: HttpClient, private ngZone: NgZone, private cdr: ChangeDetectorRef, private provinceService: ProvinceService, private pitchService: PitchService) { }
 
   ngOnInit() {
     this.initDates();
     this.fetchProvinces();
-    this.applyFilters();
     this.fetchUserLocation();
+    this.loadPitches();
+  }
+
+  loadPitches() {
+    this.isLoading = true;
+    this.pitchService.getAll().subscribe({
+      next: (data) => {
+        if (!Array.isArray(data)) {
+           this.allPitches = [];
+           this.applyFilters();
+           this.isLoading = false;
+           this.cdr.detectChanges();
+           return;
+        }
+
+        this.allPitches = data.map(p => {
+          if (!p) return null;
+          let facilities: any = {};
+          let images: string[] = [];
+          try { if (p['facilities']) facilities = typeof p['facilities'] === 'string' ? JSON.parse(p['facilities']) : p['facilities']; } catch(e){}
+          try { if (p['images']) images = typeof p['images'] === 'string' ? JSON.parse(p['images']) : p['images']; } catch(e){}
+          
+          return {
+            id: p['id'] || '',
+            name: p['name'] || 'Unknown',
+            address: p['address'] || '',
+            district: p['district'] || '',
+            city: p['city'] || '',
+            distanceKm: p['lat'] && p['lng'] ? this.calculateDistance(this.userLocation.lat, this.userLocation.lng, p['lat'], p['lng']) : 0,
+            minPrice: p['minPrice'] || 100000,
+            maxPrice: p['maxPrice'] || 300000,
+            coverImage: p['coverImage'] || 'https://images.unsplash.com/photo-1459865264687-595d652de67e?auto=format&fit=crop&q=80&w=800',
+            images: images,
+            rating: p['rating'] || 4.0,
+            reviewCount: 0,
+            facilities: p['facilities'] || ['wifi', 'parking', 'water'],
+            lat: p['lat'] || 21.028511,
+            lng: p['lng'] || 105.804817,
+            phone: p['phone'] || '0123456789',
+            openHours: '06:00 - 22:00',
+            description: p['description'] || 'Mô tả sân bóng',
+            subPitches: p['subPitches'] || [],
+            typeIds: ['1', '2'],
+            availableSlotsCount: 0,
+            isVerified: false
+          };
+        }).filter(Boolean) as Pitch[];
+        
+        // Cập nhật lại filter
+        this.applyFilters();
+        this.isLoading = false;
+        
+        // Thêm marker nếu map đã tạo
+        if (this.map) {
+          this.updateMapLayers();
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   setViewMode(mode: 'list' | 'map') {
@@ -477,14 +542,14 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       // 6. Date / Time Filter
-      if (this.filterDate || this.filterTimeFrom || this.filterTimeTo) {
-        let hasMatchingSlot = false;
-        // Simple logic for mock data: check if availableSlotsCount > 0 if no slots match exactly,
-        // but let's assume all mock pitches are somewhat matching for demonstration unless strictly filtering.
-        // Actually since we don't have full slot dates in mock pitches, we just pass them if they are available
-        hasMatchingSlot = p.availableSlotsCount > 0;
-        if (!hasMatchingSlot) return false;
-      }
+      // if (this.filterDate || this.filterTimeFrom || this.filterTimeTo) {
+      //   let hasMatchingSlot = false;
+      //   // Simple logic for mock data: check if availableSlotsCount > 0 if no slots match exactly,
+      //   // but let's assume all mock pitches are somewhat matching for demonstration unless strictly filtering.
+      //   // Actually since we don't have full slot dates in mock pitches, we just pass them if they are available
+      //   hasMatchingSlot = p.availableSlotsCount > 0;
+      //   if (!hasMatchingSlot) return false;
+      // }
 
       return matchesQuery && matchesRadius && matchesType;
     });

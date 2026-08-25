@@ -3,14 +3,14 @@
   <aside class="sidebar">
     <div class="sidebar-top">
       <div class="logo" style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
-        <img [src]="isDarkMode ? '/logo/dark-logo-pitchVn.png' : '/logo/light-logo-pitchVN.png'" alt="PitchVN Logo" />
+        <img [src]="themeService.isDarkMode() ? '/logo/dark-logo-pitchVn.png' : '/logo/light-logo-pitchVN.png'" alt="PitchVN Logo" />
         <!-- <span class="body-md"
           style="font-size: 22px; font-weight: 800; font-family: 'Inter', sans-serif; letter-spacing: -0.5px; color: var(--text-primary);">PitchVN</span> -->
       </div>
 
       <nav class="nav-menu">
         <!-- Bảng tin (Feed) -->
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+        <a routerLink="/feed" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
           <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
             <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
           </svg>
@@ -60,30 +60,48 @@
           </svg>
           <span class="body-md">Tin nhắn</span>
         </a>
-        <!-- Trang cá nhân -->
-        <a routerLink="/profile" routerLinkActive="active" class="nav-item">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-            <path
-              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-          </svg>
-          <span class="body-md">Trang cá nhân</span>
-        </a>
+        <!-- Trang cá nhân (Yêu cầu đăng nhập) -->
+        @if (authService.currentUser$ | async) {
+          <a routerLink="/profile" routerLinkActive="active" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+              <path
+                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+            <span class="body-md">Trang cá nhân</span>
+          </a>
+        }
       </nav>
 
-      <div class="sidebar-section">
-        <div class="section-header">
-          <span class="caption-sm" style="color: var(--text-tertiary)">Lối tắt</span>
-          <span class="caption-sm" style="color: var(--text-tertiary); cursor: pointer">Chỉnh sửa</span>
+      @if (authService.currentUser$ | async) {
+        <div class="sidebar-section">
+          <div class="section-header">
+            <span class="caption-sm" style="color: var(--text-tertiary)">Lối tắt</span>
+            <span class="caption-sm" style="color: var(--text-tertiary); cursor: pointer">Chỉnh sửa</span>
+          </div>
+          <nav class="nav-menu">
+            <a routerLink="/my-team" routerLinkActive="active" class="nav-item">
+              <span class="body-md">Đội bóng của tôi</span>
+            </a>
+            <a routerLink="/my-challenges" routerLinkActive="active" class="nav-item">
+              <span class="body-md">Kèo đang tìm</span>
+            </a>
+          </nav>
         </div>
-        <nav class="nav-menu">
-          <a routerLink="/my-team" routerLinkActive="active" class="nav-item">
-            <span class="body-md">Đội bóng của tôi</span>
-          </a>
-          <a routerLink="/my-challenges" routerLinkActive="active" class="nav-item">
-            <span class="body-md">Kèo đang tìm</span>
-          </a>
-        </nav>
-      </div>
+      } @else {
+        <div class="sidebar-section auth-prompt-section">
+          <p class="body-base" style="color: var(--text-secondary); margin-bottom: 12px; padding: 0 16px;">
+            Tham gia PitchVN để đặt sân và ghép kèo dễ dàng!
+          </p>
+          <div style="padding: 0 12px; display: flex; flex-direction: column; gap: 8px;">
+            <a routerLink="/register" style="padding: 10px; border-radius: 12px; text-align: center; text-decoration: none; font-weight: 600; display: block; width: 100%; background-color: var(--brand-primary); color: #000;">
+              Tạo tài khoản
+            </a>
+            <a routerLink="/login" style="padding: 10px; border-radius: 12px; text-align: center; text-decoration: none; font-weight: 600; display: block; width: 100%; color: var(--text-primary); border: 1px solid var(--border-color);">
+              Đăng nhập
+            </a>
+          </div>
+        </div>
+      }
     </div>
 
     <div class="sidebar-bottom">
@@ -104,7 +122,7 @@
   <!-- Bottom Tab Bar cho Mobile -->
   <nav class="bottom-tab-bar">
     <!-- Bảng tin -->
-    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="tab-item">
+    <a routerLink="/feed" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="tab-item">
       <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
       </svg>
@@ -138,12 +156,14 @@
       </svg>
     </a>
     <!-- Trang cá nhân -->
-    <a routerLink="/profile" routerLinkActive="active" class="tab-item">
-      <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
-        <path
-          d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-      </svg>
-    </a>
+    @if (authService.currentUser$ | async) {
+      <a routerLink="/profile" routerLinkActive="active" class="tab-item">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+          <path
+            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+        </svg>
+      </a>
+    }
   </nav>
 </div>
 
@@ -153,9 +173,9 @@
 <p-popover #moreMenu styleClass="custom-sidebar-popover" appendTo="body">
   <div class="sidebar-more-menu">
     <!-- Nút chuyển giao diện Sáng / Tối -->
-    <button class="more-menu-item" (click)="toggleTheme(); moreMenu.hide()">
-      <span>{{ isDarkMode ? 'Chế độ sáng' : 'Chế độ tối' }}</span>
-      @if (isDarkMode) {
+    <button class="more-menu-item" (click)="themeService.toggleTheme(); moreMenu.hide()">
+      <span>{{ themeService.isDarkMode() ? 'Chế độ sáng' : 'Chế độ tối' }}</span>
+      @if (themeService.isDarkMode()) {
       <!-- Sun icon -->
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
         <circle cx="12" cy="12" r="5" />
@@ -194,15 +214,17 @@
       </svg>
     </button>
 
-    <div class="more-menu-divider"></div>
+    @if (authService.currentUser$ | async) {
+      <div class="more-menu-divider"></div>
 
-    <button class="more-menu-item danger" (click)="moreMenu.hide()">
-      <span>Đăng xuất</span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-        <polyline points="16 17 21 12 16 7" />
-        <line x1="21" y1="12" x2="9" y2="12" />
-      </svg>
-    </button>
+      <button class="more-menu-item danger" (click)="authService.logout(); moreMenu.hide()">
+        <span>Đăng xuất</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+      </button>
+    }
   </div>
 </p-popover>

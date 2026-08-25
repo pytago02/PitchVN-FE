@@ -4,6 +4,8 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { MOCK_TOURNAMENTS, Tournament, TournamentStatus, TournamentTeam, TournamentMatch } from '../mock-tournament-data';
 import { MOCK_TEAMS as MOCK_TEAMS_CHALLENGE } from '../../../features/challenge-finder/mock-challenge-data';
 import { MOCK_PITCHES } from '../../../features/pitch-finder/mock-pitch-data';
+import { TournamentService } from '../../../services/tournament/tournament.service';
+import { SkeletonModule } from 'primeng/skeleton';
 
 // Shared Components
 import { TeamDetailPopupComponent } from '../../../shared/components/team-detail-popup/team-detail-popup.component';
@@ -50,22 +52,62 @@ export interface BracketRound {
     TabsModule,
     CardModule,
     TeamDetailPopupComponent,
-    PitchDetailPopupComponent
+    PitchDetailPopupComponent,
+    SkeletonModule
   ],
   templateUrl: './tournament-detail.component.html',
   styleUrl: './tournament-detail.component.css'
 })
 export class TournamentDetailComponent implements OnInit {
   tournament = signal<Tournament | null>(null);
+  isLoading = signal<boolean>(true);
   activeTab = signal<any>(0);
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute, private tournamentService: TournamentService) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      const found = MOCK_TOURNAMENTS.find(t => t.id === id);
-      this.tournament.set(found || null);
+      this.isLoading.set(true);
+      this.tournamentService.getById(id).subscribe({
+        next: (data: any) => {
+          let prizePool = 0;
+          let entryFee = 0;
+          try {
+            if (data.prizePool) {
+              const pp = typeof data.prizePool === 'string' ? JSON.parse(data.prizePool) : data.prizePool;
+              prizePool = pp.champion || pp.total || 0;
+            }
+          } catch(e){}
+          
+          const mappedTournament: Tournament = {
+            id: data.id || '',
+            name: data.name || 'Unknown',
+            thumbnail: data.coverImage || 'https://images.unsplash.com/photo-1518605368461-1ee11c5211b6?auto=format&fit=crop&q=80&w=800',
+            status: data.status as TournamentStatus || 'upcoming',
+            format: data.format || 'vong_bang',
+            startDate: data.startDate ? new Date(data.startDate).toISOString() : '',
+            endDate: data.endDate ? new Date(data.endDate).toISOString() : '',
+            location: data.location || '',
+            description: data.description || '',
+            registeredTeams: 0,
+            maxTeams: data.maxTeams || 16,
+            prize: prizePool + 'đ',
+            fee: entryFee,
+            organizer: {
+              id: data.organizerId || 'org',
+              name: 'Admin',
+              avatar: 'https://i.pravatar.cc/150?u=admin'
+            },
+            minRank: 'C',
+            teams: MOCK_TOURNAMENTS[0].teams,
+            matches: MOCK_TOURNAMENTS[0].matches
+          };
+          this.tournament.set(mappedTournament);
+          this.isLoading.set(false);
+        },
+        error: () => this.isLoading.set(false)
+      });
     }
   }
 

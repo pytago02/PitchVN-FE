@@ -1,8 +1,10 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MOCK_TOURNAMENTS, Tournament, TournamentStatus } from '../mock-tournament-data';
+import { TournamentService } from '../../../services/tournament/tournament.service';
+import { SkeletonModule } from 'primeng/skeleton';
 
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
@@ -20,13 +22,60 @@ import { TabsModule } from 'primeng/tabs';
     ButtonModule,
     SelectButtonModule,
     TagModule,
-    TabsModule
+    TabsModule,
+    SkeletonModule
   ],
   templateUrl: './tournament-list.component.html',
   styleUrl: './tournament-list.component.css'
 })
-export class TournamentListComponent {
-  tournaments = signal<Tournament[]>(MOCK_TOURNAMENTS);
+export class TournamentListComponent implements OnInit {
+  tournaments = signal<Tournament[]>([]);
+  isLoading = signal<boolean>(true);
+
+  constructor(private tournamentService: TournamentService) {}
+
+  ngOnInit(): void {
+    this.isLoading.set(true);
+    this.tournamentService.getAll().subscribe({
+      next: (data) => {
+        const mappedData: Tournament[] = data.map(t => {
+          let prizePool = 0;
+          let entryFee = 0;
+          try {
+            if (t['prizePool']) {
+              const pp = typeof t['prizePool'] === 'string' ? JSON.parse(t['prizePool']) : t['prizePool'];
+              prizePool = pp.champion || pp.total || 0;
+            }
+          } catch(e){}
+          
+          return {
+            id: t['id'] || '',
+            name: t['name'] || 'Unknown',
+            thumbnail: t['coverImage'] || 'https://images.unsplash.com/photo-1518605368461-1ee11c5211b6?auto=format&fit=crop&q=80&w=800',
+            description: t['description'] ? t['description'].substring(0, 100) + '...' : '',
+            status: t['status'] as any || 'upcoming',
+            format: t['format'] as any || 'vong_bang',
+            minRank: 'ALL',
+            fee: entryFee,
+            prize: prizePool.toString(),
+            startDate: t['startDate'] ? new Date(t['startDate']).toISOString() : new Date().toISOString(),
+            endDate: t['endDate'] ? new Date(t['endDate']).toISOString() : new Date().toISOString(),
+            organizer: {
+              id: t['organizerId'] || '1',
+              name: 'Admin',
+              avatar: 'https://i.pravatar.cc/150'
+            },
+            registeredTeams: 0,
+            maxTeams: t['maxTeams'] || 16,
+            location: t['location'] || ''
+          };
+        });
+        this.tournaments.set(mappedData);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
+  }
 
   viewModes = [
     { icon: 'pi pi-th-large', value: 'grid', label: 'Lưới' },

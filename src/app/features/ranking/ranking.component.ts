@@ -1,34 +1,40 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { 
-  MOCK_PLAYERS, 
-  MOCK_TEAMS, 
-  MOCK_PROVINCES, 
-  RANK_TIERS, 
-  RankingItem 
+import {
+  MOCK_PLAYERS,
+  MOCK_TEAMS,
+  MOCK_PROVINCES,
+  RANK_TIERS,
+  RankingItem
 } from './mock-ranking.data';
 import { Select } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { ChartModule } from 'primeng/chart';
+import { SkeletonModule } from 'primeng/skeleton';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { PlayerProfileService } from '../../services/playerprofile/playerprofile.service';
+import { TeamService } from '../../services/team/team.service';
 
 @Component({
   selector: 'app-ranking',
   standalone: true,
-  imports: [CommonModule, FormsModule, Select, InputTextModule, ChartModule],
+  imports: [CommonModule, FormsModule, Select, InputTextModule, ChartModule, SkeletonModule],
   templateUrl: './ranking.component.html',
   styleUrls: ['./ranking.component.css']
 })
-export class RankingComponent {
+export class RankingComponent implements OnInit {
   // ── States (Signals) ──────────────────────────────────────
+  allPlayers = signal<RankingItem[]>([]);
+  allTeams = signal<RankingItem[]>([]);
+  isLoading = signal<boolean>(true);
   activeTab = signal<'players' | 'teams'>('players');
   searchTerm = signal<string>('');
   selectedProvince = signal<string>('Toàn quốc');
   selectedPeriod = signal<string>('all');
   selectedTier = signal<string>('all');
   expandedRowId = signal<string | null>(null);
-  
+
   chartPlugins = [ChartDataLabels];
 
   // ── Static Metadata ──────────────────────────────────────
@@ -44,6 +50,68 @@ export class RankingComponent {
     { value: 'year', label: 'Thời gian: Năm này' }
   ];
 
+  constructor(private playerService: PlayerProfileService, private teamService: TeamService) { }
+
+  ngOnInit() {
+    this.isLoading.set(true);
+    this.playerService.getAll().subscribe({
+      next: (players: any[]) => {
+        const mappedPlayers: RankingItem[] = players.map(p => ({
+          id: p['id'] || '',
+          rank: 1,
+          name: p['username'] || p['preferredPosition'] || 'Player',
+          avatar: p['avatar'] || 'https://i.pravatar.cc/150',
+          matches: 10,
+          won: 5,
+          drawn: 2,
+          lost: 3,
+          goalsFor: 15,
+          goalsAgainst: 10,
+          goalDifference: 5,
+          elo: p['eloScore'] || 1000,
+          rankTier: 'B' as any,
+          province: p['address'] || 'Hà Nội',
+          trend: 'stable' as any,
+          rankHistory: [1, 2, 1, 1, 1, 1],
+          winRate: 50
+        }));
+        mappedPlayers.sort((a, b) => b.elo - a.elo);
+        mappedPlayers.forEach((p, i) => { p.rank = i + 1; });
+        this.allPlayers.set(mappedPlayers);
+
+        this.teamService.getAll().subscribe({
+          next: (teams: any[]) => {
+            const mappedTeams: RankingItem[] = teams.map(t => ({
+              id: t['id'] || '',
+              rank: 1,
+              name: t['name'] || 'Team',
+              avatar: t['logo'] || 'https://i.pravatar.cc/150',
+              matches: 10,
+              won: 5,
+              drawn: 2,
+              lost: 3,
+              goalsFor: 15,
+              goalsAgainst: 10,
+              goalDifference: 5,
+              elo: t['eloScore'] || 1000,
+              rankTier: 'B' as any,
+              province: t['homeArea'] || 'Hà Nội',
+              trend: 'up' as any,
+              rankHistory: [1, 2, 1, 1, 1, 1],
+              winRate: 50
+            }));
+            mappedTeams.sort((a, b) => b.elo - a.elo);
+            mappedTeams.forEach((t, i) => { t.rank = i + 1; });
+            this.allTeams.set(mappedTeams);
+            this.isLoading.set(false);
+          },
+          error: () => this.isLoading.set(false)
+        });
+      },
+      error: () => this.isLoading.set(false)
+    });
+  }
+
   // ── Computed Filtered Data ───────────────────────────────
   filteredData = computed<RankingItem[]>(() => {
     const tab = this.activeTab();
@@ -52,7 +120,7 @@ export class RankingComponent {
     const tier = this.selectedTier();
 
     // Select source data
-    const rawData = tab === 'players' ? MOCK_PLAYERS : MOCK_TEAMS;
+    const rawData = tab === 'players' ? this.allPlayers() : this.allTeams();
 
     // Apply filtering
     return rawData.filter(item => {

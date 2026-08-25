@@ -1,0 +1,59 @@
+<div class="auth-container">
+  <div class="auth-box">
+    <div class="auth-header">
+      <img src="assets/logo.png" alt="PitchVN Logo" class="brand-logo" onerror="this.style.display='none'" />
+      <h1 class="heading-xl">Tạo tài khoản mới</h1>
+      <p class="body-base text-secondary">Tham gia PitchVN để tìm sân và ghép kèo.</p>
+    </div>
+
+    <form (ngSubmit)="onRegister()" class="auth-form">
+      <div class="form-group">
+        <input type="text" pInputText placeholder="Tên đăng nhập" [(ngModel)]="username" name="username"
+          class="auth-input body-md" autocomplete="username" />
+      </div>
+
+      <div class="form-group">
+        <input type="email" pInputText placeholder="Email" [(ngModel)]="email" name="email" class="auth-input body-md"
+          autocomplete="email" />
+      </div>
+
+      <div class="form-group">
+        <input type="password" pInputText placeholder="Mật khẩu" [(ngModel)]="password" name="password"
+          class="auth-input body-md" autocomplete="new-password" />
+      </div>
+
+      <div class="form-group">
+        <input type="password" pInputText placeholder="Xác nhận mật khẩu" [(ngModel)]="confirmPassword"
+          name="confirmPassword" class="auth-input body-md" autocomplete="new-password" />
+      </div>
+
+      @if (errorMessage) {
+      <div class="error-msg caption-sm">{{ errorMessage }}</div>
+      }
+
+      <button type="submit" class="btn-primary-invert btn-block" [disabled]="isLoading">
+        @if (isLoading) {
+        <i class="pi pi-spin pi-spinner"></i>
+        } @else {
+        Đăng ký
+        }
+      </button>
+
+      <div class="divider">
+        <span class="caption-sm text-tertiary">hoặc</span>
+      </div>
+
+      <button type="button" class="btn-facebook btn-block" (click)="loginWithFacebook()" [disabled]="isFbLoading">
+        @if (isFbLoading) {
+        <i class="pi pi-spin pi-spinner"></i>
+        } @else {
+        <i class="pi pi-facebook"></i> Đăng ký với Facebook
+        }
+      </button>
+    </form>
+
+    <div class="auth-switch">
+      <p class="body-base">Đã có tài khoản? <a routerLink="/login" class="link-text-bold">Đăng nhập</a></p>
+    </div>
+  </div>
+</div>

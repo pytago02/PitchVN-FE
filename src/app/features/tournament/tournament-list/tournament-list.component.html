@@ -33,9 +33,25 @@
   <div class="tournaments-wrapper" [ngClass]="currentViewMode()">
     <!-- ===== GRID VIEW (default, also used on mobile) ===== -->
     <ng-container *ngIf="currentViewMode() === 'grid'">
-      <a *ngFor="let tournament of filteredTournaments()"
-         class="tournament-card"
-         [routerLink]="['/giai-dau', tournament.id]">
+      <ng-container *ngIf="isLoading()">
+        <div *ngFor="let i of [1,2,3,4]" class="tournament-card skeleton-card" style="background: var(--surface-card); border-radius: 12px; overflow: hidden; height: 350px;">
+          <p-skeleton width="100%" height="180px"></p-skeleton>
+          <div style="padding: 16px;">
+            <p-skeleton width="30%" height="1rem" styleClass="mb-2"></p-skeleton>
+            <p-skeleton width="80%" height="1.5rem" styleClass="mb-3"></p-skeleton>
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+              <p-skeleton width="60px" height="24px" borderRadius="12px"></p-skeleton>
+              <p-skeleton width="60px" height="24px" borderRadius="12px"></p-skeleton>
+            </div>
+            <p-skeleton width="100%" height="8px" styleClass="mb-2"></p-skeleton>
+          </div>
+        </div>
+      </ng-container>
+      
+      <ng-container *ngIf="!isLoading()">
+        <a *ngFor="let tournament of filteredTournaments()"
+           class="tournament-card"
+           [routerLink]="['/giai-dau', tournament.id]">
         <!-- Cover Image -->
         <div class="card-cover">
           <img [src]="tournament.thumbnail" [alt]="tournament.name" loading="lazy" />
@@ -92,13 +108,30 @@
           </div>
         </div>
       </a>
+      </ng-container>
     </ng-container>
 
     <!-- ===== LIST VIEW (desktop only) ===== -->
     <ng-container *ngIf="currentViewMode() === 'list'">
-      <a *ngFor="let tournament of filteredTournaments()"
-         class="tournament-list-item"
-         [routerLink]="['/giai-dau', tournament.id]">
+      <ng-container *ngIf="isLoading()">
+        <div *ngFor="let i of [1,2,3]" class="tournament-list-item skeleton-card" style="background: var(--surface-card); border-radius: 12px; overflow: hidden; margin-bottom: 16px; display: flex; height: 180px;">
+          <p-skeleton width="240px" height="100%"></p-skeleton>
+          <div style="padding: 16px; flex: 1;">
+            <p-skeleton width="60%" height="2rem" styleClass="mb-3"></p-skeleton>
+            <p-skeleton width="40%" height="1.5rem" styleClass="mb-2"></p-skeleton>
+            <p-skeleton width="100%" height="1rem" styleClass="mb-4"></p-skeleton>
+            <div style="display: flex; gap: 16px;">
+              <p-skeleton width="80px" height="24px" borderRadius="12px"></p-skeleton>
+              <p-skeleton width="80px" height="24px" borderRadius="12px"></p-skeleton>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="!isLoading()">
+        <a *ngFor="let tournament of filteredTournaments()"
+           class="tournament-list-item"
+           [routerLink]="['/giai-dau', tournament.id]">
         <img [src]="tournament.thumbnail" [alt]="tournament.name" class="list-cover" loading="lazy" />
 
         <div class="list-body">
@@ -138,10 +171,11 @@
           </div>
         </div>
       </a>
+      </ng-container>
     </ng-container>
 
     <!-- Empty State -->
-    <div *ngIf="filteredTournaments().length === 0" class="empty-state">
+    <div *ngIf="filteredTournaments().length === 0 && !isLoading()" class="empty-state">
       <i class="pi pi-inbox text-tertiary" style="font-size: 2.5rem"></i>
       <h3 class="heading-lg">Không có giải đấu nào</h3>
       <p class="caption-sm text-tertiary">Không tìm thấy giải đấu nào phù hợp với bộ lọc hiện tại.</p>

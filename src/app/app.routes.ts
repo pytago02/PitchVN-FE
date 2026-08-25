@@ -10,6 +10,11 @@ export const routes: Routes = [
     children: [
       {
         path: '',
+        redirectTo: 'feed',
+        pathMatch: 'full'
+      },
+      {
+        path: 'feed',
         loadComponent: () =>
           import('./features/feed/feed.component').then(
             (m) => m.FeedComponent
@@ -74,10 +79,38 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/auth/login/login.component').then(
+        (m) => m.LoginComponent
+      ),
+  },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./features/auth/register/register.component').then(
+        (m) => m.RegisterComponent
+      ),
+  },
+  {
+    path: 'setup-profile',
+    loadComponent: () =>
+      import('./features/profile/setup-profile/setup-profile.component').then(
+        (m) => m.SetupProfileComponent
+      ),
+  },
+  {
     path: 'dev-test',
     loadComponent: () =>
       import('./features/dev-test/dev-test.component').then(
         (m) => m.DevTestComponent
+      ),
+  },
+  {
+    path: 'privacy-policy',
+    loadComponent: () =>
+      import('./pages/privacy-policy/privacy-policy').then(
+        (m) => m.PrivacyPolicy
       ),
   },
 ];

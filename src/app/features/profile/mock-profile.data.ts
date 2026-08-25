@@ -9,8 +9,8 @@ export interface PlayerProfile {
   bio: string;
   followersCount: number;
   followingCount: number;
-  preferredPosition: 'Thủ môn' | 'Hậu vệ' | 'Tiền vệ' | 'Tiền đạo' | 'Linh hoạt';
-  preferredFoot: 'Trái' | 'Phải' | 'Hai chân';
+  preferredPosition: string[] | string;
+  preferredFoot: 'Trái' | 'Phải' | 'Hai chân' | string;
   isPrivate: boolean;
   province: string;
   socialLinks: {

@@ -1,0 +1,53 @@
+<div class="auth-container">
+  <div class="auth-box">
+    <div class="auth-header">
+      <img src="assets/logo.png" alt="PitchVN Logo" class="brand-logo" onerror="this.style.display='none'" />
+      <h1 class="heading-xl">Đăng nhập vào PitchVN</h1>
+      <p class="body-base text-secondary">Chào mừng bạn quay lại hệ sinh thái bóng đá PitchVN.</p>
+    </div>
+
+    <form (ngSubmit)="onLogin()" class="auth-form">
+      <div class="form-group">
+        <input type="text" pInputText placeholder="Tên đăng nhập, số điện thoại hoặc email" [(ngModel)]="username"
+          name="username" class="auth-input body-md" autocomplete="username" />
+      </div>
+
+      <div class="form-group">
+        <input type="password" pInputText placeholder="Mật khẩu" [(ngModel)]="password" name="password"
+          class="auth-input body-md" autocomplete="current-password" />
+      </div>
+
+      @if (errorMessage) {
+      <div class="error-msg caption-sm">{{ errorMessage }}</div>
+      }
+
+      <button type="submit" class="btn-primary-invert btn-block" [disabled]="isLoading">
+        @if (isLoading) {
+        <i class="pi pi-spin pi-spinner"></i>
+        } @else {
+        Đăng nhập
+        }
+      </button>
+
+      <div class="divider">
+        <span class="caption-sm text-tertiary">hoặc</span>
+      </div>
+
+      <button type="button" class="btn-facebook btn-block" (click)="loginWithFacebook()" [disabled]="isFbLoading">
+        @if (isFbLoading) {
+        <i class="pi pi-spin pi-spinner"></i>
+        } @else {
+        <i class="pi pi-facebook"></i> Tiếp tục với Facebook
+        }
+      </button>
+
+      <div class="auth-footer">
+        <a routerLink="/forgot-password" class="body-base link-text">Quên mật khẩu?</a>
+      </div>
+    </form>
+
+    <div class="auth-switch">
+      <p class="body-base">Chưa có tài khoản? <a routerLink="/register" class="link-text-bold">Đăng ký ngay</a></p>
+    </div>
+  </div>
+</div>

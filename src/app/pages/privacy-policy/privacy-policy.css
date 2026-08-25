@@ -1,0 +1,57 @@
+.privacy-container {
+  padding: 24px;
+  background-color: var(--surface-bg);
+  min-height: calc(100vh - 64px);
+  display: flex;
+  justify-content: center;
+}
+
+.privacy-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 800px;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.privacy-title {
+  font-size: 24px;
+  margin-bottom: 24px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--thread-line-color);
+  padding-bottom: 16px;
+}
+
+.privacy-section {
+  margin-bottom: 24px;
+}
+
+.privacy-section h2 {
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.privacy-text {
+  color: var(--text-tertiary);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.privacy-list {
+  list-style-type: disc;
+  padding-left: 20px;
+  color: var(--text-tertiary);
+  line-height: 1.6;
+}
+
+.privacy-list li {
+  margin-bottom: 8px;
+}
+
+/* Dark mode specific tweaks if needed */
+:host-context(body.dark) .privacy-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}

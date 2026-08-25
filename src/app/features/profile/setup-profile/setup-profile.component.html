@@ -1,0 +1,86 @@
+<div class="setup-container">
+  <div class="setup-box">
+    <div class="setup-header">
+      <img src="assets/logo.png" alt="PitchVN Logo" class="brand-logo" onerror="this.style.display='none'" />
+      <h2 class="title-h2">Thiết lập hồ sơ</h2>
+      <p class="body-base">Hãy cho mọi người biết thêm về bạn</p>
+    </div>
+
+    <form (ngSubmit)="onSave()" class="setup-form">
+      <div class="form-group">
+        <label class="caption-sm" style="color: var(--text-secondary)">Tên hiển thị</label>
+        <input type="text" pInputText [(ngModel)]="name" name="name" class="setup-input body-md" />
+      </div>
+
+      <div class="form-group">
+        <label class="caption-sm" style="color: var(--text-secondary)">Tiểu sử</label>
+        <input type="text" pInputText [(ngModel)]="bio" name="bio" class="setup-input body-md" placeholder="Ví dụ: Yêu bóng đá, thích pressing..." />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label class="field-label caption-sm text-tertiary">Vị trí sở trường</label>
+          <p-multiselect 
+            [options]="positionOptions" 
+            [(ngModel)]="positionIds" 
+            name="positionIds" 
+            optionLabel="name" 
+            optionValue="id" 
+            placeholder="Chọn vị trí" 
+            display="chip" 
+            styleClass="custom-p-select w-full">
+          </p-multiselect>
+        </div>
+        <div class="form-group flex-1">
+          <label class="caption-sm" style="color: var(--text-secondary)">Chân thuận</label>
+          <p-select [options]="footOptions" [(ngModel)]="footId" name="footId" optionLabel="name" optionValue="id" styleClass="w-full"></p-select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label class="field-label caption-sm text-tertiary">Khu vực thi đấu (Tỉnh/Thành)</label>
+          <p-select 
+            [options]="provinces" 
+            [(ngModel)]="selectedProvinceObj" 
+            (onChange)="onProvinceChange()"
+            name="selectedProvinceObj" 
+            optionLabel="name" 
+            placeholder="Chọn Tỉnh/Thành phố"
+            [filter]="true" 
+            filterBy="name" 
+            [showClear]="true"
+            styleClass="custom-p-select w-full">
+          </p-select>
+        </div>
+        <div class="form-group flex-1">
+          <label class="field-label caption-sm text-tertiary">Quận/Huyện (Tùy chọn)</label>
+          <p-select 
+            [options]="districts" 
+            [(ngModel)]="selectedDistrictObj" 
+            name="selectedDistrictObj" 
+            optionLabel="name" 
+            placeholder="Chọn Quận/Huyện"
+            [filter]="true" 
+            filterBy="name" 
+            [showClear]="true"
+            styleClass="custom-p-select w-full"
+            [disabled]="!selectedProvinceObj">
+          </p-select>
+        </div>
+      </div>
+
+      @if (errorMessage) {
+        <div class="error-msg caption-sm">{{ errorMessage }}</div>
+      }
+
+      <button type="submit" class="btn-primary-invert btn-block" [disabled]="isLoading">
+        @if (isLoading) {
+          <i class="pi pi-spin pi-spinner"></i>
+        } @else {
+          Hoàn tất
+        }
+      </button>
+    </form>
+  </div>
+</div>

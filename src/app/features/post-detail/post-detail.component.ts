@@ -9,11 +9,17 @@ import { MOCK_FEED, MOCK_FOLLOWING_FEED, MOCK_REPLIES, Post, Reply } from '../fe
 import { DialogModule } from 'primeng/dialog';
 import { ToastModule } from 'primeng/toast';
 import { MessageService, SharedModule } from 'primeng/api';
+import { SkeletonModule } from 'primeng/skeleton';
+
+import { PostService } from '../../services/post/post.service';
+import { UserService } from '../../services/user/user.service';
+import { PostInteractionService } from '../../services/postinteraction/postinteraction.service';
+import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-post-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, PostCardComponent, DialogModule, ToastModule, SharedModule],
+  imports: [CommonModule, FormsModule, PostCardComponent, DialogModule, ToastModule, SharedModule, SkeletonModule],
   providers: [MessageService],
   templateUrl: './post-detail.component.html',
   styleUrls: ['./post-detail.component.css'],
@@ -59,45 +65,94 @@ export class PostDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private location: Location,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private postService: PostService,
+    private userService: UserService,
+    private postInteractionService: PostInteractionService
   ) {}
+
+  isLoading = true;
 
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
       if (id) {
-        // Find in MOCK_FEED first
-        const allPosts = [...MOCK_FEED, ...MOCK_FOLLOWING_FEED];
-        let found: Post | undefined = allPosts.find((p) => p.id.toString() === id);
-        this.parentPostId = null;
+        this.isLoading = true;
+        
+        // Use forkJoin or nested subscribes to get users, post, and replies
+        this.userService.getAll().subscribe({
+          next: (users) => {
+            const userMap = new Map<string, User>();
+            users.forEach(u => userMap.set(u.id!, u));
 
-        // If not found, search in all replies
-        if (!found) {
-          for (const key in MOCK_REPLIES) {
-            const reply = MOCK_REPLIES[key].find((r: Reply) => r.id.toString() === id);
-            if (reply) {
-              found = reply;
-              this.parentPostId = key;
-              break;
-            }
-          }
-        }
+            this.postService.getById(id).subscribe({
+              next: (p) => {
+                const u = userMap.get(p['authorId']) || {} as User;
+                let images = [];
+                try { if (p['images']) images = JSON.parse(p['images']).map((img: string) => ({ url: img })); } catch (e) {}
+                
+                this.post = {
+                  id: p.id || '',
+                  author: {
+                    id: u.id || '',
+                    name: u['username'] || 'Unknown',
+                    username: u['username'] || 'unknown',
+                    avatar: u['avatar'] || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + u['username'],
+                    verified: false
+                  },
+                  type: 'general',
+                  typeLabel: p['postType'] === 'general' ? 'Tin tức' : 'Thông báo',
+                  time: new Date(p['createdAt']).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }),
+                  content: p['content'] || '',
+                  images: images,
+                  likes: p['likesCount'] || 0,
+                  comments: p['commentsCount'] || 0,
+                  reposts: p['repostsCount'] || 0,
+                  shares: p['sharesCount'] || 0,
+                  isLiked: false,
+                  isReposted: false,
+                  location: p['pitchName'] || p['location'] || undefined
+                };
 
-        this.post = found;
-        this.replies = MOCK_REPLIES[id] || [];
-        this.expandedReplies.clear();
-        this.nestedReplies = {};
-        this.replyText = '';
+                // Fetch replies
+                this.postInteractionService.getAll().subscribe({
+                  next: (interactions) => {
+                    // Filter replies for this post
+                    const postReplies = interactions.filter(i => i['postId'] === id);
+                    this.replies = postReplies.map(r => {
+                      const ru = userMap.get(r['userId']) || {} as User;
+                      return {
+                        id: r.id || '',
+                        author: {
+                          id: ru.id || '',
+                          name: ru['username'] || 'Unknown',
+                          username: ru['username'] || 'unknown',
+                          avatar: ru['avatar'] || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + ru['username'],
+                          verified: false
+                        },
+                        type: 'general',
+                        typeLabel: 'Bình luận',
+                        time: new Date(r['createdAt']).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }),
+                        content: r['content'] || '',
+                        likes: 0,
+                        comments: 0,
+                        reposts: 0,
+                        shares: 0,
+                        replyTo: r['replyToId'] || id
+                      };
+                    });
+                    this.isLoading = false;
+                  },
+                  error: () => this.isLoading = false
+                });
 
-        // Pre-load nested replies for each top-level reply
-        this.replies.forEach((r) => {
-          const sub = MOCK_REPLIES[r.id.toString()];
-          if (sub && sub.length > 0) {
-            this.nestedReplies[r.id.toString()] = sub;
-          }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              },
+              error: () => this.isLoading = false
+            });
+          },
+          error: () => this.isLoading = false
         });
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     });
   }
@@ -107,7 +162,7 @@ export class PostDetailComponent implements OnInit {
     if (this.parentPostId) {
       this.router.navigate(['/post', this.parentPostId]);
     } else {
-      this.router.navigate(['/']);
+      this.router.navigate(['/feed']);
     }
   }
 
@@ -212,3 +267,4 @@ export class PostDetailComponent implements OnInit {
     return this.replyText.trim().length > 0 && !this.isSubmittingReply;
   }
 }
+

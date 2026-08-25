@@ -1,7 +1,23 @@
 <div class="profile-container">
+  @if (isLoading()) {
+  <div style="padding: 24px;">
+    <p-skeleton width="100%" height="200px" styleClass="mb-4" borderRadius="16px"></p-skeleton>
+    <div style="display: flex; gap: 24px;">
+      <div style="flex: 1;">
+        <p-skeleton shape="circle" size="6rem" styleClass="mb-3"></p-skeleton>
+        <p-skeleton width="60%" height="2rem" styleClass="mb-2"></p-skeleton>
+        <p-skeleton width="40%" styleClass="mb-4"></p-skeleton>
+        <p-skeleton width="100%" height="150px" borderRadius="12px"></p-skeleton>
+      </div>
+      <div style="flex: 2;">
+        <p-skeleton width="100%" height="400px" borderRadius="12px"></p-skeleton>
+      </div>
+    </div>
+  </div>
+  } @else if (profile()) {
   <!-- Profile Cover Photo -->
   <div class="profile-cover">
-    <img [src]="profile().coverPhoto" alt="Cover banner" class="cover-img" />
+    <img [src]="profile()!.coverPhoto" alt="Cover banner" class="cover-img" />
     <div class="cover-overlay"></div>
   </div>
 
@@ -9,7 +25,7 @@
   <div class="profile-header-card">
     <div class="avatar-and-actions">
       <!-- Overlapping Avatar -->
-      <p-avatar [image]="profile().avatar" shape="circle" style="width: 96px; height: 96px;"></p-avatar>
+      <p-avatar [image]="profile()!.avatar" shape="circle" style="width: 96px; height: 96px;"></p-avatar>
 
       <!-- CTA Button to Edit Profile -->
       <div class="action-buttons" style="display: flex; gap: 8px;">
@@ -25,26 +41,27 @@
     <!-- Profile Text Info -->
     <div class="profile-info-text">
       <div class="name-row">
-        <h2 class="display-2xl">{{ profile().name }}</h2>
-        <span class="rank-badge tier-{{ profile().stats.rankTier }}" [title]="'Hạng ELO: ' + profile().stats.rankTier">
-          {{ profile().stats.rankTier }}
+        <h2 class="display-2xl">{{ profile()!.name }}</h2>
+        <span class="rank-badge tier-{{ profile()!.stats.rankTier }}"
+          [title]="'Hạng ELO: ' + profile()!.stats.rankTier">
+          {{ profile()!.stats.rankTier }}
         </span>
       </div>
-      <p class="handle-text caption-sm">@{{ profile().handle }}</p>
+      <p class="handle-text caption-sm">@{{ profile()!.handle }}</p>
 
       <!-- Bio -->
-      <p class="bio-text body-md">{{ profile().bio }}</p>
+      <p class="bio-text body-md">{{ profile()!.bio }}</p>
 
       <!-- Followers & Province -->
       <div class="profile-meta-row">
         <span class="caption-sm text-tertiary font-medium">
-          {{ profile().followersCount }} người theo dõi • {{ profile().followingCount }} đang theo dõi
+          {{ profile()!.followersCount }} người theo dõi • {{ profile()!.followingCount }} đang theo dõi
         </span>
         <span class="dot-separator">•</span>
         <span class="caption-sm text-tertiary">
-          <i class="pi pi-map-marker mr-1" style="font-size: 11px"></i>{{ profile().province }}
+          <i class="pi pi-map-marker mr-1" style="font-size: 11px"></i>{{ profile()!.province }}
         </span>
-        @if (profile().isPrivate) {
+        @if (profile()!.isPrivate) {
         <span class="dot-separator">•</span>
         <span class="caption-xs private-badge">
           <i class="pi pi-lock mr-1" style="font-size: 9px"></i>Riêng tư
@@ -54,18 +71,18 @@
 
       <!-- Social Networks Links -->
       <div class="social-links-row">
-        @if (profile().socialLinks.facebook) {
-        <a [href]="profile().socialLinks.facebook" target="_blank" class="social-link-btn" title="Facebook">
+        @if (profile()!.socialLinks.facebook) {
+        <a [href]="profile()!.socialLinks.facebook" target="_blank" class="social-link-btn" title="Facebook">
           <i class="pi pi-facebook"></i>
         </a>
         }
-        @if (profile().socialLinks.instagram) {
-        <a [href]="profile().socialLinks.instagram" target="_blank" class="social-link-btn" title="Instagram">
+        @if (profile()!.socialLinks.instagram) {
+        <a [href]="profile()!.socialLinks.instagram" target="_blank" class="social-link-btn" title="Instagram">
           <i class="pi pi-instagram"></i>
         </a>
         }
-        @if (profile().socialLinks.zalo) {
-        <a href="javascript:void(0)" class="social-link-btn" [title]="'Zalo SĐT: ' + profile().socialLinks.zalo">
+        @if (profile()!.socialLinks.zalo) {
+        <a href="javascript:void(0)" class="social-link-btn" [title]="'Zalo SĐT: ' + profile()!.socialLinks.zalo">
           <i class="pi pi-phone"></i>
         </a>
         }
@@ -109,15 +126,15 @@
         <div class="style-details">
           <div class="style-item">
             <span class="style-label caption-sm text-tertiary">Vị trí sở trường</span>
-            <span class="style-val body-md font-semibold">{{ profile().preferredPosition }}</span>
+            <span class="style-val body-md font-semibold">{{ getDisplayPosition() }}</span>
           </div>
           <div class="style-item">
             <span class="style-label caption-sm text-tertiary">Chân thuận</span>
-            <span class="style-val body-md font-semibold">{{ profile().preferredFoot }}</span>
+            <span class="style-val body-md font-semibold">{{ profile()!.preferredFoot }}</span>
           </div>
           <div class="style-item">
             <span class="style-label caption-sm text-tertiary">Khu vực phủi</span>
-            <span class="style-val body-md font-semibold">{{ profile().province }}</span>
+            <span class="style-val body-md font-semibold">{{ profile()!.province }}</span>
           </div>
         </div>
       </div>
@@ -127,39 +144,39 @@
         <h3 class="heading-lg text-primary mb-3 font-bold">Thống kê chỉ số</h3>
         <div class="stats-numbers-grid">
           <div class="metric-box">
-            <span class="metric-val text-primary">{{ profile().stats.matches }}</span>
+            <span class="metric-val text-primary">{{ profile()!.stats.matches }}</span>
             <span class="metric-lbl caption-xs text-tertiary">Trận</span>
           </div>
           <div class="metric-box">
-            <span class="metric-val text-green">{{ profile().stats.won }}</span>
+            <span class="metric-val text-green">{{ profile()!.stats.won }}</span>
             <span class="metric-lbl caption-xs text-tertiary">Thắng</span>
           </div>
           <div class="metric-box">
-            <span class="metric-val text-yellow">{{ profile().stats.drawn }}</span>
+            <span class="metric-val text-yellow">{{ profile()!.stats.drawn }}</span>
             <span class="metric-lbl caption-xs text-tertiary">Hòa</span>
           </div>
           <div class="metric-box">
-            <span class="metric-val text-red">{{ profile().stats.lost }}</span>
+            <span class="metric-val text-red">{{ profile()!.stats.lost }}</span>
             <span class="metric-lbl caption-xs text-tertiary">Thua</span>
           </div>
           <div class="metric-box">
-            <span class="metric-val">{{ profile().stats.goals }}</span>
+            <span class="metric-val">{{ profile()!.stats.goals }}</span>
             <span class="metric-lbl caption-xs text-tertiary">Bàn thắng</span>
           </div>
           <div class="metric-box">
-            <span class="metric-val">{{ profile().stats.assists }}</span>
+            <span class="metric-val">{{ profile()!.stats.assists }}</span>
             <span class="metric-lbl caption-xs text-tertiary">Kiến tạo</span>
           </div>
           <div class="metric-box">
-            <span class="metric-val text-yellow">{{ profile().stats.yellowCards }}</span>
+            <span class="metric-val text-yellow">{{ profile()!.stats.yellowCards }}</span>
             <span class="metric-lbl caption-xs text-tertiary">Thẻ vàng</span>
           </div>
           <div class="metric-box">
-            <span class="metric-val text-red">{{ profile().stats.redCards }}</span>
+            <span class="metric-val text-red">{{ profile()!.stats.redCards }}</span>
             <span class="metric-lbl caption-xs text-tertiary">Thẻ đỏ</span>
           </div>
           <div class="metric-box">
-            <span class="metric-val text-green font-bold">{{ profile().stats.winRate }}%</span>
+            <span class="metric-val text-green font-bold">{{ profile()!.stats.winRate }}%</span>
             <span class="metric-lbl caption-xs text-tertiary">Tỷ lệ thắng</span>
           </div>
         </div>
@@ -174,8 +191,8 @@
       </div>
 
       <div class="chart-wrapper" style="height: 160px; padding: 0 10px;">
-        <p-chart type="line" [data]="getChartData(profile().eloHistory)"
-          [options]="getChartOptions(profile().eloHistory)" [plugins]="chartPlugins"></p-chart>
+        <p-chart type="line" [data]="getChartData(profile()!.eloHistory)"
+          [options]="getChartOptions(profile()!.eloHistory)" [plugins]="chartPlugins"></p-chart>
       </div>
 
       <div class="chart-x-axis caption-xs text-tertiary">
@@ -215,6 +232,7 @@
     </div>
   </div>
   }
+  }
 </div>
 
 <!-- ══════════════════════════════════════════════════════
@@ -253,25 +271,44 @@
         <!-- Row: Position & Foot -->
         <div class="field-row">
           <div class="field-item flex-1">
-            <label class="field-label caption-sm text-tertiary">Vị trí ưa thích</label>
-            <p-select [options]="positionOptions" [(ngModel)]="editPosition" styleClass="custom-p-select">
-            </p-select>
+            <label class="field-label caption-sm text-tertiary">Vị trí sở trường</label>
+            <p-multiselect [options]="positionOptions" [(ngModel)]="editPosition" optionLabel="name" optionValue="id"
+              placeholder="Chọn vị trí" display="chip" styleClass="custom-p-select w-full">
+            </p-multiselect>
           </div>
 
           <div class="field-item flex-1">
             <label class="field-label caption-sm text-tertiary">Chân thuận</label>
-            <p-select [options]="footOptions" [(ngModel)]="editFoot" styleClass="custom-p-select">
+            <p-select [options]="footOptions" [(ngModel)]="editFoot" optionLabel="name" optionValue="id"
+              styleClass="w-full"></p-select>
+          </div>
+        </div>
+
+        <!-- Row: Province & District -->
+        <div class="field-row">
+          <div class="field-item flex-1">
+            <label class="field-label caption-sm text-tertiary">Khu vực thi đấu (Tỉnh/Thành)</label>
+            <p-select [options]="provinces()" [(ngModel)]="editProvinceObj" (onChange)="onEditProvinceChange()"
+              optionLabel="name" placeholder="Chọn Tỉnh/Thành phố" [filter]="true" filterBy="name" [showClear]="true"
+              styleClass="custom-p-select w-full">
+            </p-select>
+          </div>
+          <div class="field-item flex-1">
+            <label class="field-label caption-sm text-tertiary">Quận/Huyện (Tùy chọn)</label>
+            <p-select [options]="districts()" [(ngModel)]="editDistrictObj" optionLabel="name"
+              placeholder="Chọn Quận/Huyện" [filter]="true" filterBy="name" [showClear]="true"
+              styleClass="custom-p-select w-full" [disabled]="!editProvinceObj">
             </p-select>
           </div>
         </div>
 
         <!-- Field 5: Privacy -->
-        <div class="field-item">
+        <!-- <div class="field-item">
           <label class="field-label caption-sm text-tertiary">Chế độ trang cá nhân</label>
           <p-select [options]="privacyOptions" optionLabel="label" optionValue="value" [(ngModel)]="editIsPrivate"
             styleClass="custom-p-select">
           </p-select>
-        </div>
+        </div> -->
 
         <!-- Social Networks Links group -->
         <div class="field-item-group-title caption-sm text-tertiary font-bold mt-2">Mạng xã hội & liên hệ</div>
@@ -338,9 +375,9 @@
 
     <!-- Nút chuyển giao diện Sáng / Tối -->
     <div class="more-menu-item" (click)="toggleTheme()" style="cursor: pointer;">
-      <span>{{ isDarkMode ? 'Giao diện sáng' : 'Giao diện tối' }}</span>
+      <span>{{ themeService.isDarkMode() ? 'Giao diện sáng' : 'Giao diện tối' }}</span>
 
-      @if (isDarkMode) {
+      @if (themeService.isDarkMode()) {
       <!-- Sun icon -->
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
         <circle cx="12" cy="12" r="5" />

@@ -42,7 +42,7 @@ export interface VersionResponse {
     providedIn: 'root'
 })
 export class ProvinceService {
-    private readonly baseApiUrl = 'https://provinces.open-api.vn/api';
+    private readonly baseApiUrl = '/api/provinces';
 
     constructor(private http: HttpClient) { }
 

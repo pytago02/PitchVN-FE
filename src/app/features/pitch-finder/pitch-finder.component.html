@@ -215,7 +215,31 @@
       </div>
 
       <div class="pitches-cards-stream">
-        @for (pitch of filteredPitches; track pitch.id) {
+        @if (isLoading) {
+        @for (i of [1,2,3]; track $index) {
+        <div class="skeleton-card"
+          style="background: var(--surface-card); border-radius: 16px; overflow: hidden; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
+          <p-skeleton width="100%" height="220px"></p-skeleton>
+          <div style="padding: 16px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+              <p-skeleton width="60%" height="1.5rem"></p-skeleton>
+              <p-skeleton width="20%" height="1.5rem"></p-skeleton>
+            </div>
+            <p-skeleton width="40%" styleClass="mb-3"></p-skeleton>
+            <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+              <p-skeleton width="60px" height="24px" borderRadius="12px"></p-skeleton>
+              <p-skeleton width="60px" height="24px" borderRadius="12px"></p-skeleton>
+              <p-skeleton width="60px" height="24px" borderRadius="12px"></p-skeleton>
+            </div>
+            <div style="display: flex; gap: 12px;">
+              <p-skeleton width="50%" height="40px" borderRadius="8px"></p-skeleton>
+              <p-skeleton width="50%" height="40px" borderRadius="8px"></p-skeleton>
+            </div>
+          </div>
+        </div>
+        }
+        } @else {
+        @for (pitch of filteredPitches; track $index) {
         <div [id]="'pitch-card-' + pitch.id" class="pitch-card"
           [class.highlighted]="activeMapMarkerPitch?.id === pitch.id" (click)="selectMapMarker(pitch)">
           <!-- Card Image Box -->
@@ -306,8 +330,9 @@
           </div>
         </div>
         }
+        }
 
-        @if (filteredPitches.length === 0) {
+        @if (filteredPitches.length === 0 && !isLoading) {
         <div class="no-pitches-state">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
             <circle cx="12" cy="12" r="10" />
@@ -330,7 +355,7 @@
         <!-- Map Controls -->
         <div class="map-overlay-controls">
           <div class="radius-indicator-card caption-sm">
-            <span class="pulse-dot"></span>
+            <!-- <span class="pulse-dot"></span> -->
             Bán kính quét: <strong>{{ selectedRadius }} km</strong>
           </div>
           <button class="map-recenter-btn" (click)="recenterMap()" title="Về vị trí của tôi">
@@ -422,7 +447,7 @@
           <div class="subpitch-pills grab-scroll-container" #subpitchScroll
             (mousedown)="startDrag($event, subpitchScroll)" (mousemove)="onDrag($event, subpitchScroll)"
             (mouseup)="stopDrag()" (mouseleave)="stopDrag()">
-            @for (sub of selectedPitch.subPitches; track sub.id) {
+            @for (sub of selectedPitch.subPitches; track $index) {
             <button class="sub-pill caption-sm" [class.active]="selectedSubPitch?.id === sub.id"
               (click)="selectSubPitch(sub)">
               {{ sub.name }} ({{ sub.typeLabel }})

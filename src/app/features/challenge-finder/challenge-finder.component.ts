@@ -1,4 +1,4 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -13,6 +13,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { CheckboxModule } from 'primeng/checkbox';
+import { SkeletonModule } from 'primeng/skeleton';
 
 import {
   MOCK_CHALLENGES,
@@ -33,17 +34,19 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ProvinceService } from '../../services/provinces/province-service';
 import { TeamDetailPopupComponent } from '../../shared/components/team-detail-popup/team-detail-popup.component';
 import { PitchDetailPopupComponent } from '../../shared/components/pitch-detail-popup/pitch-detail-popup.component';
+import { ChallengeService } from '../../services/challenge/challenge.service';
 @Component({
   selector: 'app-challenge-finder',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogModule, ToastModule, SharedModule, HttpClientModule, Select, MultiSelectModule, CheckboxModule, DatePickerModule, InputTextModule, TextareaModule, InputNumberModule, TeamDetailPopupComponent, PitchDetailPopupComponent],
+  imports: [CommonModule, FormsModule, DialogModule, InputTextModule, SkeletonModule, ToastModule, SharedModule, DatePickerModule, TextareaModule, InputNumberModule, TeamDetailPopupComponent, PitchDetailPopupComponent, Select, CheckboxModule],
   providers: [MessageService],
   templateUrl: './challenge-finder.component.html',
   styleUrls: ['./challenge-finder.component.css'],
 })
 export class ChallengeFinderComponent implements OnInit {
   // ── Data Sources ──────────────────────────────────────────
-  allChallenges: Challenge[] = MOCK_CHALLENGES;
+  allChallenges: Challenge[] = [];
+  isLoading = true;
   filteredChallenges: Challenge[] = [];
   myTeam: Team = MY_TEAM;
   rankTiers = RANK_TIERS;
@@ -169,7 +172,7 @@ export class ChallengeFinderComponent implements OnInit {
     'Đội mình chào đón bạn, đến sân đúng giờ nhé!',
   ];
 
-  constructor(private messageService: MessageService, private http: HttpClient, private provinceService: ProvinceService) { }
+  constructor(private messageService: MessageService, private http: HttpClient, private provinceService: ProvinceService, private challengeService: ChallengeService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.fetchProvinces();
@@ -200,7 +203,71 @@ export class ChallengeFinderComponent implements OnInit {
   }
 
   fetchData() {
-    this.applyFilters();
+    this.isLoading = true;
+    this.challengeService.getAll().subscribe({
+      next: (data) => {
+        if (!Array.isArray(data)) {
+           this.allChallenges = [];
+           this.applyFilters();
+           this.isLoading = false;
+           this.cdr.detectChanges();
+           return;
+        }
+
+        this.allChallenges = data.map(c => {
+          if (!c) return null;
+          let tr: any = [];
+          let np: any = [];
+          try { if (c['targetRanks']) tr = typeof c['targetRanks'] === 'string' ? JSON.parse(c['targetRanks']) : c['targetRanks']; } catch(e){}
+          try { if (c['neededPositions']) np = typeof c['neededPositions'] === 'string' ? JSON.parse(c['neededPositions']) : c['neededPositions']; } catch(e){}
+          
+          return {
+            id: c.id || '',
+            type: c['type'] as any || 'team', // 'team' | 'individual'
+            individualSubtype: c['type'] === 'individual' ? (c['individualSubtype'] as any || 'join') : undefined,
+            format: c['matchFormat'] || '7v7',
+            formatLabel: c['matchFormat'] || 'Sân 7',
+            matchDate: new Date(c['dateTime'] || Date.now()),
+            matchTime: new Date(c['dateTime'] || Date.now()).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'}),
+            feeSplit: c['feeSplit'] as any || '50-50',
+            feeSplitLabel: '50-50',
+            estimatedPrice: c['estimatedPrice'] || 500000,
+            hasPitchAlready: !!c['pitchId'],
+            status: c['status'] as any || 'open',
+            note: c['note'] || '',
+            targetRanks: tr.length ? tr : ['A'],
+            neededPositions: np,
+            title: c['title'] || 'Giao lưu bóng đá',
+            pitchName: c['pitchId'] ? 'Sân ' + c['pitchId'] : 'Chưa có sân',
+            pitchAddress: 'Hà Nội',
+            district: 'Cầu Giấy',
+            createdAt: new Date().toISOString(),
+            applicantsCount: 0,
+            contactPhone: c['phone'] || '0123456789',
+            
+            // Mocks since these are relations that need to be populated by backend later
+            creatorTeam: c['type'] === 'team' ? MOCK_TEAMS[0] : undefined,
+            creatorUser: c['type'] === 'individual' ? {
+              id: '1',
+              name: 'Player',
+              avatar: 'https://i.pravatar.cc/150',
+              rank: 'B',
+              elo: 1000,
+              phone: '0123456789'
+            } : undefined
+          };
+        }).filter(Boolean) as Challenge[];
+        
+        // Mặc định load all
+        this.applyFilters();
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   fetchProvinces() {
