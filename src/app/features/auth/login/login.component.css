@@ -15,6 +15,23 @@
   position: relative;
 }
 
+.back-home-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  gap: 8px;
+  transition: color 0.2s ease;
+  z-index: 10;
+  margin-top: 16px;
+}
+
+.back-home-link:hover {
+  color: var(--brand-primary);
+}
+
 .auth-box {
   width: 400px;
   display: flex;
@@ -173,4 +190,21 @@
 
 .link-text-bold:hover {
   text-decoration: underline;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 480px) {
+  .auth-box {
+    width: 100%;
+    padding: 32px 20px;
+    border-radius: 16px;
+  }
+
+  .auth-container {
+    padding: 16px;
+  }
+
+  .auth-header h1 {
+    font-size: 1.5rem;
+  }
 }

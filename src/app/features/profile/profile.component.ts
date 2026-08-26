@@ -1,4 +1,4 @@
-﻿import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
@@ -66,7 +66,7 @@ export class ProfileComponent implements OnInit {
     private location: Location,
     private titleService: Title,
     public themeService: ThemeService,
-    private authService: AuthService,
+    public authService: AuthService,
     private masterDataService: MasterDataService,
     private provinceService: ProvinceService
   ) { }
@@ -103,8 +103,8 @@ export class ProfileComponent implements OnInit {
             preferredPosition: p.preferredPosition || 'Linh hoáº¡t',
             preferredFoot: p.preferredFoot || 'Hai chÃ¢n',
             isPrivate: p.isPrivate || false,
-            province: p.province || 'HÃ  Ná»™i',
-            socialLinks: p.socialLinks ? JSON.parse(p.socialLinks) : {},
+            province: p.provinceId ? p.provinceId : (p.province || 'Hà Nội'),
+            socialLinks: (typeof p.socialLinks === 'string') ? JSON.parse(p.socialLinks) : (p.socialLinks || {}),
             stats: {
               matches: p.matchesPlayed || 0,
               won: p.matchesWon || 0,

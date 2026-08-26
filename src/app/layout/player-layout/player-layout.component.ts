@@ -5,10 +5,12 @@ import { PopoverModule } from 'primeng/popover';
 import { ThemeService } from '../../services/theme/theme.service';
 import { AuthService } from '../../services/auth/auth.service';
 
+import { DialogModule } from 'primeng/dialog';
+
 @Component({
   selector: 'app-player-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterModule, PopoverModule],
+  imports: [CommonModule, RouterOutlet, RouterModule, PopoverModule, DialogModule],
   templateUrl: './player-layout.component.html',
   styleUrls: ['./player-layout.component.css']
 })

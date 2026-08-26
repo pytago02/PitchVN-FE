@@ -7,6 +7,9 @@ import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../../services/auth/auth.service';
 import { ThemeService } from '../../../services/theme/theme.service';
 import { PlayerProfileService } from '../../../services/playerprofile/playerprofile.service';
+import { FacebookSdkService } from '../../../services/facebook/facebook-sdk.service';
+
+declare const FB: any;
 
 @Component({
   selector: 'app-login',
@@ -15,7 +18,7 @@ import { PlayerProfileService } from '../../../services/playerprofile/playerprof
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   username = '';
   password = '';
   isLoading = false;
@@ -23,11 +26,19 @@ export class LoginComponent {
   errorMessage = '';
 
   constructor(
-    private authService: AuthService, 
+    private authService: AuthService,
     private router: Router,
     public themeService: ThemeService,
-    private playerProfileService: PlayerProfileService
+    private playerProfileService: PlayerProfileService,
+    private facebookSdk: FacebookSdkService
   ) {}
+
+  ngOnInit(): void {
+    // Pre-load Facebook SDK ngầm khi component khởi tạo
+    this.facebookSdk.loadSdk().catch(() => {
+      // Bỏ qua lỗi load SDK ở đây – sẽ báo lỗi khi user click login
+    });
+  }
 
   onLogin() {
     if (!this.username || !this.password) {
@@ -54,36 +65,62 @@ export class LoginComponent {
     this.isFbLoading = true;
     this.errorMessage = '';
 
-    // Mock Facebook Login delay
-    setTimeout(() => {
-      // In a real scenario, this uses the Facebook SDK to get the access token
-      const mockFbToken = 'mock_fb_access_token_' + Date.now();
-      
-      this.authService.loginWithFacebook(mockFbToken).subscribe({
-        next: (res) => {
-          this.checkProfileAndRedirect(res.user.id, true);
-        },
-        error: (err) => {
-          this.isFbLoading = false;
-          this.errorMessage = 'Lỗi đăng nhập bằng Facebook.';
-        }
-      });
-    }, 1500);
+    this.facebookSdk.login('public_profile,email').then((result) => {
+      if (result.status === 'connected' && result.authResponse?.accessToken) {
+        const accessToken = result.authResponse.accessToken;
+
+        // Lấy thông tin profile Facebook ngay tại đây (còn trong session)
+        FB.api('/me', { fields: 'name,picture.type(large)' }, (fbProfile: any) => {
+          const fbName: string = (!fbProfile || fbProfile.error) ? '' : (fbProfile.name || '');
+          const fbAvatar: string = (!fbProfile || fbProfile.error) ? '' : (fbProfile.picture?.data?.url || '');
+
+          // Gửi accessToken lên backend để xác thực và lấy JWT
+          this.authService.loginWithFacebook(accessToken).subscribe({
+            next: (res) => {
+              this.checkProfileAndRedirect(res.user.id, true, fbName, fbAvatar);
+            },
+            error: (err) => {
+              this.isFbLoading = false;
+              this.errorMessage = 'Đăng nhập bằng Facebook thất bại. Vui lòng thử lại.';
+              console.error('Facebook login error:', err);
+            }
+          });
+        });
+      } else if (result.status === 'not_authorized') {
+        this.isFbLoading = false;
+        this.errorMessage = 'Bạn cần cấp quyền cho PitchVN để tiếp tục đăng nhập.';
+      } else {
+        // Người dùng đóng popup hoặc huỷ
+        this.isFbLoading = false;
+      }
+    }).catch((err) => {
+      this.isFbLoading = false;
+      this.errorMessage = 'Không thể kết nối đến Facebook. Vui lòng kiểm tra kết nối mạng.';
+      console.error('Facebook SDK error:', err);
+    });
   }
 
-  private checkProfileAndRedirect(userId: string, isFacebook: boolean = false) {
+  private checkProfileAndRedirect(
+    userId: string,
+    isFacebook: boolean = false,
+    fbName: string = '',
+    fbAvatar: string = ''
+  ) {
     this.playerProfileService.getByUserId(userId).subscribe({
-      next: (profile) => {
+      next: () => {
         this.isLoading = false;
         this.isFbLoading = false;
         this.router.navigate(['/feed']);
       },
-      error: (err) => {
+      error: () => {
         this.isLoading = false;
         this.isFbLoading = false;
-        // 404 means profile doesn't exist
         if (isFacebook) {
-          this.router.navigate(['/setup-profile'], { queryParams: { isFacebook: 'true' } });
+          // Truyền thông tin Facebook qua navigation state (không xuất hiện trên URL)
+          this.router.navigate(['/setup-profile'], {
+            queryParams: { isFacebook: 'true' },
+            state: { fbName, fbAvatar }
+          });
         } else {
           this.router.navigate(['/setup-profile']);
         }
@@ -91,5 +128,3 @@ export class LoginComponent {
     });
   }
 }
-
-

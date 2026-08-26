@@ -6,28 +6,61 @@
       <p class="body-base">Hãy cho mọi người biết thêm về bạn</p>
     </div>
 
+    <!-- Banner Facebook info -->
+    @if (isFacebookMode) {
+      <div class="fb-banner">
+        @if (fbInfoLoaded) {
+          <div class="fb-banner-success">
+            <div class="fb-avatar-preview">
+              <img [src]="fbAvatar" alt="Facebook avatar" class="fb-avatar-img" onerror="this.src='https://i.pravatar.cc/150'" />
+              <div class="fb-avatar-badge">
+                <i class="pi pi-facebook"></i>
+              </div>
+            </div>
+            <div class="fb-banner-text">
+              <span class="fb-banner-title">Đã lấy thông tin từ Facebook</span>
+              <span class="fb-banner-sub">Tên hiển thị và ảnh đã được điền tự động</span>
+            </div>
+            <button type="button" class="fb-reapply-btn" (click)="applyFacebookInfo()" title="Áp dụng lại">
+              <i class="pi pi-refresh"></i>
+            </button>
+          </div>
+        } @else {
+          <div class="fb-banner-warn">
+            <i class="pi pi-info-circle"></i>
+            <span>Không thể tải thông tin Facebook. Bạn có thể tự điền thủ công.</span>
+          </div>
+        }
+      </div>
+    }
+
     <form (ngSubmit)="onSave()" class="setup-form">
+      <!-- Avatar preview -->
+      <div class="avatar-preview-wrap">
+        <img [src]="avatar" alt="Avatar" class="avatar-preview-img" onerror="this.src='https://i.pravatar.cc/150'" />
+      </div>
+
       <div class="form-group">
         <label class="caption-sm" style="color: var(--text-secondary)">Tên hiển thị</label>
-        <input type="text" pInputText [(ngModel)]="name" name="name" class="setup-input body-md" />
+        <input type="text" pInputText [(ngModel)]="name" name="name" class="setup-input body-md" placeholder="Nhập tên hiển thị của bạn" />
       </div>
 
       <div class="form-group">
         <label class="caption-sm" style="color: var(--text-secondary)">Tiểu sử</label>
-        <input type="text" pInputText [(ngModel)]="bio" name="bio" class="setup-input body-md" placeholder="Ví dụ: Yêu bóng đá, thích pressing..." />
+        <input type="text" pInputText [(ngModel)]="bio" name="bio" class="setup-input body-md" placeholder="Vd: Yêu bóng đá, thích pressing..." />
       </div>
 
       <div class="form-row">
         <div class="form-group flex-1">
           <label class="field-label caption-sm text-tertiary">Vị trí sở trường</label>
-          <p-multiselect 
-            [options]="positionOptions" 
-            [(ngModel)]="positionIds" 
-            name="positionIds" 
-            optionLabel="name" 
-            optionValue="id" 
-            placeholder="Chọn vị trí" 
-            display="chip" 
+          <p-multiselect
+            [options]="positionOptions"
+            [(ngModel)]="positionIds"
+            name="positionIds"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Chọn vị trí"
+            display="chip"
             styleClass="custom-p-select w-full">
           </p-multiselect>
         </div>
@@ -40,29 +73,29 @@
       <div class="form-row">
         <div class="form-group flex-1">
           <label class="field-label caption-sm text-tertiary">Khu vực thi đấu (Tỉnh/Thành)</label>
-          <p-select 
-            [options]="provinces" 
-            [(ngModel)]="selectedProvinceObj" 
+          <p-select
+            [options]="provinces"
+            [(ngModel)]="selectedProvinceObj"
             (onChange)="onProvinceChange()"
-            name="selectedProvinceObj" 
-            optionLabel="name" 
+            name="selectedProvinceObj"
+            optionLabel="name"
             placeholder="Chọn Tỉnh/Thành phố"
-            [filter]="true" 
-            filterBy="name" 
+            [filter]="true"
+            filterBy="name"
             [showClear]="true"
             styleClass="custom-p-select w-full">
           </p-select>
         </div>
         <div class="form-group flex-1">
-          <label class="field-label caption-sm text-tertiary">Quận/Huyện (Tùy chọn)</label>
-          <p-select 
-            [options]="districts" 
-            [(ngModel)]="selectedDistrictObj" 
-            name="selectedDistrictObj" 
-            optionLabel="name" 
+          <label class="field-label caption-sm text-tertiary">Quận/Huyện (Tuỳ chọn)</label>
+          <p-select
+            [options]="districts"
+            [(ngModel)]="selectedDistrictObj"
+            name="selectedDistrictObj"
+            optionLabel="name"
             placeholder="Chọn Quận/Huyện"
-            [filter]="true" 
-            filterBy="name" 
+            [filter]="true"
+            filterBy="name"
             [showClear]="true"
             styleClass="custom-p-select w-full"
             [disabled]="!selectedProvinceObj">

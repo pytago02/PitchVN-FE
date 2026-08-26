@@ -28,8 +28,10 @@ import {
 } from './mock-pitch-data';
 import { PitchDetailPopupComponent } from '../../shared/components/pitch-detail-popup/pitch-detail-popup.component';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { ProvinceService } from '../../services/provinces/province-service';
+import { ProvinceService, Province, District } from '../../services/provinces/province-service';
 import { PitchService } from '../../services/pitch/pitch.service';
+import { AuthService } from '../../services/auth/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-pitch-finder',
@@ -157,7 +159,16 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
   private startX = 0;
   private startScrollLeft = 0;
 
-  constructor(private messageService: MessageService, private http: HttpClient, private ngZone: NgZone, private cdr: ChangeDetectorRef, private provinceService: ProvinceService, private pitchService: PitchService) { }
+  constructor(
+    private messageService: MessageService,
+    private http: HttpClient,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef,
+    private provinceService: ProvinceService,
+    private pitchService: PitchService,
+    private router: Router,
+    public authService: AuthService
+  ) { }
 
   ngOnInit() {
     this.initDates();
@@ -703,6 +714,11 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ── Booking Flow ──────────────────────────────────────────
   proceedToBooking() {
+    if (!this.authService.currentUserValue) {
+      this.authService.promptLogin();
+      return;
+    }
+    
     if (!this.selectedPitch || !this.selectedSubPitch) {
       this.messageService.add({
         severity: 'warn',

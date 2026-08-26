@@ -12,6 +12,7 @@ import { Post as UIPost, PostUser, MOCK_USERS } from './mock-feed-data';
 import { PostCardComponent } from '../../shared/components/post-card/post-card.component';
 import { PostService } from '../../services/post/post.service';
 import { UserService } from '../../services/user/user.service';
+import { AuthService } from '../../services/auth/auth.service';
 import { User } from '../../models/user.model';
 
 @Component({
@@ -50,7 +51,8 @@ export class FeedComponent implements OnInit {
     private messageService: MessageService,
     private postService: PostService,
     private userService: UserService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -120,6 +122,20 @@ export class FeedComponent implements OnInit {
             }).filter(Boolean) as any[];
             this.isLoading = false;
             this.cdr.detectChanges();
+
+            // Fetch isLiked status for each post in the background
+            // Use object spread to create new reference → triggers ngOnChanges in PostCard
+            this.feedList.forEach((post, idx) => {
+              if (post?.id) {
+                this.postService.isLiked(post.id.toString()).subscribe({
+                  next: (res) => {
+                    this.feedList[idx] = { ...this.feedList[idx], isLiked: res.isLiked };
+                    this.cdr.detectChanges();
+                  },
+                  error: () => { /* silently ignore */ }
+                });
+              }
+            });
           },
           error: () => {
             this.isLoading = false;
@@ -148,6 +164,10 @@ export class FeedComponent implements OnInit {
 
   // ── Compose ───────────────────────────────────────────────
   openCompose() {
+    if (!this.authService.currentUserValue) {
+      this.authService.promptLogin();
+      return;
+    }
     this.composeText = '';
     this.composeVisibility = 'Tất cả mọi người';
     this.showVisibilityMenu = false;

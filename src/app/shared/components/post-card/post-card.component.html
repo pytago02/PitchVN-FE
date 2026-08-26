@@ -1,3 +1,76 @@
+@if (isLoading) {
+<!-- thread-post-skeleton.component.html -->
+<article class="thread-post">
+  <!-- ─── Cột trái: Avatar + Thread Line ─── -->
+  <div class="thread-left">
+    <p-skeleton class="thread-avatar" shape="circle" size="36px"
+      style="margin-bottom: 8px; display: block;"></p-skeleton>
+
+    <!-- Đường line nối xuống replies -->
+    @if (!isDetail) {
+    <div class="thread-line"></div>
+    }
+  </div>
+
+  <!-- ─── Cột phải: Nội dung ─── -->
+  <div class="thread-right">
+
+    <!-- Header -->
+    <header class="flex justify-between items-start mb-1">
+      <div class="flex flex-col gap-1.5" style="margin-bottom: 5px;">
+        <!-- Tên + badge -->
+        <div class="flex items-center gap-1.5">
+          <p-skeleton width="120px" height="17px"></p-skeleton>
+          <p-skeleton width="16px" height="16px" shape="circle"></p-skeleton>
+          <p-skeleton width="60px" height="18px" borderRadius="20px"></p-skeleton>
+        </div>
+        <!-- Location -->
+        <p-skeleton width="70px" height="10px"></p-skeleton>
+      </div>
+
+      <!-- Time + more menu -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <p-skeleton width="30px" height="12px"></p-skeleton>
+        <p-skeleton width="18px" height="18px" shape="circle"></p-skeleton>
+      </div>
+    </header>
+
+    <!-- Body: Text -->
+    <div class="flex flex-col gap-1.5" style="margin-bottom: 10px;">
+      <p-skeleton width="100%" height="14px" style="margin-bottom: 6px; display: block;"></p-skeleton>
+      <p-skeleton width="85%" height="14px" style="margin-bottom: 6px; display: block;"></p-skeleton>
+      <p-skeleton width="55%" height="14px" style="margin-bottom: 10px; display: block;"></p-skeleton>
+
+      <!-- Media placeholder (ảnh đơn) -->
+      <p-skeleton width="100%" height="260px" borderRadius="12px"></p-skeleton>
+    </div>
+
+    <!-- Action Bar -->
+    <footer class="flex items-center gap-4 mb-2">
+      <div class="flex items-center gap-1.5">
+        <p-skeleton width="20px" height="20px" shape="circle"></p-skeleton>
+        <p-skeleton width="20px" height="12px"></p-skeleton>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <p-skeleton width="20px" height="20px" shape="circle"></p-skeleton>
+        <p-skeleton width="20px" height="12px"></p-skeleton>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <p-skeleton width="20px" height="20px" shape="circle"></p-skeleton>
+        <p-skeleton width="20px" height="12px"></p-skeleton>
+      </div>
+      <p-skeleton width="20px" height="20px" shape="circle"></p-skeleton>
+    </footer>
+
+    <!-- Stats + CTA -->
+    <div class="flex items-center justify-between min-h-[20px]">
+      <p-skeleton width="120px" height="12px"></p-skeleton>
+      <p-skeleton width="80px" height="26px" borderRadius="20px"></p-skeleton>
+    </div>
+
+  </div>
+</article>
+} @else {
 <article class="thread-post" (click)="goToDetail()" [class.clickable]="!isDetail">
   <!-- ─── Cột trái: Avatar + Thread Line ─── -->
   <div class="thread-left">
@@ -158,6 +231,7 @@
   </div>
   </div>
 </article>
+}
 
 <!-- ══════════════════════════════════════════════════════
      PrimeNG: Repost Popover Panel

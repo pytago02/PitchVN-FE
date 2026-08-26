@@ -105,3 +105,151 @@
   margin-top: 4px;
   text-align: center;
 }
+/* ===== Facebook Info Banner ===== */
+.fb-banner {
+  margin-bottom: 20px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.fb-banner-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: rgba(24, 119, 242, 0.08);
+  border: 1px solid rgba(24, 119, 242, 0.25);
+  border-radius: 14px;
+  color: #4a9ff5;
+  font-size: 0.875rem;
+}
+
+.fb-banner-success {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: rgba(24, 119, 242, 0.08);
+  border: 1px solid rgba(24, 119, 242, 0.25);
+  border-radius: 14px;
+}
+
+.fb-avatar-preview {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.fb-avatar-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #1877f2;
+}
+
+.fb-avatar-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  background: #1877f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--card-bg);
+}
+
+.fb-avatar-badge .pi {
+  font-size: 8px;
+  color: white;
+}
+
+.fb-banner-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fb-banner-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4a9ff5;
+}
+
+.fb-banner-sub {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.fb-reapply-btn {
+  background: rgba(24, 119, 242, 0.15);
+  border: none;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #4a9ff5;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.fb-reapply-btn:hover {
+  background: rgba(24, 119, 242, 0.25);
+}
+
+.fb-banner-warn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: rgba(234, 179, 8, 0.08);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  border-radius: 14px;
+  color: #ca8a04;
+  font-size: 0.875rem;
+}
+
+/* ===== Avatar Preview ===== */
+.avatar-preview-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.avatar-preview-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--brand-primary);
+  box-shadow: 0 0 0 4px rgba(133, 234, 45, 0.15);
+  transition: all 0.3s ease;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 600px) {
+  .setup-box {
+    width: 100%;
+    max-width: 100%;
+    padding: 24px 16px;
+    border-radius: 16px;
+    border: none;
+    box-shadow: none;
+  }
+  
+  .setup-container {
+    padding: 16px;
+    align-items: flex-start;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+}

@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth/auth.service';
 
 // PrimeNG
 import { DialogModule } from 'primeng/dialog';
@@ -172,7 +173,14 @@ export class ChallengeFinderComponent implements OnInit {
     'Đội mình chào đón bạn, đến sân đúng giờ nhé!',
   ];
 
-  constructor(private messageService: MessageService, private http: HttpClient, private provinceService: ProvinceService, private challengeService: ChallengeService, private cdr: ChangeDetectorRef) { }
+  constructor(
+    private messageService: MessageService, 
+    private http: HttpClient, 
+    private provinceService: ProvinceService, 
+    private challengeService: ChallengeService, 
+    private cdr: ChangeDetectorRef,
+    public authService: AuthService
+  ) { }
 
   ngOnInit() {
     this.fetchProvinces();
@@ -679,6 +687,10 @@ export class ChallengeFinderComponent implements OnInit {
   // ══════════════════════════════════════════════════════
 
   openCreateChallenge() {
+    if (!this.authService.currentUserValue) {
+      this.authService.promptLogin();
+      return;
+    }
     // Set default location based on current filter or first province
     if (!this.newProvinceObj) {
       this.newProvinceObj = this.selectedProvince || (this.provinces.length > 0 ? this.provinces[0] : null);
@@ -867,6 +879,10 @@ export class ChallengeFinderComponent implements OnInit {
   // ── Quick Chat Modal ──────────────────────────────────────
   openChat(challenge: Challenge, event?: Event) {
     if (event) event.stopPropagation();
+    if (!this.authService.currentUserValue) {
+      this.authService.promptLogin();
+      return;
+    }
     this.selectedChallenge = challenge;
     this.chatMessages = MOCK_CHATS[challenge.id] || [
       {
@@ -937,6 +953,10 @@ export class ChallengeFinderComponent implements OnInit {
   // ── Match Challenge Flow ──────────────────────────────────
   openMatchConfirm(challenge: Challenge, event?: Event) {
     if (event) event.stopPropagation();
+    if (!this.authService.currentUserValue) {
+      this.authService.promptLogin();
+      return;
+    }
     this.selectedChallenge = challenge;
     this.showMatchConfirmModal = true;
   }

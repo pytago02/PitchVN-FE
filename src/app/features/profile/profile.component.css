@@ -1041,6 +1041,8 @@
   ::ng-deep .custom-edit-profile-dialog.p-dialog {
     width: 100% !important;
     max-width: 100% !important;
+    height: 90vh !important;
+    max-height: 90vh !important;
     position: fixed !important;
     bottom: 0 !important;
     left: 0 !important;
@@ -1050,12 +1052,36 @@
     border-bottom: none !important;
     border-left: none !important;
     border-right: none !important;
-    max-height: 85vh !important;
     animation: slideUpBottomSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  ::ng-deep .custom-edit-profile-dialog .p-dialog-content {
+    flex: 1 1 auto;
+    overflow: hidden; /* Prevent outer scroll */
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .edit-dialog-inner {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
   }
 
   .dialog-body {
-    max-height: 55vh;
+    max-height: none;
+    flex: 1 1 auto;
+    overflow-y: auto;
+  }
+
+  .dialog-footer {
+    flex-shrink: 0;
   }
 }
 

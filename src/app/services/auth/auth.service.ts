@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 
 export interface User {
@@ -8,6 +9,7 @@ export interface User {
   role: string;
   name: string;
   avatar: string;
+  facebookProfileUrl?: string;
 }
 
 export interface AuthResponse {
@@ -23,8 +25,14 @@ export class AuthService {
 
   private currentUserSubject = new BehaviorSubject<User | null>(this.getUserFromStorage());
   public currentUser$ = this.currentUserSubject.asObservable();
+  
+  public showLoginPrompt$ = new BehaviorSubject<boolean>(false);
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private router: Router) { }
+
+  public promptLogin() {
+    this.showLoginPrompt$.next(true);
+  }
 
   public get currentUserValue(): User | null {
     return this.currentUserSubject.value;
@@ -46,6 +54,10 @@ export class AuthService {
     return localStorage.getItem('jwtToken');
   }
 
+  public getFbProfileUrl(): string | null {
+    return localStorage.getItem('fbProfileUrl');
+  }
+
   login(credentials: any): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap(response => {
@@ -64,6 +76,10 @@ export class AuthService {
         if (response && response.token) {
           localStorage.setItem('jwtToken', response.token);
           localStorage.setItem('currentUser', JSON.stringify(response.user));
+          // Lưu Facebook profile URL riêng để dùng khi tạo profile
+          if (response.user.facebookProfileUrl) {
+            localStorage.setItem('fbProfileUrl', response.user.facebookProfileUrl);
+          }
           this.currentUserSubject.next(response.user);
         }
       })
@@ -77,7 +93,9 @@ export class AuthService {
   logout() {
     localStorage.removeItem('jwtToken');
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('fbProfileUrl');
     this.currentUserSubject.next(null);
+    this.router.navigate(['/login']);
   }
 }
 

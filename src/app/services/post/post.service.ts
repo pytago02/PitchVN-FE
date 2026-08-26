@@ -28,6 +28,30 @@ export class PostService {
     return this.http.put<void>(`${this.baseUrl}/${id}`, data);
   }
 
+  likePost(id: string): Observable<{message: string, isLiked: boolean}> {
+    return this.http.post<{message: string, isLiked: boolean}>(`${this.baseUrl}/${id}/like`, {});
+  }
+
+  unlikePost(id: string): Observable<{message: string, isLiked: boolean}> {
+    return this.http.post<{message: string, isLiked: boolean}>(`${this.baseUrl}/${id}/unlike`, {});
+  }
+
+  isLiked(id: string): Observable<{isLiked: boolean}> {
+    return this.http.get<{isLiked: boolean}>(`${this.baseUrl}/${id}/liked`);
+  }
+
+  commentPost(id: string, data: { userId: string, content: string, replyToId?: string }): Observable<{message: string}> {
+    return this.http.post<{message: string}>(`${this.baseUrl}/${id}/comment`, data);
+  }
+
+  repostPost(id: string): Observable<{message: string}> {
+    return this.http.post<{message: string}>(`${this.baseUrl}/${id}/repost`, {});
+  }
+
+  sharePost(id: string): Observable<{message: string}> {
+    return this.http.post<{message: string}>(`${this.baseUrl}/${id}/share`, {});
+  }
+
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }

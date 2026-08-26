@@ -25,8 +25,13 @@ export class SetupProfileComponent implements OnInit {
   bio = '';
   positionIds: string[] = [];
   footId: string = '';
-  province: string = '';
   avatar = 'https://i.pravatar.cc/150';
+
+  isFacebookMode = false;
+  fbInfoLoaded = false;
+  fbName = '';
+  fbAvatar = '';
+  fbProfileUrl = '';   // URL trang Facebook cua nguoi dung
 
   isLoading: boolean = false;
   errorMessage: string = '';
@@ -54,13 +59,13 @@ export class SetupProfileComponent implements OnInit {
     this.masterDataService.getPositions().subscribe(data => this.positionOptions = data);
     this.masterDataService.getFoots().subscribe(data => {
       this.footOptions = data;
-      if(data.length > 0) this.footId = data[0].id;
+      if (data.length > 0) this.footId = data[0].id;
     });
 
     this.provinceService.showAllDivisions('v1', 2).subscribe({
       next: (data) => {
         this.provinces = data;
-        const defaultProv = data.find(p => p.code === 1 || p.name.includes('Hà N?i')) || data[0];
+        const defaultProv = data.find((p: Province) => p.code === 1 || p.name.includes('Ha Noi')) || data[0];
         if (defaultProv) {
           this.selectedProvinceObj = defaultProv;
           this.districts = defaultProv.districts || [];
@@ -74,14 +79,37 @@ export class SetupProfileComponent implements OnInit {
       return;
     }
     this.userId = user.id;
-    this.name = user.name || (user as any).username || 'Ngu?i choi m?i';
+    this.name = user.name || (user as any).username || 'Nguoi choi moi';
 
     this.route.queryParams.subscribe(params => {
       if (params['isFacebook'] === 'true') {
-        this.bio = 'Ð?n t? Facebook';
-        this.avatar = 'https://i.pravatar.cc/150?u=' + this.userId;
+        this.isFacebookMode = true;
+
+        // Doc thong tin Facebook tu Router navigation state
+        const navState = this.router.getCurrentNavigation()?.extras?.state
+          || (history.state as { fbName?: string; fbAvatar?: string; fbProfileUrl?: string });
+
+        const fbName: string = navState?.['fbName'] || '';
+        const fbAvatar: string = navState?.['fbAvatar'] || '';
+
+        // Lay fbProfileUrl tu localStorage (da luu khi login)
+        this.fbProfileUrl = this.authService.getFbProfileUrl() || '';
+
+        if (fbName || fbAvatar) {
+          this.fbInfoLoaded = true;
+          this.fbName = fbName;
+          this.fbAvatar = fbAvatar;
+          if (fbName) this.name = fbName;
+          if (fbAvatar) this.avatar = fbAvatar;
+        }
       }
     });
+  }
+
+  /** Nguoi dung co the ap dung lai thong tin tu Facebook */
+  applyFacebookInfo() {
+    if (this.fbName) this.name = this.fbName;
+    if (this.fbAvatar) this.avatar = this.fbAvatar;
   }
 
   onProvinceChange() {
@@ -91,39 +119,48 @@ export class SetupProfileComponent implements OnInit {
 
   onSave() {
     if (!this.name) {
-      this.errorMessage = 'Vui lòng nh?p tên hi?n th?';
+      this.errorMessage = 'Vui long nhap ten hien thi';
       return;
     }
 
     this.isLoading = true;
     this.errorMessage = '';
 
-    const finalProvinceStr = this.selectedDistrictObj
-      ? `, `
-      : (this.selectedProvinceObj?.name || 'Hà N?i');
+    // province_id va district_id luu theo code (so nguyen -> string)
+    const provinceId: string | null = this.selectedProvinceObj?.code?.toString() || null;
+    const districtId: string | null = this.selectedDistrictObj?.code?.toString() || null;
+
+    // Tu dong tao social_links voi Facebook URL neu dang nhap bang Facebook
+    let socialLinks: string | undefined = undefined;
+    if (this.fbProfileUrl) {
+      socialLinks = JSON.stringify({ fb: this.fbProfileUrl });
+    }
 
     const newProfile = {
       userId: this.userId,
       name: this.name,
       avatar: this.avatar,
       bio: this.bio,
-      positionIds: this.positionIds,
-      footId: this.footId,
-      province: finalProvinceStr,
-      isPrivate: false
+      positionIds: this.positionIds,   // mang UUID cua vi tri
+      footId: this.footId || null,      // UUID cua chan thuan
+      provinceId: provinceId,           // code tinh/thanh (string)
+      districtId: districtId,           // code quan/huyen (string)
+      isPrivate: false,
+      socialLinks: socialLinks
     };
 
     this.playerProfileService.create(newProfile).subscribe({
       next: () => {
         this.isLoading = false;
+        // Xoa fbProfileUrl sau khi da luu vao profile
+        localStorage.removeItem('fbProfileUrl');
         this.router.navigate(['/feed']);
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = 'Có l?i x?y ra khi t?o h? so. Vui lòng th? l?i.';
+        this.errorMessage = 'Co loi xay ra khi tao ho so. Vui long thu lai.';
         console.error(err);
       }
     });
   }
 }
-

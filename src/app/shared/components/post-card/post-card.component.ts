@@ -1,7 +1,8 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { SkeletonModule } from 'primeng/skeleton';
 
 // PrimeNG
 import { DialogModule } from 'primeng/dialog';
@@ -19,6 +20,8 @@ import { SearchMinus } from '@primeicons/angular/search-minus';
 import { Times } from '@primeicons/angular/times';
 
 import { Post, MOCK_USERS } from '../../../features/feed/mock-feed-data';
+import { PostService } from '../../../services/post/post.service';
+import { AuthService } from '../../../services/auth/auth.service';
 
 @Component({
   selector: 'app-post-card',
@@ -33,15 +36,17 @@ import { Post, MOCK_USERS } from '../../../features/feed/mock-feed-data';
     SharedModule,
     CarouselModule,
     GalleryModule,
+    SkeletonModule,
     Replay, Refresh, SearchPlus, SearchMinus, Times
   ],
   providers: [MessageService],
   templateUrl: './post-card.component.html',
   styleUrls: ['./post-card.component.css'],
 })
-export class PostCardComponent implements OnInit {
+export class PostCardComponent implements OnInit, OnChanges {
   @Input() post: any;
   @Input() isDetail: boolean = false;
+  @Input() isLoading: boolean = false;
 
   // ViewChild for overlay panels
   @ViewChild('repostPanel') repostPanel!: Popover;
@@ -56,6 +61,7 @@ export class PostCardComponent implements OnInit {
   likeCount = 0;
   repostCount = 0;
   commentCount = 0;
+  shareCount = 0;
 
   // Like animation state
   likeAnimating = false;
@@ -72,19 +78,29 @@ export class PostCardComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private postService: PostService,
+    private authService: AuthService
   ) { }
 
   ngOnInit() {
-    // Initialize local state from post
+    this.syncPostState();
+    this.buildMoreMenu();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['post'] && !changes['post'].firstChange) {
+      this.syncPostState();
+    }
+  }
+
+  private syncPostState() {
     this.isLiked = this.post?.isLiked ?? false;
     this.isReposted = this.post?.isReposted ?? false;
     this.likeCount = this.post?.likes ?? 0;
     this.repostCount = this.post?.reposts ?? 0;
     this.commentCount = this.post?.comments ?? 0;
-
-    // Build more menu
-    this.buildMoreMenu();
+    this.shareCount = this.post?.shares ?? 0;
   }
 
   goToDetail() {
@@ -98,16 +114,34 @@ export class PostCardComponent implements OnInit {
   // ── Like ──────────────────────────────────────────────────
   toggleLike(event: Event) {
     event.stopPropagation();
+    if (!this.post?.id) return;
 
     this.likeAnimating = true;
     setTimeout(() => (this.likeAnimating = false), 400);
 
+    const originalLiked = this.isLiked;
+    const originalCount = this.likeCount;
+
     if (this.isLiked) {
       this.isLiked = false;
       this.likeCount = Math.max(0, this.likeCount - 1);
+      this.postService.unlikePost(this.post.id.toString()).subscribe({
+        error: () => {
+          this.isLiked = originalLiked;
+          this.likeCount = originalCount;
+          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể bỏ thích. Vui lòng thử lại.', life: 2000 });
+        }
+      });
     } else {
       this.isLiked = true;
       this.likeCount++;
+      this.postService.likePost(this.post.id.toString()).subscribe({
+        error: () => {
+          this.isLiked = originalLiked;
+          this.likeCount = originalCount;
+          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể thích. Vui lòng thử lại.', life: 2000 });
+        }
+      });
     }
   }
 
@@ -157,14 +191,25 @@ export class PostCardComponent implements OnInit {
   }
 
   submitReply() {
-    if (!this.replyText.trim()) return;
-    this.commentCount++;
-    this.closeReplyDialog();
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Đã đăng',
-      detail: 'Bình luận của bạn đã được đăng!',
-      life: 2500,
+    if (!this.replyText.trim() || !this.post?.id) return;
+    
+    this.postService.commentPost(this.post.id.toString(), {
+      userId: this.authService.currentUserValue?.id || '00000000-0000-0000-0000-000000000001',
+      content: this.replyText
+    }).subscribe({
+      next: () => {
+        this.commentCount++;
+        this.closeReplyDialog();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Đã đăng',
+          detail: 'Bình luận của bạn đã được đăng!',
+          life: 2500,
+        });
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể gửi bình luận.', life: 2000 });
+      }
     });
   }
 
@@ -177,6 +222,7 @@ export class PostCardComponent implements OnInit {
   doRepost(event: Event) {
     event.stopPropagation();
     this.repostPanel.hide();
+    if (!this.post?.id) return;
 
     if (this.isReposted) {
       this.isReposted = false;
@@ -187,14 +233,25 @@ export class PostCardComponent implements OnInit {
         detail: 'Đã xóa bài đăng lại.',
         life: 2000,
       });
+      // Need an API to un-repost ideally, keeping optimistic update here
     } else {
       this.isReposted = true;
       this.repostCount++;
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Đã đăng lại',
-        detail: 'Bài viết đã được đăng lại!',
-        life: 2000,
+      
+      this.postService.repostPost(this.post.id.toString()).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Đã đăng lại',
+            detail: 'Bài viết đã được đăng lại!',
+            life: 2000,
+          });
+        },
+        error: () => {
+          this.isReposted = false;
+          this.repostCount = Math.max(0, this.repostCount - 1);
+          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể đăng lại.', life: 2000 });
+        }
       });
     }
   }
@@ -223,6 +280,7 @@ export class PostCardComponent implements OnInit {
     navigator.clipboard
       .writeText(link)
       .then(() => {
+        this.trackShare();
         this.messageService.add({
           severity: 'success',
           summary: 'Đã sao chép',
@@ -243,6 +301,7 @@ export class PostCardComponent implements OnInit {
   shareToFacebook(event: Event) {
     event.stopPropagation();
     this.sharePanel.hide();
+    this.trackShare();
     this.messageService.add({
       severity: 'info',
       summary: 'Chia sẻ Facebook',
@@ -254,12 +313,22 @@ export class PostCardComponent implements OnInit {
   shareToInstagram(event: Event) {
     event.stopPropagation();
     this.sharePanel.hide();
+    this.trackShare();
     this.messageService.add({
       severity: 'info',
       summary: 'Chia sẻ Instagram',
       detail: 'Tính năng chia sẻ Instagram sẽ sớm ra mắt!',
       life: 2000,
     });
+  }
+  
+  private trackShare() {
+    if (this.post?.id) {
+      this.shareCount++;
+      this.postService.sharePost(this.post.id.toString()).subscribe({
+        error: () => this.shareCount = Math.max(0, this.shareCount - 1)
+      });
+    }
   }
 
   // ── More Menu ─────────────────────────────────────────────

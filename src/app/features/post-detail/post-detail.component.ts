@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -14,6 +14,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { PostService } from '../../services/post/post.service';
 import { UserService } from '../../services/user/user.service';
 import { PostInteractionService } from '../../services/postinteraction/postinteraction.service';
+import { AuthService } from '../../services/auth/auth.service';
 import { User } from '../../models/user.model';
 
 @Component({
@@ -68,7 +69,9 @@ export class PostDetailComponent implements OnInit {
     private messageService: MessageService,
     private postService: PostService,
     private userService: UserService,
-    private postInteractionService: PostInteractionService
+    private postInteractionService: PostInteractionService,
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   isLoading = true;
@@ -95,7 +98,7 @@ export class PostDetailComponent implements OnInit {
                   id: p.id || '',
                   author: {
                     id: u.id || '',
-                    name: u['username'] || 'Unknown',
+                    name: u['fullName'] || u['username'] || 'Unknown',
                     username: u['username'] || 'unknown',
                     avatar: u['avatar'] || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + u['username'],
                     verified: false
@@ -114,6 +117,18 @@ export class PostDetailComponent implements OnInit {
                   location: p['pitchName'] || p['location'] || undefined
                 };
 
+                // Fetch isLiked status from database
+                this.postService.isLiked(id).subscribe({
+                  next: (res) => {
+                    if (this.post) {
+                      // Spread to new reference so PostCard's ngOnChanges triggers
+                      this.post = { ...this.post, isLiked: res.isLiked };
+                      this.cdr.detectChanges();
+                    }
+                  },
+                  error: () => { /* ignore */ }
+                });
+
                 // Fetch replies
                 this.postInteractionService.getAll().subscribe({
                   next: (interactions) => {
@@ -125,7 +140,7 @@ export class PostDetailComponent implements OnInit {
                         id: r.id || '',
                         author: {
                           id: ru.id || '',
-                          name: ru['username'] || 'Unknown',
+                          name: ru['fullName'] || ru['username'] || 'Unknown',
                           username: ru['username'] || 'unknown',
                           avatar: ru['avatar'] || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + ru['username'],
                           verified: false
@@ -142,16 +157,26 @@ export class PostDetailComponent implements OnInit {
                       };
                     });
                     this.isLoading = false;
+                    this.cdr.detectChanges();
                   },
-                  error: () => this.isLoading = false
+                  error: () => {
+                    this.isLoading = false;
+                    this.cdr.detectChanges();
+                  }
                 });
 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               },
-              error: () => this.isLoading = false
+              error: () => {
+                this.isLoading = false;
+                this.cdr.detectChanges();
+              }
             });
           },
-          error: () => this.isLoading = false
+          error: () => {
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          }
         });
       }
     });
@@ -202,40 +227,62 @@ export class PostDetailComponent implements OnInit {
 
     this.isSubmittingReply = true;
 
-    setTimeout(() => {
-      const newReply: Reply = {
-        id: 'reply_' + Date.now(),
-        author: {
-          id: 'me',
-          name: 'Bạn',
-          username: 'me',
-          avatar: 'https://i.pravatar.cc/150?u=me_user',
-          role: 'player',
-        },
-        type: 'general',
-        typeLabel: 'Bình luận',
-        time: 'Vừa xong',
-        content: this.replyText.trim(),
-        likes: 0,
-        comments: 0,
-        reposts: 0,
-        shares: 0,
-        isLiked: false,
-        isReposted: false,
-        replyTo: this.post?.id?.toString(),
-      };
-
-      this.replies = [newReply, ...this.replies];
-      this.replyText = '';
-      this.isSubmittingReply = false;
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Đã đăng!',
-        detail: 'Bình luận của bạn đã được đăng.',
-        life: 2500,
-      });
-    }, 600);
+    if (!this.post?.id) return;
+    
+    this.postService.commentPost(this.post.id.toString(), {
+      userId: this.authService.currentUserValue?.id || '00000000-0000-0000-0000-000000000001',
+      content: this.replyText.trim()
+    }).subscribe({
+      next: () => {
+        // Optimistically add to UI
+        const newReply: any = {
+          id: 'reply_' + Date.now(),
+          author: {
+            id: 'me',
+            name: 'Bạn',
+            username: 'me',
+            avatar: 'https://i.pravatar.cc/150?u=me_user',
+            role: 'player',
+          },
+          type: 'general',
+          typeLabel: 'Bình luận',
+          time: 'Vừa xong',
+          content: this.replyText.trim(),
+          likes: 0,
+          comments: 0,
+          reposts: 0,
+          shares: 0,
+          isLiked: false,
+          isReposted: false,
+          replyTo: this.post?.id?.toString(),
+        };
+  
+        this.replies = [newReply, ...this.replies];
+        this.replyText = '';
+        this.isSubmittingReply = false;
+        if (this.post) {
+            this.post.comments = (this.post.comments || 0) + 1;
+        }
+  
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Đã đăng!',
+          detail: 'Bình luận của bạn đã được đăng.',
+          life: 2500,
+        });
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isSubmittingReply = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Lỗi',
+          detail: 'Không thể đăng bình luận.',
+          life: 2000,
+        });
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   // ── Nested Replies ─────────────────────────────────────────
