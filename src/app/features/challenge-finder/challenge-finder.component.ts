@@ -231,26 +231,28 @@ export class ChallengeFinderComponent implements OnInit {
           
           return {
             id: c.id || '',
-            type: c['type'] as any || 'team', // 'team' | 'individual'
-            individualSubtype: c['type'] === 'individual' ? (c['individualSubtype'] as any || 'join') : undefined,
+            type: c['challengeIndividualSubtypeId'] ? 'individual' : 'team',
+            individualSubtype: c['challengeIndividualSubtypeId'] ? 'team_needs_player' : undefined,
             format: c['matchFormat'] || '7v7',
             formatLabel: c['matchFormat'] || 'Sân 7',
-            matchDate: new Date(c['dateTime'] || Date.now()),
-            matchTime: new Date(c['dateTime'] || Date.now()).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'}),
+            matchDate: c['matchDate'] ? new Date(c['matchDate']) : new Date(),
+            matchTime: c['matchTime'] || 'Chưa cập nhật',
             feeSplit: c['feeSplit'] as any || '50-50',
             feeSplitLabel: '50-50',
-            estimatedPrice: c['estimatedPrice'] || 500000,
-            hasPitchAlready: !!c['pitchId'],
+            estimatedPrice: c['estimatedPrice'] ?? 0,
+            hasPitchAlready: c['hasPitchAlready'] ?? !!c['pitchId'],
             status: c['status'] as any || 'open',
             note: c['note'] || '',
             targetRanks: tr.length ? tr : ['A'],
             neededPositions: np,
             title: c['title'] || 'Giao lưu bóng đá',
-            pitchName: c['pitchId'] ? 'Sân ' + c['pitchId'] : 'Chưa có sân',
-            pitchAddress: 'Hà Nội',
-            district: 'Cầu Giấy',
-            createdAt: new Date().toISOString(),
-            applicantsCount: 0,
+            pitchName: c['pitch']?.name || (c['pitchId'] ? 'Đang cập nhật sân' : 'Chưa có sân'),
+            pitchAddress: c['pitch']?.address || '',
+            district: c['district'] || c['pitch']?.district || '',
+            pitchId: c['pitchId'],
+            pitch: c['pitch'],
+            createdAt: c['createdAt'] || new Date().toISOString(),
+            applicantsCount: c['applicantsCount'] ?? 0,
             contactPhone: c['phone'] || '0123456789',
             
             // Mocks since these are relations that need to be populated by backend later
@@ -834,8 +836,19 @@ export class ChallengeFinderComponent implements OnInit {
   openPitchDetail(challenge: Challenge, event?: Event) {
     if (event) event.stopPropagation();
 
+    const apiPitch = challenge['pitch'];
     const foundPitch = MOCK_PITCHES.find(p => p.name === challenge.pitchName);
-    if (foundPitch) {
+    if (apiPitch) {
+      this.selectedPitch = {
+        ...apiPitch,
+        images: this.parsePitchImages(apiPitch.images),
+        facilities: Array.isArray(apiPitch.facilities) ? apiPitch.facilities : [],
+        subPitches: [],
+        availableSlotsCount: 0,
+        distanceKm: challenge.distanceKm || 0,
+        isVerified: false,
+      } as Pitch;
+    } else if (foundPitch) {
       this.selectedPitch = foundPitch;
     } else {
       this.selectedPitch = {
@@ -864,6 +877,17 @@ export class ChallengeFinderComponent implements OnInit {
     }
 
     this.showPitchModal = true;
+  }
+
+  private parsePitchImages(images: unknown): string[] {
+    if (Array.isArray(images)) return images;
+    if (typeof images !== 'string') return [];
+    try {
+      const parsed = JSON.parse(images);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   }
 
   openTeamDetail(team: Team, event?: Event) {

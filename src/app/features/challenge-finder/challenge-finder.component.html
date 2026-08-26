@@ -39,7 +39,8 @@
     <aside class="challenge-filters-col">
       <div class="sidebar-header mb-4" (click)="showFilters = !showFilters">
         <h3 class="heading-lg">Bộ lọc tìm kiếm</h3>
-        <button class="sidebar-toggle-btn caption-sm" style="display:none; align-items:center; gap:4px; background:none; border:1px solid var(--border-color); border-radius:20px; padding:5px 12px; cursor:pointer; color:var(--text-secondary);">
+        <button class="sidebar-toggle-btn caption-sm"
+          style="display:none; align-items:center; gap:4px; background:none; border:1px solid var(--border-color); border-radius:20px; padding:5px 12px; cursor:pointer; color:var(--text-secondary);">
           <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
             <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" />
           </svg>
@@ -265,22 +266,23 @@
         </div>
 
         @if (isLoading) {
-          @for (i of [1,2,3]; track $index) {
-          <div class="skeleton-card" style="background: var(--surface-card); padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; gap: 16px;">
-            <p-skeleton shape="circle" size="4rem"></p-skeleton>
-            <div style="flex: 1;">
-              <p-skeleton style="display: block; margin-bottom: 8px;" width="60%" height="1.5rem"></p-skeleton>
-              <p-skeleton style="display: block; margin-bottom: 12px;" width="40%" height="1rem"></p-skeleton>
-              <p-skeleton style="display: block; margin-bottom: 12px;" width="100%" height="3rem"></p-skeleton>
-              <div style="display: flex; gap: 8px;">
-                <p-skeleton width="80px" height="24px" borderRadius="12px"></p-skeleton>
-                <p-skeleton width="80px" height="24px" borderRadius="12px"></p-skeleton>
-              </div>
+        @for (i of [1,2,3]; track $index) {
+        <div class="skeleton-card"
+          style="background: var(--surface-card); padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; gap: 16px;">
+          <p-skeleton shape="circle" size="4rem"></p-skeleton>
+          <div style="flex: 1;">
+            <p-skeleton style="display: block; margin-bottom: 8px;" width="60%" height="1.5rem"></p-skeleton>
+            <p-skeleton style="display: block; margin-bottom: 12px;" width="40%" height="1rem"></p-skeleton>
+            <p-skeleton style="display: block; margin-bottom: 12px;" width="100%" height="3rem"></p-skeleton>
+            <div style="display: flex; gap: 8px;">
+              <p-skeleton width="80px" height="24px" borderRadius="12px"></p-skeleton>
+              <p-skeleton width="80px" height="24px" borderRadius="12px"></p-skeleton>
             </div>
           </div>
-          }
+        </div>
+        }
         } @else {
-          @for (chl of filteredChallenges; track $index) {
+        @for (chl of filteredChallenges; track $index) {
         <article class="challenge-card" [class.matched]="chl.status === 'matched'">
 
           <!-- Left Column: Avatar / Logo + Rank Badge -->
@@ -371,15 +373,7 @@
 
             <!-- Match Specifications Matrix -->
             <div class="challenge-specs-box">
-              <div class="spec-row" style="margin-bottom: 8px;">
-                <span class="caption-sm spec-item w-full" style="color: var(--text-secondary);">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                    <circle cx="12" cy="10" r="3"></circle>
-                  </svg>
-                  <span>{{ chl.pitchAddress || chl.district }}</span>
-                </span>
-              </div>
+
 
               <div class="spec-row">
                 <span class="caption-sm spec-item">

@@ -86,6 +86,9 @@ export interface Challenge {
   formatLabel: string;
   matchDate: Date; // "Hôm nay, 19:30" or YYYY-MM-DD
   matchTime: string; // "19:00 - 20:30"
+  pitchId?: string;
+  // Full pitch data included by the challenges API when a venue is selected.
+  pitch?: any;
   pitchName: string;
   pitchAddress: string;
   district: string;
