@@ -35,4 +35,8 @@ export class MasterDataService {
   getPitchTypes(): Observable<MasterData[]> {
     return this.http.get<MasterData[]>(`${this.apiUrl}/pitchtypes`);
   }
+
+  getFacilities(): Observable<MasterData[]> {
+    return this.http.get<MasterData[]>(`${this.apiUrl}/facilities`);
+  }
 }

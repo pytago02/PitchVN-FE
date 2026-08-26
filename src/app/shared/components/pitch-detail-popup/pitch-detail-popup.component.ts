@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import * as L from 'leaflet';
 import { Pitch, SubPitch, PitchFacility, ALL_FACILITIES, PitchReview, MOCK_PITCH_REVIEWS } from '../../../features/pitch-finder/mock-pitch-data';
+import { MasterData, MasterDataService } from '../../../services/master-data/master-data.service';
 
 @Component({
   selector: 'app-pitch-detail-popup',
@@ -30,7 +31,24 @@ export class PitchDetailPopupComponent implements OnChanges, AfterViewInit {
   routeDistanceStr: string | null = null;
   routeDurationStr: string | null = null;
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private masterDataService: MasterDataService,
+  ) {}
+
+  ngOnInit() {
+    this.masterDataService.getFacilities().subscribe({
+      next: (facilities: MasterData[]) => {
+        if (facilities.length > 0) {
+          this.allFacilities = facilities.map(facility => ({
+            id: facility.id,
+            name: facility.name,
+            icon: ALL_FACILITIES.find(item => item.id === facility.code)?.icon ?? 'pi pi-check-circle',
+          }));
+        }
+      },
+    });
+  }
 
   getFacilityInfo(facilityId: string): PitchFacility | undefined {
     return this.allFacilities.find(f => f.id === facilityId);

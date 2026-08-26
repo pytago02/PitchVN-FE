@@ -32,6 +32,7 @@ import { ProvinceService, Province, District } from '../../services/provinces/pr
 import { PitchService } from '../../services/pitch/pitch.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { Router } from '@angular/router';
+import { MasterData, MasterDataService } from '../../services/master-data/master-data.service';
 
 @Component({
   selector: 'app-pitch-finder',
@@ -166,6 +167,7 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private provinceService: ProvinceService,
     private pitchService: PitchService,
+    private masterDataService: MasterDataService,
     private router: Router,
     public authService: AuthService
   ) { }
@@ -174,7 +176,22 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.initDates();
     this.fetchProvinces();
     this.fetchUserLocation();
+    this.loadFacilities();
     this.loadPitches();
+  }
+
+  private loadFacilities() {
+    this.masterDataService.getFacilities().subscribe({
+      next: (facilities: MasterData[]) => {
+        if (facilities.length > 0) {
+          this.facilitiesList = facilities.map(facility => ({
+            id: facility.id,
+            name: facility.name,
+            icon: this.getFacilityIconByCode(facility.code),
+          }));
+        }
+      },
+    });
   }
 
   loadPitches() {
@@ -209,7 +226,7 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
             images: images,
             rating: p['rating'] || 4.0,
             reviewCount: 0,
-            facilities: p['facilities'] || ['wifi', 'parking', 'water'],
+            facilities: Array.isArray(facilities) ? facilities : [],
             lat: p['lat'] || 21.028511,
             lng: p['lng'] || 105.804817,
             phone: p['phone'] || '0123456789',
@@ -871,5 +888,9 @@ export class PitchFinderComponent implements OnInit, AfterViewInit, OnDestroy {
   getFacilityIcon(id: string): string {
     const f = this.facilitiesList.find((item) => item.id === id);
     return f ? f.icon : 'pi pi-check';
+  }
+
+  private getFacilityIconByCode(code: string): string {
+    return ALL_FACILITIES.find(facility => facility.id === code)?.icon ?? 'pi pi-check-circle';
   }
 }
